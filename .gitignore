@@ -3,6 +3,8 @@
 
 wordpress
 composer.lock
+.vscode
+vendor
 
 # Tests 
 tests/.env
