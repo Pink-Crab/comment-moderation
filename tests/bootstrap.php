@@ -14,8 +14,6 @@ try {
 	$dotenv = Dotenv\Dotenv::createUnsafeImmutable( __DIR__ );
 	$dotenv->load();
 } catch ( \Throwable $th ) {
-	// Do nothing if fails to find env as not used in pipeline.
-	die( 'Failed to load env file' );
 }
 
 
