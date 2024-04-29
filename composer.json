@@ -1,0 +1,70 @@
+{
+    "name": "pinkcrab/comment-moderation",
+    "type": "library",
+    "description": "Advanced comment moderation for auto-approving, blacklisting, and more.",
+    "keywords": [],
+    "homepage": "https://github.com/Pink-Crab/comment-moderation",
+    "license": "GPL-3.0",
+    "authors": [{
+        "name": "Glynn Quelch",
+        "email": "glynn@pinkcrab.co.uk",
+        "homepage": "https://github.com/gin0115",
+        "role": "Developer"
+    }],
+    "autoload": {
+        "psr-4": {
+            "PinkCrab\\Comment_Moderation\\": "src"
+        },
+        "files": []
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "PinkCrab\\Comment_Moderation\\Tests\\": "tests"
+        }
+    },
+    "require-dev": {
+        "wp-cli/i18n-command": "^2.4",
+        "squizlabs/php_codesniffer": "3.*",
+        "dealerdirect/phpcodesniffer-composer-installer": "*",
+        "roave/security-advisories": "dev-latest",
+        "php-stubs/wordpress-stubs": "6.5.*",
+        "phpunit/phpunit": "^8.5 || ^9.0",
+        "roots/wordpress": "6.5.*",
+        "wp-phpunit/wp-phpunit": "6.5.*",
+        "yoast/phpunit-polyfills": "^1.0.0 || ^2.0.0",
+        "vlucas/phpdotenv": "<=5.5.0",
+        "wp-coding-standards/wpcs": "^3",
+        "phpcompatibility/phpcompatibility-wp": "*",
+        "phpstan/phpstan": "1.*",
+        "szepeviktor/phpstan-wordpress": "<=1.3.1",
+        "symfony/var-dumper": "^5.0"
+    },
+    "require": {
+        "php": ">=7.4.0",
+        "pinkcrab/perique-framework-core": "^1.0",
+        "ext-json": "*"
+    },
+    "scripts": {
+        "test": "./vendor/bin/phpunit --coverage-clover coverage.xml --testdox",
+        "coverage": "./vendor/bin/phpunit --coverage-html coverage-report --testdox",
+        "analyse": "./vendor/bin/phpstan analyse src -l8",
+        "sniff": "./vendor/bin/phpcs src/ -v",
+        "all": "composer test && composer analyse && composer sniff",
+        "internationalize": [
+            "@makepot",
+            "@updatepo",
+            "@makejson"
+        ],
+        "makepot": "wp i18n make-pot .",
+        "updatepo": "wp i18n update-po ./languages/wayback-link-fixer.pot",
+        "makejson": "wp i18n make-json ./languages --pretty-print --no-purge",
+        "makemo": "wp i18n make-mo ./languages"
+    },
+    "config": {
+        "allow-plugins": {
+            "composer/*": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "roots/wordpress-core-installer": true
+        }
+    }
+}
