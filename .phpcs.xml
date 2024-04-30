@@ -72,6 +72,7 @@
 		<properties>
 			<property name="prefixes" type="array">
 				<element value="pc_cm_"/>
+				<element value="PinkCrab\Comment_Moderation\" />
 			</property>
 		</properties>
 	</rule>

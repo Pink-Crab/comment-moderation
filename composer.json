@@ -13,7 +13,9 @@
     }],
     "autoload": {
         "psr-4": {
-            "PinkCrab\\Comment_Moderation\\": "src"
+            "PinkCrab\\Comment_Moderation\\": "src",
+            "PinkCrab\\Comment_Moderation\\Migration\\": "migrations"
+
         },
         "files": []
     },
@@ -41,15 +43,16 @@
     },
     "require": {
         "php": ">=7.4.0",
-        "pinkcrab/perique-framework-core": "^1.0",
-        "ext-json": "*"
+        "pinkcrab/perique-framework-core": "^2.0",
+        "ext-json": "*",
+        "pinkcrab/perique-migration": "^2.0"
     },
     "scripts": {
         "test": "./vendor/bin/phpunit --coverage-clover coverage.xml --testdox",
         "coverage": "./vendor/bin/phpunit --coverage-html coverage-report --testdox",
-        "analyse": "./vendor/bin/phpstan analyse src -l8",
-        "sniff": "./vendor/bin/phpcs src/ -v",
-        "format": "./vendor/bin/phpcbf src/ -v",
+        "analyse": "./vendor/bin/phpstan analyse src migrations -l8",
+        "sniff": "./vendor/bin/phpcs src migrations -v",
+        "format": "./vendor/bin/phpcbf src migrations -v",
         "all": "composer test && composer analyse && composer sniff",
         "internationalize": [
             "@makepot",

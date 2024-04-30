@@ -11,12 +11,13 @@ jobs:
     strategy:
       matrix:
         operating-system: [ubuntu-latest]
-        php-versions: [  '7.4', '8.0', '8.1', '8.2', '8.3']
+        php-versions: [ '7.4', '8.0', '8.1']
+        mysql-versions: ['mysql:8.1', 'mysql:8.3', 'mariadb:10.3','mariadb:10.10']
     runs-on: ${{ matrix.operating-system }}
     services:
       # Setup MYSQL
       mysql-service:
-        image: 'mysql:5.7'
+        image: ${{ matrix.mysql-versions }}
         env:
           MYSQL_ROOT_PASSWORD: 'crab'
           MYSQL_DATABASE: comment-moderation-tests

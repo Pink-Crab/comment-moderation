@@ -15,10 +15,23 @@
  */
 
 use PinkCrab\Perique\Application\App_Factory;
+use PinkCrab\Plugin_Lifecycle\Plugin_Life_Cycle;
+use PinkCrab\Perique\Migration\Module\Perique_Migrations;
 
 require_once __DIR__ . '/vendor/autoload.php';
+
+
 ( new App_Factory( __DIR__ ) )
 	->default_setup()
+	->module( Plugin_Life_Cycle::class )
+	->module(
+		Perique_Migrations::class,
+		function ( Perique_Migrations $module ) {
+			// Add the migrations.
+			$module->add_migration( \PinkCrab\Comment_Moderation\Migration\Comment_Rule_001::class );
+			return $module;
+		}
+	)
 	->di_rules( require __DIR__ . '/config/dependencies.php' )
 	->app_config( require __DIR__ . '/config/settings.php' )
 	->registration_classes( require __DIR__ . '/config/registration.php' )
