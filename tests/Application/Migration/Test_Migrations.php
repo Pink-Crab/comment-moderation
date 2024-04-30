@@ -40,26 +40,22 @@ class Test_Migrations extends \WP_UnitTestCase {
 		return $wpdb->prefix . 'comment_moderation_rules';
 	}
 
-    /**
-     * Check if the current database is MariaDB.
-     *
-     * @return boolean
-     */
-    protected function is_mariadb(): bool
-    {
-        $result = $GLOBALS['wpdb']->get_results("SELECT VERSION() AS version");
-        dump($result);
-        return stripos($result['version'], 'MariaDB') !== false;
-    }
+	/**
+	 * Check if the current database is MariaDB.
+	 *
+	 * @return boolean
+	 */
+	protected function is_mariadb(): bool {
+		$result = $GLOBALS['wpdb']->get_results( 'SELECT VERSION() AS version' );
+		return stripos( $result['version'], 'MariaDB' ) !== false;
+	}
 
 	/**
 	 * @testdox When the plugin is activated, the rules table should be created.
-	 * @_runInSeparateProcess
-	 * @_preserveGlobalState disabled
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
 	 */
 	public function test_rules_table_is_created_on_activation() {
-		$this->is_mariadb()
-
 		// Activate the plugin.
 		activate_plugin( 'comment-moderation/comment-moderation.php' );
 
@@ -113,7 +109,7 @@ class Test_Migrations extends \WP_UnitTestCase {
 		$expected = array(
 			'id'           => array(
 				'Field'   => 'id',
-				'Type'    => 'int(11) unsigned',
+				'Type'    => $this->is_mariadb() ? 'int(11) unsigned' : 'int unsigned',
 				'Null'    => 'NO',
 				'Key'     => 'PRI',
 				'Default' => null,
