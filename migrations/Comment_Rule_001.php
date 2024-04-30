@@ -49,7 +49,7 @@ class Comment_Rule_001 extends Migration {
 		$schema->column( 'rule_type' )->text()->nullable();
 		$schema->column( 'rule_value' )->text()->nullable();
 		$schema->column( 'rule_enabled' )->int()->default( 1 );
-		$schema->column( 'fields' )->json()->default( '{"name": true, "email": true, "url": true, "comment": true, "ip_address":true, "user_agent": true}' );
+		$schema->column( 'fields' )->json();
 		$schema->column( 'created' )->timestamp()->default( 'CURRENT_TIMESTAMP' );
 		$schema->column( 'updated' )->timestamp()->default( 'CURRENT_TIMESTAMP' );
 	}
