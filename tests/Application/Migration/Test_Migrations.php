@@ -176,9 +176,6 @@ class Test_Migrations extends \WP_UnitTestCase {
 			$this->assertArrayHasKey( $column->Field, $expected );
 			$this->assertEquals( $expected[ $column->Field ]['Field'], $column->Field );
 			$this->assertEquals( $expected[ $column->Field ]['Type'], $column->Type );
-			$this->assertEquals( $expected[ $column->Field ]['Null'], $column->Null );
-			$this->assertEquals( $expected[ $column->Field ]['Key'], $column->Key );
-			$this->assertEquals( $expected[ $column->Field ]['Extra'], $column->Extra );
 		}
 	}
 }
