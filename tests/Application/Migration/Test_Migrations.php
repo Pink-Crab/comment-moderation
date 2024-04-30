@@ -40,13 +40,25 @@ class Test_Migrations extends \WP_UnitTestCase {
 		return $wpdb->prefix . 'comment_moderation_rules';
 	}
 
+    /**
+     * Check if the current database is MariaDB.
+     *
+     * @return boolean
+     */
+    protected function is_mariadb(): bool
+    {
+        $result = $GLOBALS['wpdb']->get_results("SELECT VERSION() AS version");
+        dump($result);
+        return stripos($result['version'], 'MariaDB') !== false;
+    }
+
 	/**
 	 * @testdox When the plugin is activated, the rules table should be created.
-	 * @runInSeparateProcess
-	 * @preserveGlobalState disabled
+	 * @_runInSeparateProcess
+	 * @_preserveGlobalState disabled
 	 */
 	public function test_rules_table_is_created_on_activation() {
-		print_r( get_option( 'pinkcrab_migration_log' ) );
+		$this->is_mariadb()
 
 		// Activate the plugin.
 		activate_plugin( 'comment-moderation/comment-moderation.php' );
