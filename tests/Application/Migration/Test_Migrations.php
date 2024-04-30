@@ -46,8 +46,8 @@ class Test_Migrations extends \WP_UnitTestCase {
 	 * @return boolean
 	 */
 	protected function is_mariadb(): bool {
-		$result = $GLOBALS['wpdb']->get_results( 'SELECT VERSION() AS version' );
-		return stripos( $result['version'], 'MariaDB' ) !== false;
+		$result = $GLOBALS['wpdb']->get_row( 'SELECT VERSION() AS version', ARRAY_A );
+        return stripos( $result['version'], 'MariaDB' ) !== false;
 	}
 
 	/**
