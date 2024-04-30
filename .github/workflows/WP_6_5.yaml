@@ -12,7 +12,7 @@ jobs:
       matrix:
         operating-system: [ubuntu-latest]
         php-versions: [ '7.4', '8.0', '8.1']
-        mysql-versions: ['mysql:8.1', 'mysql:8.3', 'mariadb:10.3','mariadb:11.4']
+        mysql-versions: ['mysql:8.1', 'mysql:8.3', 'mariadb:10.3','mariadb:10.10']
     runs-on: ${{ matrix.operating-system }}
     services:
       # Setup MYSQL
