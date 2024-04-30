@@ -17,15 +17,7 @@
 use PinkCrab\Perique\Application\App_Factory;
 use PinkCrab\Plugin_Lifecycle\Plugin_Life_Cycle;
 use PinkCrab\Perique\Migration\Module\Perique_Migrations;
-if ( ! function_exists('write_log')) {
-   function write_log ( $log )  {
-      if ( is_array( $log ) || is_object( $log ) ) {
-         error_log( print_r( $log, true ) );
-      } else {
-         error_log( $log );
-      }
-   }
-}
+
 require_once __DIR__ . '/vendor/autoload.php';
 
 
@@ -44,9 +36,3 @@ require_once __DIR__ . '/vendor/autoload.php';
 	->app_config( require __DIR__ . '/config/settings.php' )
 	->registration_classes( require __DIR__ . '/config/registration.php' )
 	->boot();
-
- add_action('init', function(){
-
-
- });
-
