@@ -47,7 +47,7 @@ class Test_Migrations extends \WP_UnitTestCase {
 	 */
 	protected function is_mariadb(): bool {
 		$result = $GLOBALS['wpdb']->get_row( 'SELECT VERSION() AS version', ARRAY_A );
-        return stripos( $result['version'], 'MariaDB' ) !== false;
+		return stripos( $result['version'], 'MariaDB' ) !== false;
 	}
 
 	/**
@@ -110,63 +110,34 @@ class Test_Migrations extends \WP_UnitTestCase {
 			'id'           => array(
 				'Field'   => 'id',
 				'Type'    => $this->is_mariadb() ? 'int(11) unsigned' : 'int unsigned',
-				'Null'    => 'NO',
-				'Key'     => 'PRI',
-				'Default' => null,
-				'Extra'   => 'auto_increment',
 			),
 			'rule_name'    => array(
 				'Field'   => 'rule_name',
 				'Type'    => 'text',
-				'Null'    => 'YES',
-				'Key'     => '',
-				'Default' => null,
-				'Extra'   => '',
 			),
 			'rule_type'    => array(
 				'Field'   => 'rule_type',
 				'Type'    => 'text',
-				'Null'    => 'YES',
-				'Key'     => '',
-				'Default' => null,
-				'Extra'   => '',
 			),
 			'rule_value'   => array(
 				'Field'   => 'rule_value',
 				'Type'    => 'text',
-				'Null'    => 'YES',
-				'Key'     => '',
-				'Default' => null,
-				'Extra'   => '',
 			),
 			'rule_enabled' => array(
 				'Field'   => 'rule_enabled',
 				'Type'    => $this->is_mariadb() ? 'int(11)' : 'int',
-				'Null'    => 'NO',
-				'Key'     => '',
-				'Default' => '1',
-				'Extra'   => '',
 			),
 			'fields'       => array(
-				'Field'   => 'fields',
-				'Type'    => 'longtext',
-				'Null'    => 'NO',
-				'Key'     => '',
-				'Extra'   => '',
+				'Field' => 'fields',
+				'Type'  => $this->is_mariadb() ? 'longtext' : 'json',
 			),
 			'created'      => array(
 				'Field' => 'created',
 				'Type'  => 'timestamp',
-				'Null'  => 'NO',
-				'Key'   => '',
-				'Extra' => '',
 			),
 			'updated'      => array(
 				'Field' => 'updated',
 				'Type'  => 'timestamp',
-				'Null'  => 'NO',
-				'Key'   => '',
-				'Extra' => '',
 			),
 		);
 
