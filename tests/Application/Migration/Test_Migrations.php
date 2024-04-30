@@ -141,7 +141,7 @@ class Test_Migrations extends \WP_UnitTestCase {
 			),
 			'rule_enabled' => array(
 				'Field'   => 'rule_enabled',
-				'Type'    => 'int(11)',
+				'Type'    => $this->is_mariadb() ? 'int(11)' : 'int',
 				'Null'    => 'NO',
 				'Key'     => '',
 				'Default' => '1',
@@ -152,7 +152,6 @@ class Test_Migrations extends \WP_UnitTestCase {
 				'Type'    => 'longtext',
 				'Null'    => 'NO',
 				'Key'     => '',
-				'Default' => '{"name": true, "email": true, "url": true, "comment": true, "ip_address":true, "user_agent": true}',
 				'Extra'   => '',
 			),
 			'created'      => array(
