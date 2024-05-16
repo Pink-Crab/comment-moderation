@@ -79,6 +79,7 @@ class Rule_Repository {
 			ARRAY_A
 		);
 
+		// @phpstan-ignore-next-line
 		return $rule ? $this->map_to_rule( $rule ) : null; // @phpstan-ignore-line
 	}
 
