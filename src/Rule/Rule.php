@@ -21,6 +21,8 @@ declare(strict_types=1);
 
 namespace PinkCrab\Comment_Moderation\Rule;
 
+use PinkCrab\Comment_Moderation\Util\Rule_Helper;
+
 /**
  * Model for a Rule.
  */
@@ -42,11 +44,10 @@ class Rule {
 		self::RULE_TYPE_WILDCARD,
 	);
 
-
 	/**
 	 * The ID of the rule.
 	 *
-	 * @var int
+	 * @var int|null
 	 */
 	protected $id;
 
@@ -86,6 +87,13 @@ class Rule {
 	protected $fields;
 
 	/**
+	 * The outcome of the rule.
+	 *
+	 * @var string
+	 */
+	protected $outcome;
+
+	/**
 	 * The date the rule was created.
 	 *
 	 * @var \DateTimeImmutable
@@ -102,31 +110,34 @@ class Rule {
 	/**
 	 * Create a new instance of the Rule.
 	 *
-	 * @param integer                 $id           The rule ID.
+	 * @param integer|null            $id           The rule ID.
 	 * @param string                  $rule_name    The name of the rule.
 	 * @param string                  $rule_type    The type of the rule.
 	 * @param string                  $rule_value   The value of the rule.
 	 * @param boolean                 $rule_enabled If the rule is enabled.
 	 * @param array<string>           $fields       The fields the rule applies to.
+	 * @param string                  $outcome      The outcome of the rule.
 	 * @param \DateTimeImmutable|null $created      The date the rule was created.
 	 * @param \DateTimeImmutable|null $updated      The date the rule was last updated.
 	 */
 	public function __construct(
-		int $id,
+		?int $id,
 		string $rule_name,
 		string $rule_type,
 		string $rule_value,
 		bool $rule_enabled,
 		array $fields,
+		string $outcome,
 		?\DateTimeImmutable $created = null,
 		?\DateTimeImmutable $updated = null
 	) {
-		$this->id           = absint( $id );
+		$this->id           = $id ? absint( $id ) : null;
 		$this->rule_name    = esc_html( $rule_name );
 		$this->rule_type    = $this->validate_rule_type( $rule_type );
 		$this->rule_value   = esc_attr( $rule_value );
 		$this->rule_enabled = $rule_enabled;
-		$this->fields       = array_map( 'esc_attr', $fields );
+		$this->fields       = Rule_Helper::normalize_fields( $fields );
+		$this->outcome      = esc_attr( $outcome );
 		$this->created      = $created ?? new \DateTimeImmutable();
 		$this->updated      = $updated ?? new \DateTimeImmutable();
 	}
@@ -159,9 +170,9 @@ class Rule {
 	/**
 	 * Get the ID of the rule.
 	 *
-	 * @return integer
+	 * @return integer|null
 	 */
-	public function get_id(): int {
+	public function get_id(): ?int {
 		return $this->id;
 	}
 
@@ -208,6 +219,15 @@ class Rule {
 	 */
 	public function get_fields(): array {
 		return $this->fields;
+	}
+
+	/**
+	 * Get the outcome of the rule.
+	 *
+	 * @return string
+	 */
+	public function get_outcome(): string {
+		return $this->outcome;
 	}
 
 	/**

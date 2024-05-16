@@ -10,4 +10,8 @@
  * @since 0.1.0
  */
 
-return array();
+use PinkCrab\Comment_Moderation\Admin\Rules_Page;
+
+return array(
+    Rules_Page::class,
+);

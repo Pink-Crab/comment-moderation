@@ -10,4 +10,14 @@
  * @since 0.1.0
  */
 
-return array();
+use PinkCrab\HTTP\HTTP_Helper;
+use Psr\Http\Message\ServerRequestInterface;
+
+
+return array(
+	'*' => array(
+		'substitutions' => array(
+			ServerRequestInterface::class => HTTP_Helper::global_server_request(),
+		),
+	),
+);

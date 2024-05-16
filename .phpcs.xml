@@ -39,6 +39,8 @@
 		<exclude name="Generic.Commenting.DocComment.TagValueIndent" />
 		<!-- Ignore @param tags not being first since normally start with @since and @version tags. -->
 		<exclude name="Generic.Commenting.DocComment.ParamNotFirst" />
+		<!-- Ignore grouping of tags as we sometimes group tags for readability. -->
+		<exclude name="Generic.Commenting.DocComment.NonParamGroup" />
 	</rule>
 
 	<!-- Check that function comments exist and that they contain @param, @return and @throws tags. -->

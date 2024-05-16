@@ -3,9 +3,6 @@
 /**
  * Application Migration Test_Migrations
  *
- * @group Application
- * @group Migration
- *
  * @since 0.1.0
  */
 
@@ -15,6 +12,9 @@ namespace PinkCrab\Comment_Moderation\Tests\Application\Migration;
 
 /**
  * Test_Migrations tests the migrations for the application.
+ *
+ * @group application
+ * @group migration
  */
 class Test_Migrations extends \WP_UnitTestCase {
 
@@ -108,24 +108,24 @@ class Test_Migrations extends \WP_UnitTestCase {
 
 		$expected = array(
 			'id'           => array(
-				'Field'   => 'id',
-				'Type'    => $this->is_mariadb() ? 'int(11) unsigned' : 'int unsigned',
+				'Field' => 'id',
+				'Type'  => $this->is_mariadb() ? 'int(11) unsigned' : 'int unsigned',
 			),
 			'rule_name'    => array(
-				'Field'   => 'rule_name',
-				'Type'    => 'text',
+				'Field' => 'rule_name',
+				'Type'  => 'text',
 			),
 			'rule_type'    => array(
-				'Field'   => 'rule_type',
-				'Type'    => 'text',
+				'Field' => 'rule_type',
+				'Type'  => 'text',
 			),
 			'rule_value'   => array(
-				'Field'   => 'rule_value',
-				'Type'    => 'text',
+				'Field' => 'rule_value',
+				'Type'  => 'text',
 			),
 			'rule_enabled' => array(
-				'Field'   => 'rule_enabled',
-				'Type'    => $this->is_mariadb() ? 'int(11)' : 'int',
+				'Field' => 'rule_enabled',
+				'Type'  => $this->is_mariadb() ? 'int(11)' : 'int',
 			),
 			'fields'       => array(
 				'Field' => 'fields',
@@ -138,6 +138,10 @@ class Test_Migrations extends \WP_UnitTestCase {
 			'updated'      => array(
 				'Field' => 'updated',
 				'Type'  => 'timestamp',
+			),
+			'outcome'      => array(
+				'Field' => 'outcome',
+				'Type'  => 'text',
 			),
 		);
 
