@@ -45,14 +45,17 @@
         "php": ">=7.4.0",
         "pinkcrab/perique-framework-core": "^2.0",
         "ext-json": "*",
-        "pinkcrab/perique-migration": "^2.0"
+        "pinkcrab/perique-migration": "^2.0",
+        "pinkcrab/perique-admin-menu": "^2.0",
+        "pinkcrab/wp-nonce": "^0.1.0",
+        "pinkcrab/http": "^1.0"
     },
     "scripts": {
         "test": "./vendor/bin/phpunit --coverage-clover coverage.xml --testdox",
         "coverage": "./vendor/bin/phpunit --coverage-html coverage-report --testdox",
         "analyse": "./vendor/bin/phpstan analyse src migrations -l8",
-        "sniff": "./vendor/bin/phpcs src migrations -v",
-        "format": "./vendor/bin/phpcbf src migrations -v",
+        "sniff": "./vendor/bin/phpcs src views migrations -v",
+        "format": "./vendor/bin/phpcbf src views migrations -v",
         "all": "composer test && composer analyse && composer sniff",
         "internationalize": [
             "@makepot",

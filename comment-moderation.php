@@ -16,7 +16,9 @@
 
 use PinkCrab\Perique\Application\App_Factory;
 use PinkCrab\Plugin_Lifecycle\Plugin_Life_Cycle;
+use PinkCrab\Perique_Admin_Menu\Module\Admin_Menu;
 use PinkCrab\Perique\Migration\Module\Perique_Migrations;
+use PinkCrab\Comment_Moderation\Migration\Comment_Rule_001;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
@@ -27,11 +29,12 @@ require_once __DIR__ . '/vendor/autoload.php';
 	->module(
 		Perique_Migrations::class,
 		function ( Perique_Migrations $module ) {
-			// Add the migrations.
-			$module->add_migration( \PinkCrab\Comment_Moderation\Migration\Comment_Rule_001::class );
+			// The Migrations.
+			$module->add_migration( Comment_Rule_001::class );
 			return $module;
 		}
 	)
+	->module( Admin_Menu::class )
 	->di_rules( require __DIR__ . '/config/dependencies.php' )
 	->app_config( require __DIR__ . '/config/settings.php' )
 	->registration_classes( require __DIR__ . '/config/registration.php' )
