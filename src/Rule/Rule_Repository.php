@@ -88,8 +88,8 @@ class Rule_Repository {
 	 * @return Rule[]
 	 */
 	public function get_all_rules(): array {
-		// @phpstan-ignore-next-line
 		$rules = $this->wpdb->get_results( "SELECT * FROM {$this->table_name()}", ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, Cant escape the table name.
+		// @phpstan-ignore-next-line
 		return array_map( array( $this, 'map_to_rule' ), $rules ?? array() );
 	}
 
