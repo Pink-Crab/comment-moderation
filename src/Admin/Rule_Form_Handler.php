@@ -228,7 +228,11 @@ class Rule_Form_Handler {
 		 * @return mixed
 		 */
 	public function get_request_value( string $key ) {
-		return $this->request->getParsedBody()[ $key ] ?? null;
+		$request = (array) $this->request->getParsedBody();
+
+		return \array_key_exists( $key, $request )
+			? $request[ $key ]
+			: null;
 	}
 
 		/**
