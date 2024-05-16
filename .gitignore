@@ -11,4 +11,4 @@ tests/.env
 .phpunit.result.cache
 coverage.xml
 coverage
-coverage-reports
+coverage-report
