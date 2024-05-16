@@ -79,7 +79,7 @@ class Rule_Repository {
 			ARRAY_A
 		);
 
-		// @phpstan-ignore-next-line
+		// @phpstan-ignore-next-line, this will be an array based on ARRAY_A.
 		return $rule ? $this->map_to_rule( $rule ) : null; // @phpstan-ignore-line
 	}
 
@@ -90,7 +90,7 @@ class Rule_Repository {
 	 */
 	public function get_all_rules(): array {
 		$rules = $this->wpdb->get_results( "SELECT * FROM {$this->table_name()}", ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, Cant escape the table name.
-		// @phpstan-ignore-next-line
+		// @phpstan-ignore-next-line, this will be an array based on ARRAY_A.
 		return array_map( array( $this, 'map_to_rule' ), $rules ?? array() );
 	}
 
