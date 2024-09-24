@@ -50,6 +50,7 @@ class Comment_Rule_001 extends Migration {
 		$schema->column( 'rule_value' )->text()->nullable();
 		$schema->column( 'rule_enabled' )->int()->default( 1 );
 		$schema->column( 'fields' )->json();
+		$schema->column( 'outcome' )->text()->nullable();
 		$schema->column( 'created' )->timestamp()->default( 'CURRENT_TIMESTAMP' );
 		$schema->column( 'updated' )->timestamp()->default( 'CURRENT_TIMESTAMP' );
 	}
