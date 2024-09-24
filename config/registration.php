@@ -13,5 +13,5 @@
 use PinkCrab\Comment_Moderation\Admin\Rules_Page;
 
 return array(
-    Rules_Page::class,
+	Rules_Page::class,
 );

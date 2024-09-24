@@ -32,6 +32,8 @@ class Rule {
 	public const RULE_TYPE_NOT_CONTAIN = 'not_contain';
 	public const RULE_TYPE_EQUALS      = 'equals';
 	public const RULE_TYPE_NOT_EQUALS  = 'not_equals';
+	public const RULE_TYPE_STARTS_WITH = 'starts_with';
+	public const RULE_TYPE_ENDS_WITH   = 'ends_with';
 	public const RULE_TYPE_REGEX       = 'regex';
 	public const RULE_TYPE_WILDCARD    = 'wildcard';
 
@@ -40,6 +42,8 @@ class Rule {
 		self::RULE_TYPE_NOT_CONTAIN,
 		self::RULE_TYPE_EQUALS,
 		self::RULE_TYPE_NOT_EQUALS,
+		self::RULE_TYPE_STARTS_WITH,
+		self::RULE_TYPE_ENDS_WITH,
 		self::RULE_TYPE_REGEX,
 		self::RULE_TYPE_WILDCARD,
 	);

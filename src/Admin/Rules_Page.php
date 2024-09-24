@@ -22,7 +22,7 @@ use PinkCrab\Comment_Moderation\Rule\Rule_Repository;
  */
 class Rules_Page extends Menu_Page {
 	// Required
-	protected string $page_slug = 'acme_pages';
+	protected string $page_slug = 'pc_comment_moderation';
 
 	// Optional
 	protected ?string $parent_slug = 'tools.php';       // If null, will be a top level menu item.
@@ -158,5 +158,29 @@ class Rules_Page extends Menu_Page {
 	 */
 	public function new_rule_url(): string {
 		return \add_query_arg( 'new_rule', 'true', \menu_page_url( $this->slug(), false ) );
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param string  $a Some value.
+	 * @param boolean $c Some value.
+	 * @return string
+	 */
+	public function foo( string $a, bool $c ): string {
+		return $a;
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function enqueue( Page $page ): void {
+		\wp_enqueue_script(
+			'pc-cm-admin',
+			$this->app_config->url( 'assets' ) . 'app/dist/index.bundle.js',
+			array( 'wp-i18n' ),
+			$this->app_config->version(),
+			true
+		);
 	}
 }

@@ -23,3 +23,4 @@ $pc_cm_table->prepare_items();
 		<?php $pc_cm_table->display(); ?>
 	</form>
 </div>
+<div id="pc-app">	</div>
