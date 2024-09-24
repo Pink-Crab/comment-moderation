@@ -171,30 +171,30 @@ use PinkCrab\Comment_Moderation\Util\Rule_Helper;
 <style> 
 .group{
 	margin-left:  10px;
-    border: 1px solid grey;
-    padding: 5px;
+	border: 1px solid grey;
+	padding: 5px;
 }
 .condition{
 	display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    padding: 5px;
-    margin: 5px;
-    margin-left: 10px;
-    border: 1px solid black;
+	flex-direction: row;
+	flex-wrap: wrap;
+	padding: 5px;
+	margin: 5px;
+	margin-left: 10px;
+	border: 1px solid black;
 }
 .condition__field_relation,
 .condition__field_value{
 	width: 49%;
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 10px;
+	display: flex;
+	flex-direction: column;
+	margin-bottom: 10px;
 }
 
 .condition__fields fieldset{
 	display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    min-width: 100%;
+	grid-template-columns: repeat(6, 1fr);
+	min-width: 100%;
 }
 .condition__fields fieldset legend{
 	grid-column: span 6;
@@ -202,10 +202,10 @@ use PinkCrab\Comment_Moderation\Util\Rule_Helper;
 
 .condition__fields fieldset > div{
 	display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    margin-right: 5px;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	margin-right: 5px;
 }
 </style>
 

@@ -172,12 +172,22 @@ class Rules_Page extends Menu_Page {
 	}
 
 	/**
-	 * @inheritDoc
+	 * Enqueue the required assets.
+	 *
+	 * @param Page $page The page object.
+	 *
+	 * @return void
 	 */
 	public function enqueue( Page $page ): void {
+		$assets_url = $this->app_config->url( 'assets' );
+
+		if ( ! is_string( $assets_url ) ) {
+			return;
+		}
+
 		\wp_enqueue_script(
 			'pc-cm-admin',
-			$this->app_config->url( 'assets' ) . 'app/dist/index.bundle.js',
+			$assets_url . 'app/dist/index.bundle.js',
 			array( 'wp-i18n' ),
 			$this->app_config->version(),
 			true

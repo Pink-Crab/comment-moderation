@@ -90,7 +90,7 @@ class Condition implements \JsonSerializable {
 	 */
 	public function __construct( string $rule_type, ?callable $callback ) {
 		$this->rule_type = $rule_type;
-		if ( $callback !== null ) {
+		if ( null !== $callback ) {
 			$callback( $this );
 		}
 	}
@@ -254,7 +254,7 @@ class Condition implements \JsonSerializable {
 	/**
 	 * Get the fields the rule applies to.
 	 *
-	 * @return array<string>
+	 * @return array<string, bool>
 	 */
 	public function get_fields(): array {
 		return array_filter(

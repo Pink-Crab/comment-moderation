@@ -1,10 +1,10 @@
-<?php 
+<?php
 
 /**
  * A comment model.
- * 
+ *
  * @package PinkCrab\Comment_Moderation
- * 
+ *
  * @since 0.1.0
  */
 
