@@ -20,11 +20,9 @@ use PinkCrab\Perique\Application\App_Config;
  *
  * @phpstan-type RuleDBRow array{
  * id: int,
- * rule_name: string,
- * rule_type: string,
- * rule_value: string,
+ * name: string,
  * rule_enabled: bool,
- * fields: string,
+ * conditions: string,
  * outcome: string,
  * created: string,
  * updated: string
@@ -129,16 +127,14 @@ class Rule_Repository {
 		$inserted = $this->wpdb->insert(
 			$this->table_name(),
 			array(
-				'rule_name'    => $rule->get_rule_name(),
-				'rule_type'    => $rule->get_rule_type(),
-				'rule_value'   => $rule->get_rule_value(),
+				'name'         => $rule->get_rule_name(),
 				'rule_enabled' => $rule->get_rule_enabled(),
-				'fields'       => wp_json_encode( $rule->get_fields() ),
+				'conditions'   => \json_encode( $rule->get_rule_conditions() ),
 				'outcome'      => $rule->get_outcome(),
 				'created'      => $rule->get_created()->format( 'Y-m-d H:i:s' ),
 				'updated'      => current_time( 'mysql' ),
 			),
-			array( '%s', '%s', '%s', '%d', '%s', '%s', '%s', '%s' )
+			array( '%s', '%d', '%s', '%s', '%s', '%s' )
 		);
 
 		if ( ! $inserted ) {
@@ -154,10 +150,8 @@ class Rule_Repository {
 		return new Rule(
 			(int) $this->wpdb->insert_id,
 			$rule->get_rule_name(),
-			$rule->get_rule_type(),
-			$rule->get_rule_value(),
 			$rule->get_rule_enabled(),
-			$rule->get_fields(),
+			$rule->get_rule_conditions(),
 			$rule->get_outcome(),
 			new \DateTimeImmutable( $rule->get_created()->format( 'Y-m-d H:i:s' ) ),
 			new \DateTimeImmutable( current_time( 'mysql' ) )
@@ -175,16 +169,14 @@ class Rule_Repository {
 		$updated = $this->wpdb->update(
 			$this->table_name(),
 			array(
-				'rule_name'    => $rule->get_rule_name(),
-				'rule_type'    => $rule->get_rule_type(),
-				'rule_value'   => $rule->get_rule_value(),
+				'name'         => $rule->get_rule_name(),
 				'rule_enabled' => $rule->get_rule_enabled(),
-				'fields'       => wp_json_encode( $rule->get_fields() ),
+				'conditions'   => wp_json_encode( $rule->get_rule_conditions() ),
 				'outcome'      => $rule->get_outcome(),
 				'updated'      => current_time( 'mysql' ),
 			),
 			array( 'id' => $rule->get_id() ),
-			array( '%s', '%s', '%s', '%d', '%s', '%s', '%s' ),
+			array( '%s', '%d', '%s', '%s', '%s' ),
 			array( '%d' )
 		);
 
@@ -201,10 +193,8 @@ class Rule_Repository {
 		return new Rule(
 			$rule->get_id(),
 			$rule->get_rule_name(),
-			$rule->get_rule_type(),
-			$rule->get_rule_value(),
 			$rule->get_rule_enabled(),
-			$rule->get_fields(),
+			$rule->get_rule_conditions(),
 			$rule->get_outcome(),
 			$rule->get_created(),
 			new \DateTimeImmutable( current_time( 'mysql' ) )
@@ -223,11 +213,9 @@ class Rule_Repository {
 	// phpcs:enable	
 		return new Rule(
 			(int) $rule['id'],
-			\sanitize_text_field( $rule['rule_name'] ),
-			\sanitize_text_field( $rule['rule_type'] ),
-			\sanitize_text_field( $rule['rule_value'] ),
+			\sanitize_text_field( $rule['name'] ),
 			(bool) $rule['rule_enabled'],
-			json_decode( $rule['fields'], true ),
+			json_decode( $rule['conditions'], true ),
 			\sanitize_text_field( $rule['outcome'] ),
 			new \DateTimeImmutable( $rule['created'] ),
 			new \DateTimeImmutable( $rule['updated'] )

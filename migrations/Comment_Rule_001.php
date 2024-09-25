@@ -45,11 +45,9 @@ class Comment_Rule_001 extends Migration {
 	public function schema( Schema $schema ): void {
 		$schema->column( 'id' )->unsigned_int( 11 )->auto_increment();
 		$schema->index( 'id' )->primary();
-		$schema->column( 'rule_name' )->text()->nullable();
-		$schema->column( 'rule_type' )->text()->nullable();
-		$schema->column( 'rule_value' )->text()->nullable();
+		$schema->column( 'name' )->text();
 		$schema->column( 'rule_enabled' )->int()->default( 1 );
-		$schema->column( 'fields' )->json();
+		$schema->column( 'conditions' )->json();
 		$schema->column( 'outcome' )->text()->nullable();
 		$schema->column( 'created' )->timestamp()->default( 'CURRENT_TIMESTAMP' );
 		$schema->column( 'updated' )->timestamp()->default( 'CURRENT_TIMESTAMP' );

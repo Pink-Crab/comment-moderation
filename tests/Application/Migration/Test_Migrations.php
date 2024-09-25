@@ -111,24 +111,16 @@ class Test_Migrations extends \WP_UnitTestCase {
 				'Field' => 'id',
 				'Type'  => $this->is_mariadb() ? 'int(11) unsigned' : 'int unsigned',
 			),
-			'rule_name'    => array(
-				'Field' => 'rule_name',
-				'Type'  => 'text',
-			),
-			'rule_type'    => array(
-				'Field' => 'rule_type',
-				'Type'  => 'text',
-			),
-			'rule_value'   => array(
-				'Field' => 'rule_value',
+			'name'    => array(
+				'Field' => 'name',
 				'Type'  => 'text',
 			),
 			'rule_enabled' => array(
 				'Field' => 'rule_enabled',
 				'Type'  => $this->is_mariadb() ? 'int(11)' : 'int',
 			),
-			'fields'       => array(
-				'Field' => 'fields',
+			'conditions'       => array(
+				'Field' => 'conditions',
 				'Type'  => $this->is_mariadb() ? 'longtext' : 'json',
 			),
 			'created'      => array(

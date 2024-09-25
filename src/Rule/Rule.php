@@ -22,31 +22,12 @@ declare(strict_types=1);
 namespace PinkCrab\Comment_Moderation\Rule;
 
 use PinkCrab\Comment_Moderation\Util\Rule_Helper;
+use PinkCrab\Comment_Moderation\Rule\Condition\Group;
 
 /**
  * Model for a Rule.
  */
 class Rule {
-
-	public const RULE_TYPE_CONTAINS    = 'contains';
-	public const RULE_TYPE_NOT_CONTAIN = 'not_contain';
-	public const RULE_TYPE_EQUALS      = 'equals';
-	public const RULE_TYPE_NOT_EQUALS  = 'not_equals';
-	public const RULE_TYPE_STARTS_WITH = 'starts_with';
-	public const RULE_TYPE_ENDS_WITH   = 'ends_with';
-	public const RULE_TYPE_REGEX       = 'regex';
-	public const RULE_TYPE_WILDCARD    = 'wildcard';
-
-	protected const ALL_RULES = array(
-		self::RULE_TYPE_CONTAINS,
-		self::RULE_TYPE_NOT_CONTAIN,
-		self::RULE_TYPE_EQUALS,
-		self::RULE_TYPE_NOT_EQUALS,
-		self::RULE_TYPE_STARTS_WITH,
-		self::RULE_TYPE_ENDS_WITH,
-		self::RULE_TYPE_REGEX,
-		self::RULE_TYPE_WILDCARD,
-	);
 
 	/**
 	 * The ID of the rule.
@@ -63,20 +44,6 @@ class Rule {
 	protected $rule_name;
 
 	/**
-	 * The type of the rule.
-	 *
-	 * @var string
-	 */
-	protected $rule_type;
-
-	/**
-	 * The value of the rule.
-	 *
-	 * @var string
-	 */
-	protected $rule_value;
-
-	/**
 	 * If the rule is enabled.
 	 *
 	 * @var boolean
@@ -84,11 +51,11 @@ class Rule {
 	protected $rule_enabled;
 
 	/**
-	 * The fields the rule applies to.
+	 * The rule conditions.
 	 *
-	 * @var array<string>
+	 * @var Group
 	 */
-	protected $fields;
+	protected $conditions;
 
 	/**
 	 * The outcome of the rule.
@@ -116,10 +83,8 @@ class Rule {
 	 *
 	 * @param integer|null            $id           The rule ID.
 	 * @param string                  $rule_name    The name of the rule.
-	 * @param string                  $rule_type    The type of the rule.
-	 * @param string                  $rule_value   The value of the rule.
 	 * @param boolean                 $rule_enabled If the rule is enabled.
-	 * @param array<string>           $fields       The fields the rule applies to.
+	 * @param Group            $conditions   The rule conditions.
 	 * @param string                  $outcome      The outcome of the rule.
 	 * @param \DateTimeImmutable|null $created      The date the rule was created.
 	 * @param \DateTimeImmutable|null $updated      The date the rule was last updated.
@@ -127,49 +92,21 @@ class Rule {
 	public function __construct(
 		?int $id,
 		string $rule_name,
-		string $rule_type,
-		string $rule_value,
 		bool $rule_enabled,
-		array $fields,
+		Group $conditions,
 		string $outcome,
 		?\DateTimeImmutable $created = null,
 		?\DateTimeImmutable $updated = null
 	) {
 		$this->id           = $id ? absint( $id ) : null;
 		$this->rule_name    = esc_html( $rule_name );
-		$this->rule_type    = $this->validate_rule_type( $rule_type );
-		$this->rule_value   = esc_attr( $rule_value );
 		$this->rule_enabled = $rule_enabled;
-		$this->fields       = Rule_Helper::normalize_fields( $fields );
+		$this->conditions   = $conditions;
 		$this->outcome      = esc_attr( $outcome );
 		$this->created      = $created ?? new \DateTimeImmutable();
 		$this->updated      = $updated ?? new \DateTimeImmutable();
 	}
 
-	/**
-	 * Sets the rule type.
-	 *
-	 * Filtered to ensure only valid types are set.
-	 *
-	 * @param string $type The rule type.
-	 *
-	 * @return string
-	 */
-	private function validate_rule_type( string $type ): string {
-		// If rules in not in the defined list, throw an exception.
-		if ( ! in_array( $type, self::ALL_RULES, true ) ) {
-			throw new \InvalidArgumentException(
-				sprintf(
-					// translators: 1: Rule Type, 2: Valid Rule Types
-					'Invalid Rule Type: %s, Valid Types: %s',
-					esc_attr( $type ),
-					esc_attr( implode( ', ', self::ALL_RULES ) )
-				)
-			);
-		}
-
-		return esc_attr( $type );
-	}
 
 	/**
 	 * Get the ID of the rule.
@@ -190,24 +127,6 @@ class Rule {
 	}
 
 	/**
-	 * Get the type of the rule.
-	 *
-	 * @return string
-	 */
-	public function get_rule_type(): string {
-		return $this->rule_type;
-	}
-
-	/**
-	 * Get the value of the rule.
-	 *
-	 * @return string
-	 */
-	public function get_rule_value(): string {
-		return $this->rule_value;
-	}
-
-	/**
 	 * Get if the rule is enabled.
 	 *
 	 * @return boolean
@@ -217,12 +136,12 @@ class Rule {
 	}
 
 	/**
-	 * Get the fields the rule applies to.
+	 * Get the rule conditions.
 	 *
-	 * @return array<string>
+	 * @return Group
 	 */
-	public function get_fields(): array {
-		return $this->fields;
+	public function get_rule_conditions(): Group {
+		return $this->conditions;
 	}
 
 	/**

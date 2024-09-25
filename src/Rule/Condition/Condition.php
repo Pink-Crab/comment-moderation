@@ -26,6 +26,17 @@ class Condition implements \JsonSerializable {
 	public const TYPE_REGEX       = 'regex';
 	public const TYPE_WILDCARD    = 'wildcard';
 
+	public const ALLOWED_TYPES = array(
+		self::TYPE_CONTAINS,
+		self::TYPE_NOT_CONTAIN,
+		self::TYPE_EQUALS,
+		self::TYPE_NOT_EQUALS,
+		self::TYPE_STARTS_WITH,
+		self::TYPE_ENDS_WITH,
+		self::TYPE_REGEX,
+		self::TYPE_WILDCARD,
+	);
+
 	/**
 	 * Applies to comment content.
 	 *
@@ -202,7 +213,7 @@ class Condition implements \JsonSerializable {
 	 *
 	 * @return boolean
 	 */
-	public function get_comment_content(): bool {
+	public function is_comment_content(): bool {
 		return $this->comment_content;
 	}
 
@@ -211,7 +222,7 @@ class Condition implements \JsonSerializable {
 	 *
 	 * @return boolean
 	 */
-	public function get_comment_author(): bool {
+	public function is_comment_author(): bool {
 		return $this->comment_author;
 	}
 
@@ -220,7 +231,7 @@ class Condition implements \JsonSerializable {
 	 *
 	 * @return boolean
 	 */
-	public function get_comment_author_email(): bool {
+	public function is_comment_author_email(): bool {
 		return $this->comment_author_email;
 	}
 
@@ -229,7 +240,7 @@ class Condition implements \JsonSerializable {
 	 *
 	 * @return boolean
 	 */
-	public function get_comment_author_url(): bool {
+	public function is_comment_author_url(): bool {
 		return $this->comment_author_url;
 	}
 
@@ -238,7 +249,7 @@ class Condition implements \JsonSerializable {
 	 *
 	 * @return boolean
 	 */
-	public function get_comment_author_ip(): bool {
+	public function is_comment_author_ip(): bool {
 		return $this->comment_author_ip;
 	}
 
@@ -247,7 +258,7 @@ class Condition implements \JsonSerializable {
 	 *
 	 * @return boolean
 	 */
-	public function get_comment_agent(): bool {
+	public function is_comment_agent(): bool {
 		return $this->comment_agent;
 	}
 
@@ -275,6 +286,7 @@ class Condition implements \JsonSerializable {
 	#[\ReturnTypeWillChange]
 	public function jsonSerialize() {
 		return array(
+			'type'                 => 'condition',
 			'rule_type'            => $this->rule_type,
 			'rule_value'           => $this->rule_value,
 			'comment_content'      => $this->comment_content,

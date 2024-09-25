@@ -10,8 +10,11 @@ declare(strict_types=1);
 
 namespace PinkCrab\Comment_Moderation\Tests\Unit\Rule;
 
+use DateTimeImmutable;
+use DateTimeInterface;
 use PinkCrab\Comment_Moderation\Rule\Rule;
 use PinkCrab\Perique\Application\App_Config;
+use PinkCrab\Comment_Moderation\Rule\Condition\Group;
 use PinkCrab\Comment_Moderation\Rule\Rule_Repository;
 use PinkCrab\Comment_Moderation\Tests\Tools\wpdb_logger;
 
@@ -63,11 +66,9 @@ class Test_Rule_Repository extends \WP_UnitTestCase {
 		self::set_result(
 			array(
 				'id'           => 1,
-				'rule_name'    => 'name',
-				'rule_type'    => 'contains',
-				'rule_value'   => 'value',
+				'name'    => 'name',
 				'rule_enabled' => 1,
-				'fields'       => '[]',
+				'conditions'   => '{"conditions": [], "relationship": "any"}',
 				'outcome'      => 'spam',
 				'created'      => '2021-01-01 00:00:00',
 				'updated'      => '2021-02-01 00:00:00',
@@ -89,12 +90,20 @@ class Test_Rule_Repository extends \WP_UnitTestCase {
 		$this->assertInstanceOf( Rule::class, $rule );
 		$this->assertEquals( 1, $rule->get_id() );
 		$this->assertEquals( 'name', $rule->get_rule_name() );
-		$this->assertEquals( 'contains', $rule->get_rule_type() );
-		$this->assertEquals( 'value', $rule->get_rule_value() );
 		$this->assertTrue( $rule->get_rule_enabled() );
 		$this->assertEquals( 'spam', $rule->get_outcome() );
 		$this->assertEquals( '2021-01-01', $rule->get_created()->format( 'Y-m-d' ) );
 		$this->assertEquals( '2021-02-01', $rule->get_updated()->format( 'Y-m-d' ) );
+
+		$conditions = $rule->get_rule_conditions();
+
+		$this->assertIsArray( $conditions );
+		$this->assertCount( 1, $conditions );
+		$group = $conditions[0];
+		$this->assertInstanceOf( Group::class, $group );
+		$this->assertTrue( $group->is_match_all() );
+		$this->assertIsArray( $group->get_conditions() );
+		$this->assertCount( 0, $group->get_conditions() );
 	}
 
 	/**
@@ -132,22 +141,18 @@ class Test_Rule_Repository extends \WP_UnitTestCase {
 			array(
 				array(
 					'id'           => 1,
-					'rule_name'    => 'name',
-					'rule_type'    => 'contains',
-					'rule_value'   => 'value',
+					'name'    => 'name',
 					'rule_enabled' => 1,
-					'fields'       => '[]',
+					'conditions'       => '[{"conditions":[],"match_all":true}]',
 					'outcome'      => 'spam',
 					'created'      => '2021-01-01 00:00:00',
 					'updated'      => '2021-02-01 00:00:00',
 				),
 				array(
 					'id'           => 2,
-					'rule_name'    => 'name2',
-					'rule_type'    => 'contains',
-					'rule_value'   => 'value2',
+					'name'    => 'name2',
 					'rule_enabled' => 1,
-					'fields'       => '[]',
+					'conditions'       => '[{"conditions":[],"match_all":true}]',
 					'outcome'      => 'spam',
 					'created'      => '2021-01-01 00:00:00',
 					'updated'      => '2021-02-01 00:00:00',
@@ -205,30 +210,21 @@ class Test_Rule_Repository extends \WP_UnitTestCase {
 		$rule = new Rule(
 			null,
 			'name',
-			'contains',
-			'value',
 			true,
-			array( 'comment_author' => true ),
+			array( new Group( array(), true ) ),
 			'spam',
 		);
 
 		$repo = new Rule_Repository( $this->logging_wpdb, $this->app_config );
 
 		$created_rule = $repo->upsert( $rule );
-
+		
 		// Check the fileds are correctly set.
 		$this->assertEquals( 1, $created_rule->get_id() );
 		$this->assertEquals( 'name', $created_rule->get_rule_name() );
-		$this->assertEquals( 'contains', $created_rule->get_rule_type() );
-		$this->assertEquals( 'value', $created_rule->get_rule_value() );
 		$this->assertTrue( $created_rule->get_rule_enabled() );
 		$this->assertEquals( 'spam', $created_rule->get_outcome() );
-		$this->assertTrue( $created_rule->get_fields()['comment_author'] );
-		$this->assertFalse( $created_rule->get_fields()['comment_author_email'] );
-		$this->assertFalse( $created_rule->get_fields()['comment_author_url'] );
-		$this->assertFalse( $created_rule->get_fields()['comment_content'] );
-		$this->assertFalse( $created_rule->get_fields()['comment_author_IP'] );
-		$this->assertFalse( $created_rule->get_fields()['comment_agent'] );
+		$this->assertInstanceOf(Group::class, $created_rule->get_rule_conditions()[0]);
 		$this->assertInstanceOf( \DateTimeImmutable::class, $created_rule->get_created() );
 		$this->assertInstanceOf( \DateTimeImmutable::class, $created_rule->get_updated() );
 
@@ -237,24 +233,20 @@ class Test_Rule_Repository extends \WP_UnitTestCase {
 		// Check the rule was run through the wpdb->insert method.
 		$this->assertTrue( $log[0]->insert );
 		$this->assertEquals( 'test_table_name', $log[0]->table );
-		$this->assertEquals( 'name', $log[0]->rows['rule_name'] );
-		$this->assertEquals( 'contains', $log[0]->rows['rule_type'] );
-		$this->assertEquals( 'value', $log[0]->rows['rule_value'] );
+		$this->assertEquals( 'name', $log[0]->rows['name'] );
 		$this->assertEquals( 1, $log[0]->rows['rule_enabled'] );
-		$this->assertEquals( '{"comment_author":true,"comment_author_email":false,"comment_author_url":false,"comment_content":false,"comment_author_IP":false,"comment_agent":false}', $log[0]->rows['fields'] );
+		$this->assertEquals( '[{"conditions":[],"match_all":true}]', $log[0]->rows['conditions'] );
 		$this->assertEquals( 'spam', $log[0]->rows['outcome'] );
 		$this->assertInstanceOf( \DateTimeInterface::class, \DateTimeImmutable::createFromFormat( 'Y-m-d H:i:s', $log[0]->rows['created'] ) );
 		$this->assertInstanceOf( \DateTimeInterface::class, \DateTimeImmutable::createFromFormat( 'Y-m-d H:i:s', $log[0]->rows['updated'] ) );
 
 		// Check the value formats.
 		$this->assertEquals( '%s', $log[0]->format[0] );
-		$this->assertEquals( '%s', $log[0]->format[1] );
+		$this->assertEquals( '%d', $log[0]->format[1] );
 		$this->assertEquals( '%s', $log[0]->format[2] );
-		$this->assertEquals( '%d', $log[0]->format[3] );
+		$this->assertEquals( '%s', $log[0]->format[3] );
 		$this->assertEquals( '%s', $log[0]->format[4] );
 		$this->assertEquals( '%s', $log[0]->format[5] );
-		$this->assertEquals( '%s', $log[0]->format[6] );
-		$this->assertEquals( '%s', $log[0]->format[7] );
 
 		// where and where_format should be empty as insert
 		$this->assertEmpty( $log[0]->where );
@@ -275,10 +267,8 @@ class Test_Rule_Repository extends \WP_UnitTestCase {
 		$rule = new Rule(
 			null,
 			'name',
-			'contains',
-			'value',
-			true,
-			array( 'comment_author' => true ),
+			true, 
+			[],
 			'spam',
 		);
 
@@ -306,10 +296,8 @@ class Test_Rule_Repository extends \WP_UnitTestCase {
 		$rule = new Rule(
 			10,
 			'name',
-			'contains',
-			'value',
 			true,
-			array( 'comment_author' => true ),
+			[new Group([], false)],
 			'spam',
 		);
 
@@ -320,16 +308,10 @@ class Test_Rule_Repository extends \WP_UnitTestCase {
 		// Check the fileds are correctly set.
 		$this->assertEquals( 10, $created_rule->get_id() );
 		$this->assertEquals( 'name', $created_rule->get_rule_name() );
-		$this->assertEquals( 'contains', $created_rule->get_rule_type() );
-		$this->assertEquals( 'value', $created_rule->get_rule_value() );
 		$this->assertTrue( $created_rule->get_rule_enabled() );
 		$this->assertEquals( 'spam', $created_rule->get_outcome() );
-		$this->assertTrue( $created_rule->get_fields()['comment_author'] );
-		$this->assertFalse( $created_rule->get_fields()['comment_author_email'] );
-		$this->assertFalse( $created_rule->get_fields()['comment_author_url'] );
-		$this->assertFalse( $created_rule->get_fields()['comment_content'] );
-		$this->assertFalse( $created_rule->get_fields()['comment_author_IP'] );
-		$this->assertFalse( $created_rule->get_fields()['comment_agent'] );
+		$this->assertInstanceOf(Group::class, $created_rule->get_rule_conditions()[0]);
+		// $this->assertFalse( $created_rule->get_rule_conditions()[0]->is_match_all() );
 		$this->assertInstanceOf( \DateTimeImmutable::class, $created_rule->get_created() );
 		$this->assertInstanceOf( \DateTimeImmutable::class, $created_rule->get_updated() );
 
@@ -338,22 +320,19 @@ class Test_Rule_Repository extends \WP_UnitTestCase {
 		// Check the rule was run through the wpdb->insert method.
 		$this->assertFalse( $log[0]->insert );
 		$this->assertEquals( 'test_table_name', $log[0]->table );
-		$this->assertEquals( 'name', $log[0]->rows['rule_name'] );
-		$this->assertEquals( 'contains', $log[0]->rows['rule_type'] );
-		$this->assertEquals( 'value', $log[0]->rows['rule_value'] );
+		$this->assertEquals( 'name', $log[0]->rows['name'] );
 		$this->assertEquals( 1, $log[0]->rows['rule_enabled'] );
-		$this->assertEquals( '{"comment_author":true,"comment_author_email":false,"comment_author_url":false,"comment_content":false,"comment_author_IP":false,"comment_agent":false}', $log[0]->rows['fields'] );
+		$this->assertEquals( '[{"conditions":[],"match_all":false}]', $log[0]->rows['conditions'] );
 		$this->assertEquals( 'spam', $log[0]->rows['outcome'] );
 		$this->assertInstanceOf( \DateTimeInterface::class, \DateTimeImmutable::createFromFormat( 'Y-m-d H:i:s', $log[0]->rows['updated'] ) );
 
 		// Check the value formats.
 		$this->assertEquals( '%s', $log[0]->format[0] );
-		$this->assertEquals( '%s', $log[0]->format[1] );
+		$this->assertEquals( '%d', $log[0]->format[1] );
 		$this->assertEquals( '%s', $log[0]->format[2] );
-		$this->assertEquals( '%d', $log[0]->format[3] );
+		$this->assertEquals( '%s', $log[0]->format[3] );
 		$this->assertEquals( '%s', $log[0]->format[4] );
-		$this->assertEquals( '%s', $log[0]->format[5] );
-		$this->assertEquals( '%s', $log[0]->format[6] );
+		
 		// where and where_format should be empty as insert
 		$this->assertEquals( 10, $log[0]->where['id'] );
 		$this->assertEquals( '%d', $log[0]->where_format[0] );
@@ -373,10 +352,8 @@ class Test_Rule_Repository extends \WP_UnitTestCase {
 		$rule = new Rule(
 			10,
 			'name',
-			'contains',
-			'value',
 			true,
-			array( 'comment_author' => true ),
+			array(),
 			'spam',
 		);
 
