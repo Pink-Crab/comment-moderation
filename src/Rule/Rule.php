@@ -21,6 +21,7 @@ declare(strict_types=1);
 
 namespace PinkCrab\Comment_Moderation\Rule;
 
+use cli\Tree;
 use PinkCrab\Comment_Moderation\Util\Rule_Helper;
 use PinkCrab\Comment_Moderation\Rule\Condition\Group;
 
@@ -28,6 +29,11 @@ use PinkCrab\Comment_Moderation\Rule\Condition\Group;
  * Model for a Rule.
  */
 class Rule {
+
+	public const SPAM    = 'spam';
+	public const HOLD    = 'hold';
+	public const APPROVE = 'approve';
+	public const TRASH   = 'trash';
 
 	/**
 	 * The ID of the rule.
@@ -84,7 +90,7 @@ class Rule {
 	 * @param integer|null            $id           The rule ID.
 	 * @param string                  $rule_name    The name of the rule.
 	 * @param boolean                 $rule_enabled If the rule is enabled.
-	 * @param Group            $conditions   The rule conditions.
+	 * @param Group                   $conditions   The rule conditions.
 	 * @param string                  $outcome      The outcome of the rule.
 	 * @param \DateTimeImmutable|null $created      The date the rule was created.
 	 * @param \DateTimeImmutable|null $updated      The date the rule was last updated.
