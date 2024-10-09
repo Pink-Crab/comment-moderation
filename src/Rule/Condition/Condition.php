@@ -26,6 +26,17 @@ class Condition implements \JsonSerializable {
 	public const TYPE_REGEX       = 'regex';
 	public const TYPE_WILDCARD    = 'wildcard';
 
+	public const ALLOWED_TYPES = array(
+		self::TYPE_CONTAINS,
+		self::TYPE_NOT_CONTAIN,
+		self::TYPE_EQUALS,
+		self::TYPE_NOT_EQUALS,
+		self::TYPE_STARTS_WITH,
+		self::TYPE_ENDS_WITH,
+		self::TYPE_REGEX,
+		self::TYPE_WILDCARD,
+	);
+
 	/**
 	 * Applies to comment content.
 	 *
@@ -73,23 +84,23 @@ class Condition implements \JsonSerializable {
 	 *
 	 * @var string
 	 */
-	protected $rule_type;
+	protected $condition_type;
 
 	/**
 	 * The value of the rule.
 	 *
 	 * @var string
 	 */
-	protected $rule_value = '';
+	protected $condition_value = '';
 
 	/**
 	 * Creates an instance of the Rule Condition.
 	 *
-	 * @param string                         $rule_type The type of the rule.
-	 * @param callable(Condition): void|null $callback  The callback to set additional values.
+	 * @param string                         $condition_type The type of the rule.
+	 * @param callable(Condition): void|null $callback       The callback to set additional values.
 	 */
-	public function __construct( string $rule_type, ?callable $callback ) {
-		$this->rule_type = $rule_type;
+	public function __construct( string $condition_type, ?callable $callback ) {
+		$this->condition_type = $condition_type;
 		if ( null !== $callback ) {
 			$callback( $this );
 		}
@@ -98,12 +109,12 @@ class Condition implements \JsonSerializable {
 	/**
 	 * Sets the rule value.
 	 *
-	 * @param string $rule_value The value of the rule.
+	 * @param string $condition_value The value of the rule.
 	 *
 	 * @return self
 	 */
-	public function set_rule_value( string $rule_value ): self {
-		$this->rule_value = $rule_value;
+	public function set_condition_value( string $condition_value ): self {
+		$this->condition_value = $condition_value;
 		return $this;
 	}
 
@@ -184,8 +195,8 @@ class Condition implements \JsonSerializable {
 	 *
 	 * @return string
 	 */
-	public function get_rule_type(): string {
-		return $this->rule_type;
+	public function get_condition_type(): string {
+		return $this->condition_type;
 	}
 
 	/**
@@ -193,8 +204,8 @@ class Condition implements \JsonSerializable {
 	 *
 	 * @return string
 	 */
-	public function get_rule_value(): string {
-		return $this->rule_value;
+	public function get_condition_value(): string {
+		return $this->condition_value;
 	}
 
 	/**
@@ -202,7 +213,7 @@ class Condition implements \JsonSerializable {
 	 *
 	 * @return boolean
 	 */
-	public function get_comment_content(): bool {
+	public function is_comment_content(): bool {
 		return $this->comment_content;
 	}
 
@@ -211,7 +222,7 @@ class Condition implements \JsonSerializable {
 	 *
 	 * @return boolean
 	 */
-	public function get_comment_author(): bool {
+	public function is_comment_author(): bool {
 		return $this->comment_author;
 	}
 
@@ -220,7 +231,7 @@ class Condition implements \JsonSerializable {
 	 *
 	 * @return boolean
 	 */
-	public function get_comment_author_email(): bool {
+	public function is_comment_author_email(): bool {
 		return $this->comment_author_email;
 	}
 
@@ -229,7 +240,7 @@ class Condition implements \JsonSerializable {
 	 *
 	 * @return boolean
 	 */
-	public function get_comment_author_url(): bool {
+	public function is_comment_author_url(): bool {
 		return $this->comment_author_url;
 	}
 
@@ -238,7 +249,7 @@ class Condition implements \JsonSerializable {
 	 *
 	 * @return boolean
 	 */
-	public function get_comment_author_ip(): bool {
+	public function is_comment_author_ip(): bool {
 		return $this->comment_author_ip;
 	}
 
@@ -247,7 +258,7 @@ class Condition implements \JsonSerializable {
 	 *
 	 * @return boolean
 	 */
-	public function get_comment_agent(): bool {
+	public function is_comment_agent(): bool {
 		return $this->comment_agent;
 	}
 
@@ -275,8 +286,9 @@ class Condition implements \JsonSerializable {
 	#[\ReturnTypeWillChange]
 	public function jsonSerialize() {
 		return array(
-			'rule_type'            => $this->rule_type,
-			'rule_value'           => $this->rule_value,
+			'type'                 => 'condition',
+			'condition_type'       => $this->condition_type,
+			'condition_value'      => $this->condition_value,
 			'comment_content'      => $this->comment_content,
 			'comment_author'       => $this->comment_author,
 			'comment_author_email' => $this->comment_author_email,
@@ -284,88 +296,5 @@ class Condition implements \JsonSerializable {
 			'comment_author_ip'    => $this->comment_author_ip,
 			'comment_agent'        => $this->comment_agent,
 		);
-	}
-
-	/**
-	 * Create from JSON
-	 *
-	 * @param string $json JSON string.
-	 *
-	 * @return self
-	 *
-	 * @throws \JsonException If invalid JSON.
-	 */
-	public static function from_json( string $json ): self {
-		$data = json_decode( $json, true, 512, JSON_THROW_ON_ERROR );
-
-		try {
-			$condition = self::from_json( $data );
-		} catch ( \Throwable $th ) {
-			throw new \JsonException( esc_html( $th->getMessage() ) );
-		}
-
-		return $condition;
-	}
-
-	/**
-	 * Creates a new instance of the Con\dition from an array.
-	 *
-	 * @param array<string, mixed> $data The data to create the condition from.
-	 *
-	 * @return self
-	 *
-	 * @throws \InvalidArgumentException If invalid data.
-	 */
-	public static function from_array( array $data ): self {
-
-		// If doesnt contain rule_type, throw exception.
-		if ( ! array_key_exists( 'rule_type', $data ) ) {
-			throw new \InvalidArgumentException( 'Invalid data, missing rule_type' );
-		}
-		$condition = new self( esc_html( $data['rule_type'] ), null );
-
-		// If doesnt contain rule_value, throw exception.
-		if ( ! array_key_exists( 'rule_value', $data ) ) {
-			throw new \InvalidArgumentException( 'Invalid data, missing rule_value' );
-		}
-		$condition->set_rule_value( $data['rule_value'] );
-
-		// If doesnt contain comment_content, throw exception.
-		if ( ! array_key_exists( 'comment_content', $data ) ) {
-			throw new \InvalidArgumentException( 'Invalid data, missing comment_content' );
-		}
-		$condition->set_comment_content( (bool) $data['comment_content'] );
-
-		// If doesnt contain comment_author, throw exception.
-		if ( ! array_key_exists( 'comment_author', $data ) ) {
-			throw new \InvalidArgumentException( 'Invalid data, missing comment_author' );
-		}
-		$condition->set_comment_author( (bool) $data['comment_author'] );
-
-		// If doesnt contain comment_author_email, throw exception.
-		if ( ! array_key_exists( 'comment_author_email', $data ) ) {
-			throw new \InvalidArgumentException( 'Invalid data, missing comment_author_email' );
-		}
-		$condition->set_comment_author_email( (bool) $data['comment_author_email'] );
-
-		// If doesnt contain comment_author_url, throw exception.
-		if ( ! array_key_exists( 'comment_author_url', $data ) ) {
-			throw new \InvalidArgumentException( 'Invalid data, missing comment_author_url' );
-		}
-		$condition->set_comment_author_url( (bool) $data['comment_author_url'] );
-
-		// If doesnt contain comment_author_ip, throw exception.
-		if ( ! array_key_exists( 'comment_author_ip', $data ) ) {
-			throw new \InvalidArgumentException( 'Invalid data, missing comment_author_ip' );
-		}
-		$condition->set_comment_author_ip( (bool) $data['comment_author_ip'] );
-
-		// If doesnt contain comment_agent, throw exception.
-		if ( ! array_key_exists( 'comment_agent', $data ) ) {
-			throw new \InvalidArgumentException( 'Invalid data, missing comment_agent' );
-		}
-		$condition->set_comment_agent( (bool) $data['comment_agent'] );
-
-		return $condition;
 	}
 }

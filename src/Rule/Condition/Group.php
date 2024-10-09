@@ -16,7 +16,10 @@ use PinkCrab\Comment_Moderation\Rule\Condition\Condition;
 /**
  * A group of conditions.
  */
-class Group {
+class Group implements \JsonSerializable {
+
+	public const MATCH_ALL = true;
+	public const MATCH_ANY = false;
 
 	/**
 	 * The conditions in the group.
@@ -39,9 +42,26 @@ class Group {
 	 * @param boolean          $match_all  Is the group a match all or any.
 	 */
 	public function __construct( array $conditions = array(), bool $match_all = true ) {
-		$this->conditions = $conditions;
+		$this->conditions = $this->filter_conditions( $conditions );
 		$this->match_all  = $match_all;
 	}
+
+	/**
+	 * Filter the conditions on construct.
+	 *
+	 * @param array<mixed> $conditions The conditions to filter.
+	 *
+	 * @return array<Group|Condition>
+	 */
+	private function filter_conditions( array $conditions ): array {
+		return array_filter(
+			$conditions,
+			function ( $condition ) {
+				return $condition instanceof Group || $condition instanceof Condition;
+			}
+		);
+	}
+
 
 	/**
 	 * Get the conditions in the group.
@@ -59,5 +79,19 @@ class Group {
 	 */
 	public function is_match_all(): bool {
 		return $this->match_all;
+	}
+
+	/**
+	 * Json serializable.
+	 *
+	 * @return array
+	 */
+	#[\ReturnTypeWillChange]
+	public function jsonSerialize(): array {
+		return array(
+			'type'       => 'group',
+			'conditions' => $this->conditions,
+			'match_all'  => $this->match_all,
+		);
 	}
 }
