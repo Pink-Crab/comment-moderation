@@ -6,6 +6,24 @@
  * @package PinkCrab\Comment_Moderation\Rule\Condition
  *
  * @since 0.1.0
+ * 
+ * @template ConditionArray as array{
+ *     type: string,
+ *     condition_type: string,
+ *     condition_value: string,
+ *     comment_content: bool,
+ *     comment_author: bool,
+ *     comment_author_email: bool,
+ *     comment_author_url: bool,
+ *     comment_author_ip: bool,
+ *     comment_agent: bool
+ * }
+ *
+ * @template GroupArray as array{
+ *     type: string,
+ *     match_all: bool,
+ *     conditions: array<GroupArray|ConditionArray>
+ * }
  */
 declare(strict_types=1);
 
@@ -15,6 +33,8 @@ use PinkCrab\Comment_Moderation\Rule\Condition\Condition;
 
 /**
  * Utility class used to serialize and unserialize Rule Conditions.
+ *
+
  */
 class Serializer {
 
@@ -27,7 +47,7 @@ class Serializer {
 	 */
 	public function encode( Group $group ): string {
 		// Encode the conditions, but ensure we only include valid groups.
-		return wp_json_encode( $group );
+		return wp_json_encode( $group ) ?: ''; // phpcs:ignore Universal.Operators.DisallowShortTernary.Found
 	}
 
 	/**
@@ -46,7 +66,7 @@ class Serializer {
 		}
 
 		// If we dont have type = group, throw exception.
-		if ( ! is_array( $decoded ) || ! array_key_exists( 'type', $decoded ) || $decoded['type'] !== 'group' ) {
+		if ( ! array_key_exists( 'type', $decoded ) || $decoded['type'] !== 'group' ) {
 			throw new \InvalidArgumentException( 'Invalid group, type must be group' );
 		}
 
@@ -57,7 +77,7 @@ class Serializer {
 	/**
 	 * Parse simple group to Group object.
 	 *
-	 * @param array $group The group to parse.
+	 * @param GroupArray $group The group to parse.
 	 *
 	 * @return Group
 	 * @throws \InvalidArgumentException If the group is not valid.
@@ -71,20 +91,15 @@ class Serializer {
 			}
 		}
 
-		// If the type is not group
-		if ( $group['type'] !== 'group' ) {
-			throw new \InvalidArgumentException( 'Invalid group, type must be group' );
-		}
-
 		// Parse the conditions.
 		$conditions = array_map(
 			function ( $condition ) {
 				// If we have a group, parse it.
-				if ( $condition['type'] === 'group' ) {
+				if ( 'group' === $condition['type'] ) {
 					return $this->parse_group( $condition );
 				}
 				// If we have a condition, parse it.
-				if ( $condition['type'] === 'condition' ) {
+				if ( 'condition' === $condition['type'] ) {
 					return $this->parse_condition( $condition );
 				}
 				// If we have an invalid type, throw exception.
@@ -107,7 +122,7 @@ class Serializer {
 	 */
 	private function parse_condition( array $condition ): Condition {
 		// Check we have the required keys.
-		$keys = array( 'rule_type', 'rule_value', 'comment_content', 'comment_author', 'comment_author_email', 'comment_author_url', 'comment_author_ip', 'comment_agent' );
+		$keys = array( 'condition_type', 'condition_value', 'comment_content', 'comment_author', 'comment_author_email', 'comment_author_url', 'comment_author_ip', 'comment_agent' );
 		foreach ( $keys as $key ) {
 			if ( ! array_key_exists( $key, $condition ) ) {
 				throw new \InvalidArgumentException( sprintf( 'Invalid condition, missing key: %s', $key ) );
@@ -116,10 +131,10 @@ class Serializer {
 
 		// Return the new condition.
 		return new Condition(
-			esc_html( $condition['rule_type'] ),
+			esc_html( $condition['condition_type'] ),
 			function ( Condition $model ) use ( $condition ): Condition {
 				// Set the values.
-				return $model->set_rule_value( $condition['rule_value'] )
+				return $model->set_condition_value( $condition['condition_value'] )
 					->set_comment_content( (bool) $condition['comment_content'] )
 					->set_comment_author( (bool) $condition['comment_author'] )
 					->set_comment_author_email( (bool) $condition['comment_author_email'] )

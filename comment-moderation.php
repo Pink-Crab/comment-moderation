@@ -24,18 +24,18 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 // return;
 ( new App_Factory( __DIR__ ) )
-->default_setup()
-->module( Plugin_Life_Cycle::class )
-->module(
-	Perique_Migrations::class,
-	function ( Perique_Migrations $module ) {
-		// The Migrations.
-		$module->add_migration( Comment_Rule_001::class );
-		return $module;
-	}
-)
-->module( Admin_Menu::class )
-->di_rules( require __DIR__ . '/config/dependencies.php' )
-->app_config( require __DIR__ . '/config/settings.php' )
-->registration_classes( require __DIR__ . '/config/registration.php' )
-->boot();
+	->default_setup()
+	->module( Plugin_Life_Cycle::class )
+	->module(
+		Perique_Migrations::class,
+		function ( Perique_Migrations $module ) {
+			// The Migrations.
+			$module->add_migration( Comment_Rule_001::class );
+			return $module;
+		}
+	)
+	->module( Admin_Menu::class )
+	->di_rules( require __DIR__ . '/config/dependencies.php' )
+	->app_config( require __DIR__ . '/config/settings.php' )
+	->registration_classes( require __DIR__ . '/config/registration.php' )
+	->boot();

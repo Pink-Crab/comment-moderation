@@ -14,6 +14,7 @@ namespace PinkCrab\Comment_Moderation\Rule;
 
 use PinkCrab\Comment_Moderation\Rule\Rule;
 use PinkCrab\Perique\Application\App_Config;
+use PinkCrab\Comment_Moderation\Rule\Condition\Serializer;
 
 /**
  * Repository for the Rule entity.
@@ -45,14 +46,23 @@ class Rule_Repository {
 	protected $app_config;
 
 	/**
+	 * Condition Serializer.
+	 * 
+	 * @var Serializer
+	 */
+	protected $serializer;
+
+	/**
 	 * Construct.
 	 *
 	 * @param \wpdb      $wpdb       The WPDB instance.
 	 * @param App_Config $app_config The App Config.
+	 * @param Serializer $serializer The Condition Serializer.
 	 */
-	public function __construct( \wpdb $wpdb, App_Config $app_config ) {
+	public function __construct( \wpdb $wpdb, App_Config $app_config, Serializer $serializer ) {
 		$this->wpdb       = $wpdb;
 		$this->app_config = $app_config;
+		$this->serializer = $serializer;
 	}
 
 	/**
@@ -215,7 +225,7 @@ class Rule_Repository {
 			(int) $rule['id'],
 			\sanitize_text_field( $rule['name'] ),
 			(bool) $rule['rule_enabled'],
-			json_decode( $rule['conditions'], true ),
+			$this->serializer->decode( $rule['conditions'] ),
 			\sanitize_text_field( $rule['outcome'] ),
 			new \DateTimeImmutable( $rule['created'] ),
 			new \DateTimeImmutable( $rule['updated'] )

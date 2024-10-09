@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace PinkCrab\Comment_Moderation\Tests\Unit\Rule;
 
 use PinkCrab\Comment_Moderation\Rule\Rule;
+use PinkCrab\Comment_Moderation\Rule\Condition\Group;
 
 /**
  * Test_Rule tests the Rule model.
@@ -31,7 +32,7 @@ class Test_Rule extends \WP_UnitTestCase {
 			1,
 			'name',
 			true,
-			array(),
+			new Group(),
 			'spam',
 		);
 		$this->assertEquals( 1, $rule->get_id() );
@@ -48,7 +49,7 @@ class Test_Rule extends \WP_UnitTestCase {
 			null,
 			'name',
 			true,
-			array(),
+			new Group(),
 			'spam',
 		);
 		$this->assertNull( $rule->get_id() );
@@ -65,7 +66,7 @@ class Test_Rule extends \WP_UnitTestCase {
 			1,
 			'name',
 			true,
-			array(),
+			new Group(),
 			'spam',
 		);
 		$this->assertEquals( 'name', $rule->get_rule_name() );
@@ -81,7 +82,7 @@ class Test_Rule extends \WP_UnitTestCase {
 			1,
 			'name',
 			true,
-			array(),
+			new Group(),
 			'spam',
 		);
 		$this->assertTrue( $rule->get_rule_enabled() );
@@ -98,7 +99,7 @@ class Test_Rule extends \WP_UnitTestCase {
 			1,
 			'name',
 			false,
-			array(),
+			new Group(),
 			'spam',
 		);
 		$this->assertFalse( $rule->get_rule_enabled() );
@@ -115,7 +116,7 @@ class Test_Rule extends \WP_UnitTestCase {
 			1,
 			'name',
 			false,
-			array(),
+			new Group(),
 			'spam',
 		);
 		$this->assertEquals( 'spam', $rule->get_outcome() );
@@ -132,7 +133,7 @@ class Test_Rule extends \WP_UnitTestCase {
 			1,
 			'name',
 			false,
-			array(),
+			new Group(),
 			'spam',
 			new \DateTimeImmutable( '2021-01-01 00:00:00' )
 		);
@@ -151,7 +152,7 @@ class Test_Rule extends \WP_UnitTestCase {
 			1,
 			'name',
 			false,
-			array(),
+			new Group(),
 			'spam',
 		);
 
@@ -169,7 +170,7 @@ class Test_Rule extends \WP_UnitTestCase {
 			1,
 			'name',
 			false,
-			array(),
+			new Group(),
 			'spam',
 			new \DateTimeImmutable( '2021-01-01 00:00:00' ),
 			new \DateTimeImmutable( '2021-01-02 00:00:00' )
@@ -189,7 +190,7 @@ class Test_Rule extends \WP_UnitTestCase {
 			1,
 			'name',
 			false,
-			array(),
+			new Group(),
 			'spam',
 		);
 

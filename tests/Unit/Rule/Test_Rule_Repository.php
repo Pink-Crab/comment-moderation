@@ -17,6 +17,7 @@ use PinkCrab\Perique\Application\App_Config;
 use PinkCrab\Comment_Moderation\Rule\Condition\Group;
 use PinkCrab\Comment_Moderation\Rule\Rule_Repository;
 use PinkCrab\Comment_Moderation\Tests\Tools\wpdb_logger;
+use PinkCrab\Comment_Moderation\Rule\Condition\Serializer;
 
 /**
  * Test_Rule tests the Rule Repository.
@@ -68,14 +69,14 @@ class Test_Rule_Repository extends \WP_UnitTestCase {
 				'id'           => 1,
 				'name'    => 'name',
 				'rule_enabled' => 1,
-				'conditions'   => '{"conditions": [], "relationship": "any"}',
+				'conditions'   => '{"type":"group","conditions":[],"match_all":true}',
 				'outcome'      => 'spam',
 				'created'      => '2021-01-01 00:00:00',
 				'updated'      => '2021-02-01 00:00:00',
 			)
 		);
 
-		$repo = new Rule_Repository( $this->logging_wpdb, $this->app_config );
+		$repo = new Rule_Repository( $this->logging_wpdb, $this->app_config, new Serializer() );
 
 		$rule = $repo->get( 1 );
 
@@ -97,13 +98,10 @@ class Test_Rule_Repository extends \WP_UnitTestCase {
 
 		$conditions = $rule->get_rule_conditions();
 
-		$this->assertIsArray( $conditions );
-		$this->assertCount( 1, $conditions );
-		$group = $conditions[0];
-		$this->assertInstanceOf( Group::class, $group );
-		$this->assertTrue( $group->is_match_all() );
-		$this->assertIsArray( $group->get_conditions() );
-		$this->assertCount( 0, $group->get_conditions() );
+		$this->assertInstanceOf( Group::class, $conditions );
+		$this->assertTrue( $conditions->is_match_all() );
+		$this->assertIsArray( $conditions->get_conditions() );
+		$this->assertCount( 0, $conditions->get_conditions() );
 	}
 
 	/**
@@ -115,7 +113,7 @@ class Test_Rule_Repository extends \WP_UnitTestCase {
 	public function test_returns_null_if_rule_not_found(): void {
 		self::set_result( null );
 
-		$repo = new Rule_Repository( $this->logging_wpdb, $this->app_config );
+		$repo = new Rule_Repository( $this->logging_wpdb, $this->app_config, new Serializer() );
 
 		$rule = $repo->get( 1 );
 
@@ -143,7 +141,7 @@ class Test_Rule_Repository extends \WP_UnitTestCase {
 					'id'           => 1,
 					'name'    => 'name',
 					'rule_enabled' => 1,
-					'conditions'       => '[{"conditions":[],"match_all":true}]',
+					'conditions'       => '{"type":"group","conditions":[],"match_all":true}',
 					'outcome'      => 'spam',
 					'created'      => '2021-01-01 00:00:00',
 					'updated'      => '2021-02-01 00:00:00',
@@ -152,7 +150,7 @@ class Test_Rule_Repository extends \WP_UnitTestCase {
 					'id'           => 2,
 					'name'    => 'name2',
 					'rule_enabled' => 1,
-					'conditions'       => '[{"conditions":[],"match_all":true}]',
+					'conditions'       => '{"type":"group","conditions":[],"match_all":true}',
 					'outcome'      => 'spam',
 					'created'      => '2021-01-01 00:00:00',
 					'updated'      => '2021-02-01 00:00:00',
@@ -160,7 +158,7 @@ class Test_Rule_Repository extends \WP_UnitTestCase {
 			)
 		);
 
-		$repo = new Rule_Repository( $this->logging_wpdb, $this->app_config );
+		$repo = new Rule_Repository( $this->logging_wpdb, $this->app_config, new Serializer() );
 
 		$rules = $repo->get_all_rules();
 
@@ -185,7 +183,7 @@ class Test_Rule_Repository extends \WP_UnitTestCase {
 	public function test_can_count_all_rules(): void {
 		self::set_result( 5 );
 
-		$repo = new Rule_Repository( $this->logging_wpdb, $this->app_config );
+		$repo = new Rule_Repository( $this->logging_wpdb, $this->app_config, new Serializer() );
 
 		$count = $repo->count_all_rules();
 
@@ -211,11 +209,11 @@ class Test_Rule_Repository extends \WP_UnitTestCase {
 			null,
 			'name',
 			true,
-			array( new Group( array(), true ) ),
+			 new Group( array(), true ),
 			'spam',
 		);
 
-		$repo = new Rule_Repository( $this->logging_wpdb, $this->app_config );
+		$repo = new Rule_Repository( $this->logging_wpdb, $this->app_config, new  Serializer() );
 
 		$created_rule = $repo->upsert( $rule );
 		
@@ -224,7 +222,7 @@ class Test_Rule_Repository extends \WP_UnitTestCase {
 		$this->assertEquals( 'name', $created_rule->get_rule_name() );
 		$this->assertTrue( $created_rule->get_rule_enabled() );
 		$this->assertEquals( 'spam', $created_rule->get_outcome() );
-		$this->assertInstanceOf(Group::class, $created_rule->get_rule_conditions()[0]);
+		$this->assertInstanceOf(Group::class, $created_rule->get_rule_conditions());
 		$this->assertInstanceOf( \DateTimeImmutable::class, $created_rule->get_created() );
 		$this->assertInstanceOf( \DateTimeImmutable::class, $created_rule->get_updated() );
 
@@ -235,7 +233,7 @@ class Test_Rule_Repository extends \WP_UnitTestCase {
 		$this->assertEquals( 'test_table_name', $log[0]->table );
 		$this->assertEquals( 'name', $log[0]->rows['name'] );
 		$this->assertEquals( 1, $log[0]->rows['rule_enabled'] );
-		$this->assertEquals( '[{"conditions":[],"match_all":true}]', $log[0]->rows['conditions'] );
+		$this->assertEquals( '{"type":"group","conditions":[],"match_all":true}', $log[0]->rows['conditions'] );
 		$this->assertEquals( 'spam', $log[0]->rows['outcome'] );
 		$this->assertInstanceOf( \DateTimeInterface::class, \DateTimeImmutable::createFromFormat( 'Y-m-d H:i:s', $log[0]->rows['created'] ) );
 		$this->assertInstanceOf( \DateTimeInterface::class, \DateTimeImmutable::createFromFormat( 'Y-m-d H:i:s', $log[0]->rows['updated'] ) );
@@ -268,13 +266,13 @@ class Test_Rule_Repository extends \WP_UnitTestCase {
 			null,
 			'name',
 			true, 
-			[],
+			new Group(),
 			'spam',
 		);
 
 		$this->logging_wpdb->last_error = 'Error Message';
 
-		$repo = new Rule_Repository( $this->logging_wpdb, $this->app_config );
+		$repo = new Rule_Repository( $this->logging_wpdb, $this->app_config, new Serializer() );
 
 		$this->expectException( \Exception::class );
 		$this->expectExceptionMessageMatches( '/Error Message/' );
@@ -297,11 +295,11 @@ class Test_Rule_Repository extends \WP_UnitTestCase {
 			10,
 			'name',
 			true,
-			[new Group([], false)],
+			new Group([], false),
 			'spam',
 		);
 
-		$repo = new Rule_Repository( $this->logging_wpdb, $this->app_config );
+		$repo = new Rule_Repository( $this->logging_wpdb, $this->app_config, new Serializer() );
 
 		$created_rule = $repo->upsert( $rule );
 
@@ -310,7 +308,7 @@ class Test_Rule_Repository extends \WP_UnitTestCase {
 		$this->assertEquals( 'name', $created_rule->get_rule_name() );
 		$this->assertTrue( $created_rule->get_rule_enabled() );
 		$this->assertEquals( 'spam', $created_rule->get_outcome() );
-		$this->assertInstanceOf(Group::class, $created_rule->get_rule_conditions()[0]);
+		$this->assertInstanceOf(Group::class, $created_rule->get_rule_conditions());
 		// $this->assertFalse( $created_rule->get_rule_conditions()[0]->is_match_all() );
 		$this->assertInstanceOf( \DateTimeImmutable::class, $created_rule->get_created() );
 		$this->assertInstanceOf( \DateTimeImmutable::class, $created_rule->get_updated() );
@@ -322,7 +320,7 @@ class Test_Rule_Repository extends \WP_UnitTestCase {
 		$this->assertEquals( 'test_table_name', $log[0]->table );
 		$this->assertEquals( 'name', $log[0]->rows['name'] );
 		$this->assertEquals( 1, $log[0]->rows['rule_enabled'] );
-		$this->assertEquals( '[{"conditions":[],"match_all":false}]', $log[0]->rows['conditions'] );
+		$this->assertEquals( '{"type":"group","conditions":[],"match_all":false}', $log[0]->rows['conditions'] );
 		$this->assertEquals( 'spam', $log[0]->rows['outcome'] );
 		$this->assertInstanceOf( \DateTimeInterface::class, \DateTimeImmutable::createFromFormat( 'Y-m-d H:i:s', $log[0]->rows['updated'] ) );
 
@@ -353,13 +351,13 @@ class Test_Rule_Repository extends \WP_UnitTestCase {
 			10,
 			'name',
 			true,
-			array(),
+			new Group(),
 			'spam',
 		);
 
 		$this->logging_wpdb->last_error = 'Error Message';
 
-		$repo = new Rule_Repository( $this->logging_wpdb, $this->app_config );
+		$repo = new Rule_Repository( $this->logging_wpdb, $this->app_config, new Serializer() );
 
 		$this->expectException( \Exception::class );
 		$this->expectExceptionMessageMatches( '/Error Message/' );
