@@ -392,4 +392,140 @@ class Test_Wpdb_Rule_Repository extends WP_UnitTestCase {
 		$this->assertCount( 5, $page_two );
 		$this->assertSame( 30, $this->repo->count( Rule_Filter::none() ) );
 	}
+
+	/**
+	 * @testdox It should be possible to ask for a rule whose id does not exist and get null back instead of an exception
+	 */
+	public function test_find_returns_null_for_missing_id(): void {
+		$saved = $this->repo->save( $this->make_regex_rule() );
+
+		$this->assertNull(
+			$this->repo->find( (int) $saved->id() + 9999 ),
+			'find() must report a clean miss with null — engine and admin both rely on this to detect a deleted rule.'
+		);
+	}
+
+	/**
+	 * @testdox It should be possible to combine search term, type, comment part and response filters and get back only rules matching every criterion
+	 */
+	public function test_find_page_combines_search_type_part_and_response_filters_with_and_semantics(): void {
+		// Target: a Wildcard rule, scans email, response Spam, name contains 'gmail'.
+		$this->repo->save(
+			new Wildcard_Rule(
+				null,
+				'Block gmail spammers',
+				null,
+				'*@gmail.com',
+				Comment_Parts::of( Comment_Part::email() ),
+				Response::spam(),
+				$this->fresh_stats()
+			)
+		);
+		// Wrong type — should be excluded.
+		$this->repo->save( $this->make_regex_rule( array( 'name' => 'Regex gmail catch', 'response' => Response::spam() ) ) );
+		// Wrong response — should be excluded.
+		$this->repo->save(
+			new Wildcard_Rule(
+				null,
+				'Hold gmail review',
+				null,
+				'*@gmail.com',
+				Comment_Parts::of( Comment_Part::email() ),
+				Response::pending(),
+				$this->fresh_stats()
+			)
+		);
+		// Wrong comment part — should be excluded.
+		$this->repo->save(
+			new Wildcard_Rule(
+				null,
+				'gmail scan name only',
+				null,
+				'*gmail*',
+				Comment_Parts::of( Comment_Part::name() ),
+				Response::spam(),
+				$this->fresh_stats()
+			)
+		);
+		// Wrong search term — should be excluded.
+		$this->repo->save(
+			new Wildcard_Rule(
+				null,
+				'Block hotmail spammers',
+				null,
+				'*@hotmail.com',
+				Comment_Parts::of( Comment_Part::email() ),
+				Response::spam(),
+				$this->fresh_stats()
+			)
+		);
+
+		$filter = new Rule_Filter(
+			'gmail',
+			array( Rule_Type::wildcard() ),
+			Comment_Parts::of( Comment_Part::email() ),
+			array( Response::spam() )
+		);
+
+		$results = $this->repo->find_page( $filter, 1 );
+
+		$this->assertCount(
+			1,
+			$results,
+			'Every criterion is ANDed — only the single rule matching all four should come back.'
+		);
+		$this->assertSame( 'Block gmail spammers', $results[0]->name() );
+		$this->assertSame( 1, $this->repo->count( $filter ) );
+	}
+
+	/**
+	 * @testdox It should be possible to paginate inside a filtered result set so page 2 picks up where page 1 ends
+	 */
+	public function test_find_page_paginates_within_a_filtered_set(): void {
+		// 27 wildcard rules that match the filter plus a noise regex rule
+		// that must never appear regardless of page.
+		for ( $index = 1; $index <= 27; $index++ ) {
+			$this->repo->save(
+				new Wildcard_Rule(
+					null,
+					sprintf( 'Wild %02d', $index ),
+					null,
+					'*@bad.tld',
+					Comment_Parts::of( Comment_Part::email() ),
+					Response::spam(),
+					$this->fresh_stats()
+				)
+			);
+		}
+		$this->repo->save( $this->make_regex_rule( array( 'name' => 'Noise regex' ) ) );
+
+		$filter = new Rule_Filter( '', array( Rule_Type::wildcard() ) );
+
+		$page_one = $this->repo->find_page( $filter, 1 );
+		$page_two = $this->repo->find_page( $filter, 2 );
+
+		$this->assertCount( Rule_Repository::PAGE_SIZE, $page_one );
+		$this->assertCount( 2, $page_two );
+		$this->assertSame( 27, $this->repo->count( $filter ) );
+
+		$names = array_map( static fn( $rule ) => $rule->name(), array_merge( $page_one, $page_two ) );
+		$this->assertNotContains( 'Noise regex', $names, 'A non-matching rule must never leak through pagination.' );
+		$this->assertSame( 'Wild 26', $page_two[0]->name() );
+		$this->assertSame( 'Wild 27', $page_two[1]->name() );
+	}
+
+	/**
+	 * @testdox It should be possible to ask for page zero or a negative page number and have the repository clamp the request to page one
+	 */
+	public function test_find_page_clamps_non_positive_page_numbers_to_one(): void {
+		$first  = $this->repo->save( $this->make_regex_rule( array( 'name' => 'A' ) ) );
+		$second = $this->repo->save( $this->make_regex_rule( array( 'name' => 'B' ) ) );
+
+		$page_zero    = $this->repo->find_page( Rule_Filter::none(), 0 );
+		$page_negative = $this->repo->find_page( Rule_Filter::none(), -5 );
+
+		$ids = static fn( array $rules ): array => array_map( static fn( $rule ) => $rule->id(), $rules );
+		$this->assertSame( array( $first->id(), $second->id() ), $ids( $page_zero ) );
+		$this->assertSame( array( $first->id(), $second->id() ), $ids( $page_negative ) );
+	}
 }

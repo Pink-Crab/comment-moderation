@@ -105,4 +105,29 @@ test.describe( 'admin scaffold', () => {
 			fullPage: true,
 		} );
 	} );
+
+	test( 'plugin remains active after Stage 12 repository integration tests land', async ( {
+		page,
+	} ) => {
+		// Stage 12 adds PHPUnit integration coverage for the wpdb-backed
+		// Rule_Repository against the @wordpress/env database (using the
+		// migrated `pccm_rules` table). No admin screen consumes the
+		// repository yet, so the available end-to-end claim is unchanged:
+		// the plugin still autoloads and remains active on the plugins
+		// screen. The repository contract itself is proved by the new
+		// tests under tests/Integration/Repository/Test_Wpdb_Rule_Repository.php.
+		await page.goto( '/wp-admin/plugins.php' );
+		await expect( page ).toHaveURL( /plugins\.php/ );
+		await expect(
+			page.getByRole( 'row', { name: /PinkCrab Comment Moderation/i } )
+		).toBeVisible();
+
+		await page.screenshot( {
+			path: path.resolve(
+				__dirname,
+				'../../../../.karkinos/shots/stage-12.png'
+			),
+			fullPage: true,
+		} );
+	} );
 } );
