@@ -592,4 +592,59 @@ test.describe( 'admin scaffold', () => {
 			fullPage: true,
 		} );
 	} );
+
+	test( 'Stage 23: lint + build + sniff toolchain still produces a bundle that mounts the Elm admin UI', async ( {
+		page,
+	} ) => {
+		// Stage 23 only runs the project's verification gates:
+		//   - `npm run lint`        (elm-format --validate + elm-review)
+		//   - `npm run build`       (elm make --optimize + scripts/bundle-admin.js)
+		//   - `composer lint:php:phpcs` for the PHP enqueue/bridge code.
+		// No production code is changed; the available end-to-end claim is that
+		// the freshly re-emitted `assets/js/admin.js` still boots into the
+		// Settings → Comment Moderation screen, the Elm mount node renders, and
+		// the bootstrap data the PHP bridge localises is still wired up. This
+		// mirrors the per-stage "plugin remains active" pattern used by stages
+		// 9–18 for stages that intentionally touch no production code.
+		await page.goto(
+			'/wp-admin/options-general.php?page=pinkcrab-comment-moderation'
+		);
+		await expect( page ).toHaveURL(
+			/options-general\.php\?page=pinkcrab-comment-moderation/
+		);
+		await expect(
+			page.getByRole( 'heading', {
+				name: /Comment Moderation/i,
+				level: 1,
+			} )
+		).toBeVisible();
+
+		// Elm mount node + Rules card heading prove the rebuilt bundle still
+		// initialises against the PHP-localised bootstrap.
+		await expect( page.locator( 'div#pccm-admin-root.pccm-app' ) ).toHaveCount(
+			1
+		);
+		await expect(
+			page.getByRole( 'heading', { name: 'Rules', level: 2 } )
+		).toBeVisible();
+
+		// Bootstrap data is still being localised by the PHP enqueue/bridge
+		// code that `composer lint:php:phpcs` just cleared.
+		const bootstrap = await page.evaluate(
+			() =>
+				/** @type {any} */ ( window ).pccmAdminData || null
+		);
+		expect( bootstrap ).not.toBeNull();
+		expect( bootstrap.mountId ).toBe( 'pccm-admin-root' );
+		expect( typeof bootstrap.ajaxNonce ).toBe( 'string' );
+		expect( bootstrap.ajaxNonce.length ).toBeGreaterThan( 0 );
+
+		await page.screenshot( {
+			path: path.resolve(
+				__dirname,
+				'../../../../.karkinos/shots/stage-23.png'
+			),
+			fullPage: true,
+		} );
+	} );
 } );
