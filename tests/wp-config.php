@@ -24,12 +24,22 @@ define( 'ABSPATH', dirname( __DIR__ ) . '/wordpress/' );
 // install's empty plugins folder.
 define( 'WP_PLUGIN_DIR', dirname( __DIR__, 2 ) );
 
-// Database. CI usually injects env vars directly; locally a tests/.env supplies
-// them via vlucas/phpdotenv (loaded in tests/bootstrap.php).
-define( 'DB_NAME',     getenv( 'WP_DB_NAME' )     ?: 'wordpress_test' );
-define( 'DB_USER',     getenv( 'WP_DB_USER' )     ?: 'root' );
-define( 'DB_PASSWORD', getenv( 'WP_DB_PASS' )     ?: '' );
-define( 'DB_HOST',     getenv( 'WP_DB_HOST' )     ?: '127.0.0.1' );
+// Database. CI vs local split follows Pink-Crab/Perique-Framework's pattern:
+// the workflow exports `environment_github=true` and the CI branch hardcodes
+// values matching the MySQL service in .github/workflows/php-tests.yml.
+// Locally a tests/.env supplies WP_DB_* via vlucas/phpdotenv (loaded in
+// tests/bootstrap.php).
+if ( getenv( 'environment_github' ) ) {
+	define( 'DB_NAME',     'wordpress_test' );
+	define( 'DB_USER',     'root' );
+	define( 'DB_PASSWORD', 'root' );
+	define( 'DB_HOST',     '127.0.0.1' );
+} else {
+	define( 'DB_NAME',     getenv( 'WP_DB_NAME' )     ?: 'wordpress_test' );
+	define( 'DB_USER',     getenv( 'WP_DB_USER' )     ?: 'root' );
+	define( 'DB_PASSWORD', getenv( 'WP_DB_PASS' )     ?: '' );
+	define( 'DB_HOST',     getenv( 'WP_DB_HOST' )     ?: '127.0.0.1' );
+}
 define( 'DB_CHARSET',  'utf8mb4' );
 define( 'DB_COLLATE',  '' );
 

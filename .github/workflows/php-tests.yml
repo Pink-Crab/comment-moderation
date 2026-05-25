@@ -38,6 +38,8 @@ jobs:
       WP_TESTS_DB_USER: root
       WP_TESTS_DB_PASSWORD: root
       WP_TESTS_DB_HOST: 127.0.0.1
+      # Selects the CI branch in tests/wp-config.php (matches Perique-Framework pattern).
+      environment_github: true
 
     steps:
       - name: Checkout
