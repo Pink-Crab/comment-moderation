@@ -37,6 +37,11 @@ final class Hello_World_Component extends Component {
 	 */
 	public string $name;
 
+	/**
+	 * Construct the component with the name to be greeted.
+	 *
+	 * @param string $name The name to greet inside the template.
+	 */
 	public function __construct( string $name = 'World' ) {
 		$this->name = $name;
 	}

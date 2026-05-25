@@ -126,4 +126,31 @@ class Test_Plugin_Config extends WP_UnitTestCase {
 
 		$this->assertSame( '/var/www/plugin/views/', $config->view_path() );
 	}
+
+	/**
+	 * @testdox It should be possible to get the assets base filesystem path without supplying a sub-path
+	 */
+	public function test_asset_path_returns_base_when_no_relative_path(): void {
+		$config = new Plugin_Config( $this->make_app_config() );
+
+		$this->assertSame( '/var/www/plugin/assets/build/', $config->asset_path() );
+	}
+
+	/**
+	 * @testdox It should be possible to build a filesystem path for a specific asset by passing its relative path to the config helper class
+	 */
+	public function test_asset_path_concatenates_relative_path(): void {
+		$config = new Plugin_Config( $this->make_app_config() );
+
+		$this->assertSame(
+			'/var/www/plugin/assets/build/scripts/hello-world.js',
+			$config->asset_path( 'scripts/hello-world.js' )
+		);
+		// Leading slashes on the relative path are stripped — only one between base and path.
+		$this->assertSame(
+			'/var/www/plugin/assets/build/styles/hello-world.css',
+			$config->asset_path( '/styles/hello-world.css' )
+		);
+	}
+
 }

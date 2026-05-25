@@ -30,9 +30,9 @@ defined( 'ABSPATH' ) || exit;
 // ---------------------------------------------------------------------------
 
 define( 'PINKCRAB_COMMENT_MODERATION_BASENAME', plugin_basename( __FILE__ ) );
-define( 'PINKCRAB_COMMENT_MODERATION_PATH',     plugin_dir_path( __FILE__ ) );
-define( 'PINKCRAB_COMMENT_MODERATION_URL',      plugin_dir_url( __FILE__ ) );
-define( 'PINKCRAB_COMMENT_MODERATION_VERSION',  '0.1.0' );
+define( 'PINKCRAB_COMMENT_MODERATION_PATH', plugin_dir_path( __FILE__ ) );
+define( 'PINKCRAB_COMMENT_MODERATION_URL', plugin_dir_url( __FILE__ ) );
+define( 'PINKCRAB_COMMENT_MODERATION_VERSION', '0.1.0' );
 define(
 	'PINKCRAB_COMMENT_MODERATION_MINIMUM_VERSIONS',
 	array(

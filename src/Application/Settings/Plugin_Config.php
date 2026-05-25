@@ -11,6 +11,7 @@ declare( strict_types = 1 );
 namespace PinkCrab\Comment_Moderation\Application\Settings;
 
 use PinkCrab\Perique\Application\App_Config;
+use Webmozart\Assert\Assert;
 
 /**
  * Lightweight value object that wraps the shared App_Config instance.
@@ -33,12 +34,19 @@ final class Plugin_Config {
 	 */
 	public const TEXT_DOMAIN = 'pinkcrab-comment-moderation';
 
+	/**
+	 * Construct the typed accessor over the shared App_Config.
+	 *
+	 * @param App_Config $app_config The framework's shared config service.
+	 */
 	public function __construct(
 		private App_Config $app_config
 	) {}
 
 	/**
 	 * Plugin version (from `config/settings.php` → `plugin.version`).
+	 *
+	 * @return string
 	 */
 	public function version(): string {
 		return $this->app_config->version();
@@ -46,6 +54,8 @@ final class Plugin_Config {
 
 	/**
 	 * Translation text domain. Constant — App_Config does not store this.
+	 *
+	 * @return string
 	 */
 	public function text_domain(): string {
 		return self::TEXT_DOMAIN;
@@ -53,9 +63,11 @@ final class Plugin_Config {
 
 	/**
 	 * REST API namespace (from `config/settings.php` → `namespaces.rest`).
+	 *
+	 * @return string
 	 */
 	public function rest_namespace(): string {
-		return (string) $this->app_config->rest();
+		return $this->app_config->rest();
 	}
 
 	/**
@@ -63,9 +75,12 @@ final class Plugin_Config {
 	 *
 	 * @param string $relative Optional path appended to the assets base URL.
 	 *                         Leading slashes are stripped.
+	 *
+	 * @return string
 	 */
 	public function asset_url( string $relative = '' ): string {
-		$base = (string) $this->app_config->url( 'assets' );
+		$base = $this->app_config->url( 'assets' );
+		Assert::string( $base, 'App_Config "assets" url must be configured as a string in config/settings.php.' );
 		if ( '' === $relative ) {
 			return $base;
 		}
@@ -76,9 +91,12 @@ final class Plugin_Config {
 	 * Absolute filesystem path to a file inside `assets/build/`.
 	 *
 	 * @param string $relative Optional path appended to the assets base path.
+	 *
+	 * @return string
 	 */
 	public function asset_path( string $relative = '' ): string {
-		$base = (string) $this->app_config->path( 'assets' );
+		$base = $this->app_config->path( 'assets' );
+		Assert::string( $base, 'App_Config "assets" path must be configured as a string in config/settings.php.' );
 		if ( '' === $relative ) {
 			return $base;
 		}
@@ -87,8 +105,12 @@ final class Plugin_Config {
 
 	/**
 	 * Absolute filesystem path to the views directory.
+	 *
+	 * @return string
 	 */
 	public function view_path(): string {
-		return (string) $this->app_config->path( 'view' );
+		$view = $this->app_config->path( 'view' );
+		Assert::string( $view, 'App_Config "view" path must be configured as a string in config/settings.php.' );
+		return $view;
 	}
 }

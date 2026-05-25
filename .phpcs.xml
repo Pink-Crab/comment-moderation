@@ -14,11 +14,23 @@
 	<exclude-pattern>/assets/build/*</exclude-pattern>
 	<exclude-pattern>/coverage-report/*</exclude-pattern>
 	<exclude-pattern>/tests/*</exclude-pattern>
+	<!-- Build artefacts produced by scripts/build.sh — scoped vendor + a copy of
+	     src/ with rewritten namespace references. Not source; not for linting. -->
+	<exclude-pattern>/dist/*</exclude-pattern>
+	<exclude-pattern>/build/*</exclude-pattern>
 	<!-- One-shot init script — runs pre-composer-install, deleted by post_init. -->
 	<exclude-pattern>/scripts/scaffold-init.php</exclude-pattern>
 
 	<!-- Extend the team51 ruleset. -->
 	<rule ref="./vendor/a8cteam51/team51-configs/quality-tools/phpcs.xml.dist"/>
+
+	<!-- The Perique config files (di.php, settings.php) ship with commented
+	     template examples for DI rules / meta aliases. The Squiz heuristic
+	     flags those as "looks like commented-out code"; they are intentional
+	     documentation. -->
+	<rule ref="Squiz.PHP.CommentedOutCode.Found">
+		<exclude-pattern>/config/*</exclude-pattern>
+	</rule>
 
 	<!-- Pin the text domain. -->
 	<rule ref="WordPress.WP.I18n">

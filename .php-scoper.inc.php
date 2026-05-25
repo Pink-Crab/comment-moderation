@@ -45,6 +45,22 @@ $finders = array(
 		->ignoreVCS( true )
 		->name( '*.php' )
 		->in( 'build/vendor' ),
+	// Explicit per-package finders for the Perique modules and wp-nonce so
+	// they remain a declared part of scoping coverage even if the broad
+	// build/vendor sweep is ever narrowed. php-scoper de-duplicates files
+	// by realpath, so this is safe alongside the sweep above.
+	Finder::create()
+		->files()
+		->name( '*.php' )
+		->in( 'build/vendor/pinkcrab/perique-migration' ),
+	Finder::create()
+		->files()
+		->name( '*.php' )
+		->in( 'build/vendor/pinkcrab/perique-admin-menu' ),
+	Finder::create()
+		->files()
+		->name( '*.php' )
+		->in( 'build/vendor/pinkcrab/wp-nonce' ),
 	Finder::create()
 		->files()
 		->name( '*.php' )

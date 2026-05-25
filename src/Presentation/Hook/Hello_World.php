@@ -39,6 +39,12 @@ final class Hello_World implements Hookable {
 	private const SHORTCODE_TAG = 'pinkcrab_comment_moderation_hello';
 	private const ASSET_HANDLE  = 'pinkcrab-comment-moderation-hello-world';
 
+	/**
+	 * Construct the Hookable with its injected dependencies.
+	 *
+	 * @param View          $view   Injected view service for rendering Components.
+	 * @param Plugin_Config $config Injected wrapper around App_Config.
+	 */
 	public function __construct(
 		private View $view,
 		private Plugin_Config $config
@@ -46,6 +52,10 @@ final class Hello_World implements Hookable {
 
 	/**
 	 * Register WP hooks via the loader. Called by Perique on `init`.
+	 *
+	 * @param Hook_Loader $loader Perique hook loader.
+	 *
+	 * @return void
 	 */
 	public function register( Hook_Loader $loader ): void {
 		$loader->shortcode( self::SHORTCODE_TAG, array( $this, 'render_shortcode' ) );
@@ -58,6 +68,8 @@ final class Hello_World implements Hookable {
 	 * into the surrounding content.
 	 *
 	 * @param array<string,string>|string $atts Shortcode attributes (WP passes '' when there are none).
+	 *
+	 * @return string
 	 */
 	public function render_shortcode( $atts = array() ): string {
 		$atts = shortcode_atts(
@@ -82,6 +94,8 @@ final class Hello_World implements Hookable {
 	 * paths/urls come from Plugin_Config which reads them from App_Config
 	 * (configured in config/settings.php as `path.assets` / `url.assets`,
 	 * pointing at `assets/build/`).
+	 *
+	 * @return void
 	 */
 	public function enqueue_assets(): void {
 		wp_enqueue_script(

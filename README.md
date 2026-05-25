@@ -1,59 +1,14 @@
-# Perique Plugin Scaffold
+# PinkCrab Comment Moderation
 
-Opinionated starter template for WordPress plugins built on the
-[PinkCrab Perique](https://perique.info/) framework (v2.1.\*).
+Rule-based comment moderation engine for WordPress.
 
-> This README is the scaffold's own. After you run `scripts/scaffold-init.php`
-> it is deleted, and `README.scaffold.md` is renamed in its place as your new
-> plugin's README.
+- **Requires WordPress:** 6.0
+- **Requires PHP:** 8.0
+- **License:** GPLv3
 
-## What you get
+Built on the [PinkCrab Perique](https://perique.info/) framework.
 
-| Area              | What's wired up                                                                                                  |
-|-------------------|------------------------------------------------------------------------------------------------------------------|
-| Bootstrap         | `App_Factory` wiring in `perique-bootstrap.php`, pre-autoload requirement checks inline in the main plugin file. |
-| Architecture      | Clean-layered `src/Application`, `src/Domain`, `src/Infrastructure`, `src/Presentation`.                         |
-| Example feature   | `[pinkcrab_comment_moderation_hello]` shortcode → Hookable → Component → template. Exercises DI, View, and asset pipeline. |
-| Configs           | `config/{settings,di,registration}.php` triplet.                                                                 |
-| Quality           | `team51-configs` extension for phpstan, phpcs, phpmd. `type-defs.php` constant stubs for static analysis.        |
-| Tests             | PHPUnit + WP-PHPUnit bootstrap, one passing example unit test with `@testdox`.                                    |
-| Build             | `wp-scripts` for JS, PostCSS + SCSS for styles, output to `assets/build/`.                                       |
-| CI                | Three GitHub workflows (PHP quality, PHP tests across PHP/WP matrix, JS build).                                  |
-| Core Perique only | `pinkcrab/perique-framework-core: ^2.1`. Add other modules per-project.                                          |
-
-## How the scaffold becomes your plugin
-
-The scaffold ships with `##NAME##`-style placeholders throughout the tree.
-`scripts/scaffold-init.php` reads `.scaffold/manifest.json`, gathers values,
-walks the tree replacing every `##TOKEN##`, applies the renames, then deletes
-itself + `.scaffold/`.
-
-### Interactive
-
-```bash
-git clone git@github.com:Pink-Crab/plugin-scaffold.git my-plugin
-cd my-plugin
-rm -rf .git && git init
-php scripts/scaffold-init.php
-```
-
-The script prompts for each placeholder, validates against the manifest's
-regex rules, and shows derived defaults you can accept or override.
-
-### Non-interactive (agent / CI)
-
-```bash
-git clone git@github.com:Pink-Crab/plugin-scaffold.git my-plugin
-cd my-plugin
-rm -rf .git && git init
-# Write answers.json based on .scaffold/manifest.json (see .scaffold/example-answers.json).
-php scripts/scaffold-init.php --answers=answers.json
-```
-
-`.scaffold/example-answers.json` is committed as a worked example — copy it,
-edit, point `--answers=` at it.
-
-### After init
+## Installation
 
 ```bash
 composer install
@@ -61,36 +16,113 @@ npm install
 npm run build
 ```
 
-Activate the plugin in WordPress. Visit any page with
-`[pinkcrab_comment_moderation_hello name="…"]` in its content to confirm the full
-pipeline (shortcode → Hookable → Component → template + script + style)
-works end-to-end.
+Activate from the WordPress admin → Plugins screen.
 
-## Pre-init IDE warnings
+## Development
 
-Because the scaffold uses `##TOKEN##` placeholders inside PHP **identifiers**
-(function names, namespaces, constants), the templated PHP files do **not**
-parse before `scripts/scaffold-init.php` runs. Errors like "syntax error,
-unexpected token" in the IDE are expected pre-init and clear automatically
-once token substitution has happened. The setup script itself uses
-`// phpcs:ignoreFile` for the same reason.
+```bash
+npm run start         # wp-scripts dev server + SCSS watcher
+composer test         # PHPUnit (requires MySQL — see Tests below)
+composer lint:php     # phpcs + phpstan + phpmd
+composer format:php   # phpcbf auto-fixer
+npm run lint          # eslint + stylelint
+```
 
-## Placeholders
+## Build
 
-Defined in [.scaffold/manifest.json](.scaffold/manifest.json). See the
-manifest's inline `label` / `description` / `example` / `validate` fields.
+### Assets
 
-Required: `PinkCrab Comment Moderation`, `pinkcrab-comment-moderation`, `Rule-based comment moderation engine for WordPress.`,
-`PinkCrab\Comment_Moderation`, `pinkcrab/comment-moderation`, `PinkCrab`.
+| Command          | Output                                          |
+|------------------|-------------------------------------------------|
+| `npm run build`  | `assets/build/scripts/`, `assets/build/styles/` |
+| `npm run start`  | Same, in watch mode                             |
 
-Auto-derived (no prompt): `PinkCrab\\Comment_Moderation` (composer.json's `\\`
-form), `2026` (current year).
+Source lives under [assets/src/](assets/src/) (`scripts/`, `styles/`).
 
-Defaulted from another token: `pinkcrab-comment-moderation` (kebab of name),
-`pinkcrab-comment-moderation` (= slug), `pinkcrab_comment_moderation_` (slug snake_case + `_`),
-`PINKCRAB_COMMENT_MODERATION_` (function prefix uppercased), `pinkcrab-comment-moderation/v1`
-(slug + `/v1`).
+### Release (with scoped vendor)
+
+`composer build` produces a scoped, `--no-dev` release into `dist/`. Every
+PHP class, function, and constant inside `vendor/` is prefixed with
+`PinkCrab\Comment_Moderation\Vendor`, so this plugin's bundled dependencies cannot
+collide with another plugin's at runtime — even if both ship the same
+library at different versions.
+
+```bash
+composer build       # writes dist/, ready to zip
+```
+
+The exclude-list for WordPress globals is generated automatically from
+`php-stubs/wordpress-stubs` via [pinkcrab/php-scoper-helper](https://github.com/Pink-Crab/PHPScoper-Helper),
+so it stays in sync with WordPress as you upgrade. The scoping
+configuration lives in [.php-scoper.inc.php](.php-scoper.inc.php); the
+build orchestration is [scripts/build.sh](scripts/build.sh).
+
+Only **production** dependencies are scoped (the script does
+`composer install --no-dev` in an isolated work directory). Dev tools —
+phpunit, php-scoper itself, the linters — never leak into `dist/`.
+
+## Tests
+
+PHPUnit + [wp-phpunit](https://github.com/wp-phpunit/wp-phpunit). Requires a
+MySQL/MariaDB instance. Local dev: copy [tests/.env_sample](tests/.env_sample) to
+`tests/.env` and fill in DB credentials — the test bootstrap loads it
+automatically via vlucas/phpdotenv. CI sets the same env vars in the
+workflow directly.
+
+```bash
+cp tests/.env_sample tests/.env
+# edit tests/.env
+
+composer test                           # all suites (unit + integration)
+composer test -- --testsuite=unit       # fast unit tests only
+composer test -- --testsuite=integration
+composer coverage                       # writes clover.xml
+```
+
+Tests are split into `tests/Unit/` (pure PHP, mock-free thanks to App_Config
+being constructable from a plain array) and `tests/Integration/` (full WP
+boot via wp-phpunit, plugin activated, Perique fully booted — exercises
+the shortcode end-to-end).
+
+## Project structure
+
+```
+pinkcrab-comment-moderation/
+├── pinkcrab-comment-moderation.php       # WordPress plugin entry — header, constants, requirement checks
+├── functions.php             # Prefixed helper functions (loaded BEFORE Perique boots)
+├── perique-bootstrap.php     # App_Factory()->...->boot()
+├── type-defs.php             # Constant stubs for phpstan
+├── config/                   # App_Config, DI rules, registration class list
+├── src/
+│   ├── Application/          # Services + Settings (Plugin_Config)
+│   ├── Domain/               # Entities, value objects, repository interfaces
+│   ├── Infrastructure/       # Repository impls, integrations
+│   └── Presentation/
+│       ├── Hook/             # Hookables (the default Perique middleware)
+│       └── View/
+│           ├── Component/    # PHP component classes
+│           └── Model/        # View_Model containers
+├── views/                    # Default Perique view path
+│   └── components/           # Component templates (auto-resolved from class names)
+├── assets/
+│   ├── src/                  # JS + SCSS source
+│   └── build/                # Built output (gitignored)
+├── tests/                    # PHPUnit (Unit + Integration)
+└── migrations/               # DB migrations (enable perique-migration module — see README)
+```
+
+## Adding Perique modules
+
+The scaffold ships **core Perique only** (`pinkcrab/perique-framework-core`).
+To add e.g. registerables, route, admin-menu, settings-page, migrations:
+
+1. `composer require pinkcrab/<package>`.
+2. Add `->module( SomeModule::class )` in [perique-bootstrap.php](perique-bootstrap.php) between `registration_classes(...)` and `boot()`.
+3. For module-typed classes (Post_Type, Route_Controller, Menu_Page, etc.), add the FQCN to [config/registration.php](config/registration.php).
+
+See the Perique docs (`perique-modules.md`) or [perique.info](https://perique.info/)
+for the catalogue.
 
 ## License
 
-GPL-2.0-or-later.
+GPLv3. See [LICENSE](LICENSE).

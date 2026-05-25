@@ -33,12 +33,19 @@ final class Plugin_Bootstrap {
 	 */
 	private string $plugin_path;
 
+	/**
+	 * Construct the bootstrap with the resolved plugin path.
+	 *
+	 * @param string $plugin_path Absolute plugin directory path (trailing slash).
+	 */
 	public function __construct( string $plugin_path ) {
 		$this->plugin_path = $plugin_path;
 	}
 
 	/**
 	 * Build the Perique App_Factory chain and boot it.
+	 *
+	 * @return void
 	 */
 	public function boot(): void {
 		( new App_Factory( $this->plugin_path ) )

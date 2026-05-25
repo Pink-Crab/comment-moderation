@@ -17,19 +17,19 @@ defined( 'ABSPATH' ) || exit;
 
 return array(
 
-	'path' => array(
+	'path'       => array(
 		'plugin' => PINKCRAB_COMMENT_MODERATION_PATH,
 		'assets' => PINKCRAB_COMMENT_MODERATION_PATH . 'assets/build',
 		'view'   => PINKCRAB_COMMENT_MODERATION_PATH . 'views',
 	),
 
-	'url' => array(
+	'url'        => array(
 		'plugin' => PINKCRAB_COMMENT_MODERATION_URL,
 		'assets' => PINKCRAB_COMMENT_MODERATION_URL . 'assets/build',
 		'view'   => PINKCRAB_COMMENT_MODERATION_URL . 'views',
 	),
 
-	'plugin' => array(
+	'plugin'     => array(
 		'version' => PINKCRAB_COMMENT_MODERATION_VERSION,
 	),
 
@@ -41,12 +41,12 @@ return array(
 	// Aliases for post / user / term meta keys. Use App_Config::POST_META etc.
 	// as the inner keys. Inject `App_Config` then read with
 	// `$config->post_meta( 'alias' )`.
-	'meta' => array(
+	'meta'       => array(
 		// App_Config::POST_META => array( 'my_alias' => 'pinkcrab_comment_moderation_my_meta_key' ),
 	),
 
 	// Custom database table aliases. Read with `$config->db_tables( 'alias' )`.
-	'db_tables' => array(
+	'db_tables'  => array(
 		// 'my_table' => $GLOBALS['wpdb']->prefix . 'pinkcrab_comment_moderation_my_table',
 	),
 

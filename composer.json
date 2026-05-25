@@ -29,7 +29,10 @@
 		"php": ">=8.0",
 		"ext-json": "*",
 		"pinkcrab/perique-framework-core": "^2.1",
-		"webmozart/assert": "^1.11"
+		"webmozart/assert": "^1.11",
+		"pinkcrab/perique-migration": "^2.1",
+		"pinkcrab/perique-admin-menu": "^2.1",
+		"pinkcrab/wp-nonce": "^0.1.0"
 	},
 	"require-dev": {
 		"a8cteam51/team51-configs": "dev-trunk",
@@ -80,7 +83,8 @@
 			"dealerdirect/phpcodesniffer-composer-installer": true,
 			"phpstan/extension-installer": true,
 			"roots/wordpress-core-installer": true
-		}
+		},
+		"vendor-dir": "vendor"
 	},
 	"minimum-stability": "beta",
 	"prefer-stable": true,

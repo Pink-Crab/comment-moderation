@@ -5,6 +5,12 @@ parameters:
     level: 8
     bootstrapFiles:
         - type-defs.php
+    # Tell johnbillion/wp-compat which file holds the plugin headers
+    # (Requires at least, etc.). Without this it falls back to
+    # `<cwd-basename>.php` / `plugin.php` / `style.css`, none of which exist
+    # — the rule then throws and PHPStan aborts with an internal error.
+    WPCompat:
+        pluginFile: pinkcrab-comment-moderation.php
     paths:
         - src
         - migrations
