@@ -469,4 +469,127 @@ test.describe( 'admin scaffold', () => {
 			fullPage: true,
 		} );
 	} );
+
+	test( 'Stage 21: AJAX layer rejects bad nonces, sanitises boundary input, and round-trips a deep-linked rule', async ( {
+		page,
+	} ) => {
+		// Stage 21 adds targeted PHPUnit coverage for the four behaviours the
+		// rebuild spec pins on the AJAX layer (capability denial, nonce
+		// failure via pinkcrab/wp-nonce, boundary sanitisation, deep-link).
+		// This spec exercises the same contract live, end-to-end, against
+		// wp-env's admin-ajax.php so the proof carries through the wire.
+		await page.goto(
+			'/wp-admin/options-general.php?page=pinkcrab-comment-moderation'
+		);
+		await expect(
+			page.getByRole( 'heading', {
+				name: /Comment Moderation/i,
+				level: 1,
+			} )
+		).toBeVisible();
+
+		const bootstrap = await page.evaluate(
+			() =>
+				/** @type {any} */ ( window ).pccmAdminData || null
+		);
+		expect( bootstrap ).not.toBeNull();
+
+		// Reset the rules table so the assertions below own its state.
+		await page.evaluate( async ( data ) => {
+			const params = new URLSearchParams();
+			params.set( 'action', data.ajaxActions.clear );
+			params.set( '_wpnonce', data.ajaxNonce );
+			await fetch( data.ajaxUrl, {
+				method: 'POST',
+				credentials: 'include',
+				body: params,
+			} );
+		}, bootstrap );
+
+		// 1) A request with a non-empty but invalid `_wpnonce` token must be
+		//    rejected — exercises the pinkcrab/wp-nonce `Nonce::validate()`
+		//    branch (the missing-token branch is already covered by stage 20).
+		const forged = await page.evaluate( async ( data ) => {
+			const params = new URLSearchParams();
+			params.set( 'action', data.ajaxActions.create );
+			params.set( '_wpnonce', 'not-a-real-token' );
+			params.set( 'type', 'regex' );
+			params.set( 'pattern', '/casino/i' );
+			params.append( 'comment_parts[]', 'content' );
+			params.set( 'response', 'spam' );
+			const response = await fetch( data.ajaxUrl, {
+				method: 'POST',
+				credentials: 'include',
+				body: params,
+			} );
+			return response.json();
+		}, bootstrap );
+		expect( forged.success ).toBe( false );
+		expect( forged.data.message ).toBe( 'Security check failed.' );
+
+		// 2) A signed create with HTML/script-tag payloads in name +
+		//    description must succeed and persist sanitised values.
+		const created = await page.evaluate( async ( data ) => {
+			const params = new URLSearchParams();
+			params.set( 'action', data.ajaxActions.create );
+			params.set( '_wpnonce', data.ajaxNonce );
+			params.set( 'type', 'regex' );
+			params.set(
+				'name',
+				"Block <script>alert('xss')</script>casino rule"
+			);
+			params.set(
+				'description',
+				'Catches <strong>casino</strong> <script>alert(1)</script>spam.'
+			);
+			params.set( 'pattern', '/casino/i' );
+			params.append( 'comment_parts[]', 'content' );
+			params.set( 'response', 'spam' );
+			const response = await fetch( data.ajaxUrl, {
+				method: 'POST',
+				credentials: 'include',
+				body: params,
+			} );
+			return response.json();
+		}, bootstrap );
+		expect( created.success ).toBe( true );
+		expect( created.data.rule.name ).not.toContain( '<script>' );
+		expect( created.data.rule.name ).not.toContain( 'alert' );
+		expect( created.data.rule.description ).toContain(
+			'<strong>casino</strong>'
+		);
+		expect( created.data.rule.description ).not.toContain( '<script>' );
+		const createdId = created.data.rule.id;
+
+		// 3) Deep-link to the just-created rule via the get endpoint and
+		//    confirm the full payload (the sanitised name + the pattern)
+		//    comes back, mirroring the spec's "Direct link to a rule" flow.
+		const fetched = await page.evaluate(
+			async ( { data, id } ) => {
+				const params = new URLSearchParams();
+				params.set( 'action', data.ajaxActions.get );
+				params.set( '_wpnonce', data.ajaxNonce );
+				params.set( 'id', String( id ) );
+				const response = await fetch( data.ajaxUrl, {
+					method: 'POST',
+					credentials: 'include',
+					body: params,
+				} );
+				return response.json();
+			},
+			{ data: bootstrap, id: createdId }
+		);
+		expect( fetched.success ).toBe( true );
+		expect( fetched.data.rule.id ).toBe( createdId );
+		expect( fetched.data.rule.pattern ).toBe( '/casino/i' );
+		expect( fetched.data.rule.name ).not.toContain( '<script>' );
+
+		await page.screenshot( {
+			path: path.resolve(
+				__dirname,
+				'../../../../.karkinos/shots/stage-21.png'
+			),
+			fullPage: true,
+		} );
+	} );
 } );

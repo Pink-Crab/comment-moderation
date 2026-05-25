@@ -517,6 +517,166 @@ class Test_Rule_Ajax_Controller extends WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox It should reject a request that supplies a non-empty but invalid nonce token via the pinkcrab/wp-nonce validate() path
+	 */
+	public function test_invalid_token_is_rejected_by_wp_nonce_lib(): void {
+		// Supply a non-empty token so the controller takes the
+		// `Nonce::validate()` branch (rather than skipping straight to the
+		// `check_ajax_referer` fallback for missing-token requests). The token
+		// is deliberately gibberish so both `wp_verify_nonce()` (called by the
+		// wp-nonce library) AND the fallback `check_ajax_referer()` reject it,
+		// proving the security gate cannot be bypassed by a forged token.
+		$decoded = $this->call(
+			array( $this->controller, 'handle_list' ),
+			array( Rule_Ajax_Controller::NONCE_FIELD => 'not-a-real-token' ),
+			false
+		);
+
+		$this->assertFalse( $decoded['success'] );
+		$this->assertSame( 'Security check failed.', $decoded['data']['message'] );
+		$this->assertSame( 0, $this->repo->count( Rule_Filter::none() ) );
+	}
+
+	/**
+	 * @testdox It should sanitise the name, description, pattern and search inputs at the boundary so script/HTML payloads never reach the domain or the database
+	 */
+	public function test_create_endpoint_sanitises_boundary_inputs(): void {
+		// Boundary-sanitisation contract: `sanitize_text_field` strips tags +
+		// collapses whitespace on the name/pattern/search, `wp_kses_post`
+		// permits safe inline markup in the description but drops <script>.
+		$decoded = $this->call(
+			array( $this->controller, 'handle_create' ),
+			array(
+				'type'          => Rule_Type::REGEX,
+				'name'          => "  Block <script>alert('xss')</script>casino  \nrule  ",
+				'description'   => 'Catches <strong>casino</strong> <script>alert(1)</script>spam.',
+				'pattern'       => '/casino/i',
+				'comment_parts' => array( 'content' ),
+				'response'      => Response::SPAM,
+			)
+		);
+
+		$this->assertTrue( $decoded['success'], wp_json_encode( $decoded ) );
+
+		$id      = (int) $decoded['data']['rule']['id'];
+		$persist = $this->repo->find( $id );
+		$this->assertInstanceOf( Regex_Rule::class, $persist );
+
+		// `sanitize_text_field` strips `<script>` and its content, plus any
+		// other tags, and normalises run-on whitespace to a single space.
+		$saved_name = (string) $persist->name();
+		$this->assertStringNotContainsString( '<script>', $saved_name );
+		$this->assertStringNotContainsString( 'alert', $saved_name );
+		$this->assertStringNotContainsString( "\n", $saved_name );
+		$this->assertSame( trim( $saved_name ), $saved_name, 'Name should be trimmed at the boundary.' );
+
+		// `wp_kses_post` keeps benign tags but drops `<script>` itself
+		// (the text inside the tag may remain as plain text — that's the
+		// documented kses behaviour; what matters is the executable tag is
+		// gone, so the description cannot be injected back as live markup).
+		$saved_desc = (string) $persist->description();
+		$this->assertStringContainsString( '<strong>casino</strong>', $saved_desc );
+		$this->assertStringNotContainsString( '<script', $saved_desc );
+		$this->assertStringNotContainsString( '</script>', $saved_desc );
+	}
+
+	/**
+	 * @testdox It should sanitise the list endpoint's search term at the boundary so XSS-y filter input cannot reach the SQL layer with markup intact
+	 */
+	public function test_list_endpoint_sanitises_search_filter(): void {
+		// Pre-seed one matching rule so the assertion has something to assert.
+		$this->repo->save( $this->make_regex_rule( array( 'name' => 'Block casino' ) ) );
+
+		// Pass an HTML-bearing search term — the controller routes it through
+		// `sanitize_text_field` before building the Rule_Filter. The endpoint
+		// itself should still 200 OK and the search should still match the
+		// seeded rule because the tags are stripped before the LIKE runs.
+		$decoded = $this->call(
+			array( $this->controller, 'handle_list' ),
+			array( 'search' => '<script>alert(1)</script>casino' )
+		);
+
+		$this->assertTrue( $decoded['success'] );
+		$this->assertSame( 1, $decoded['data']['total'] );
+		$this->assertSame( 'Block casino', $decoded['data']['rules'][0]['name'] );
+	}
+
+	/**
+	 * @testdox It should round-trip a conditional rule through the deep-link get endpoint so the Elm app can re-open a complex tree for editing
+	 */
+	public function test_deep_link_get_returns_conditional_rule_tree(): void {
+		// Build a multi-level conditional rule via the create endpoint (so
+		// the same sanitiser + build path runs as in production), then deep-
+		// link to it via handle_get — the spec's "Direct link to a rule" flow
+		// (§6) drives this. The shape must round-trip exactly so the admin
+		// app's add/edit pane re-hydrates the original tree.
+		$created = $this->call(
+			array( $this->controller, 'handle_create' ),
+			array(
+				'type'        => Rule_Type::CONDITIONAL,
+				'name'        => 'Deep-link target',
+				'description' => 'Round-trip me',
+				'response'    => Response::PENDING,
+				'root'        => array(
+					'combinator' => 'and',
+					'children'   => array(
+						array(
+							'part'     => Comment_Part::EMAIL,
+							'operator' => 'wildcard',
+							'value'    => '*@gmail.com',
+						),
+						array(
+							'combinator' => 'or',
+							'children'   => array(
+								array(
+									'part'     => Comment_Part::CONTENT,
+									'operator' => 'contains',
+									'value'    => 'crypto',
+								),
+								array(
+									'part'     => Comment_Part::CONTENT,
+									'operator' => 'contains',
+									'value'    => 'NFT',
+								),
+							),
+						),
+					),
+				),
+			)
+		);
+		$this->assertTrue( $created['success'], wp_json_encode( $created ) );
+		$id = (int) $created['data']['rule']['id'];
+
+		$decoded = $this->call(
+			array( $this->controller, 'handle_get' ),
+			array( 'id' => $id )
+		);
+
+		$this->assertTrue( $decoded['success'] );
+		$rule = $decoded['data']['rule'];
+		$this->assertSame( $id, $rule['id'] );
+		$this->assertSame( 'conditional', $rule['type'] );
+		$this->assertSame( 'Deep-link target', $rule['name'] );
+		$this->assertSame( Response::PENDING, $rule['response'] );
+
+		$this->assertSame( 'and', $rule['root']['combinator'] );
+		$this->assertCount( 2, $rule['root']['children'] );
+
+		// First child: leaf wildcard against email.
+		$this->assertSame( Comment_Part::EMAIL, $rule['root']['children'][0]['part'] );
+		$this->assertSame( 'wildcard', $rule['root']['children'][0]['operator'] );
+		$this->assertSame( '*@gmail.com', $rule['root']['children'][0]['value'] );
+
+		// Second child: nested OR group with two contains-content leaves.
+		$nested = $rule['root']['children'][1];
+		$this->assertSame( 'or', $nested['combinator'] );
+		$this->assertCount( 2, $nested['children'] );
+		$this->assertSame( Comment_Part::CONTENT, $nested['children'][0]['part'] );
+		$this->assertSame( 'crypto', $nested['children'][0]['value'] );
+		$this->assertSame( 'NFT', $nested['children'][1]['value'] );
+	}
+
+	/**
 	 * @testdox It should be possible to create an IP range rule and have it stored with both endpoints intact
 	 */
 	public function test_create_endpoint_persists_an_ip_range_rule(): void {
