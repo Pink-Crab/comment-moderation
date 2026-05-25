@@ -517,6 +517,60 @@ class Test_Rule_Ajax_Controller extends WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox It should accept a conditional rule whose root tree arrives as a single JSON-encoded form field (the Elm admin app's wire shape)
+	 */
+	public function test_create_endpoint_accepts_json_encoded_conditional_root(): void {
+		// The Elm admin app posts the recursive condition tree as one form
+		// field whose value is the JSON-encoded shape, rather than the
+		// bracket-nested arrays PHP would parse natively. The boundary
+		// sanitiser must decode the string before walking the tree, otherwise
+		// every conditional rule created through the production UI would fail
+		// validation with "Every condition group must contain at least one
+		// condition".
+		$decoded = $this->call(
+			array( $this->controller, 'handle_create' ),
+			array(
+				'type'        => Rule_Type::CONDITIONAL,
+				'name'        => 'Elm-shape conditional',
+				'description' => 'Posted with root as a JSON string',
+				'response'    => Response::PENDING,
+				'root'        => wp_json_encode(
+					array(
+						'combinator' => 'and',
+						'children'   => array(
+							array(
+								'part'     => Comment_Part::EMAIL,
+								'operator' => 'contains',
+								'value'    => '@gmail.com',
+							),
+							array(
+								'part'     => Comment_Part::CONTENT,
+								'operator' => 'contains',
+								'value'    => 'crypto',
+							),
+						),
+					)
+				),
+			)
+		);
+
+		$this->assertTrue(
+			$decoded['success'],
+			'Elm-style JSON-string root should round-trip. Response: ' . wp_json_encode( $decoded )
+		);
+		$this->assertSame( 'Rule created', $decoded['data']['message'] );
+
+		$id    = (int) $decoded['data']['rule']['id'];
+		$found = $this->repo->find( $id );
+		$this->assertNotNull( $found, 'Conditional rule should persist.' );
+		$this->assertSame(
+			array( 'email', 'content' ),
+			$found->comment_parts()->values(),
+			'Both leaf parts should be visible on the saved rule.'
+		);
+	}
+
+	/**
 	 * @testdox It should reject a request that supplies a non-empty but invalid nonce token via the pinkcrab/wp-nonce validate() path
 	 */
 	public function test_invalid_token_is_rejected_by_wp_nonce_lib(): void {

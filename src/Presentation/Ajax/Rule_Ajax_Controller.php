@@ -581,8 +581,20 @@ final class Rule_Ajax_Controller implements Hookable {
 		}
 
 		if ( Rule_Type::CONDITIONAL === $type ) {
-			$out['root'] = isset( $input['root'] ) && is_array( $input['root'] )
-				? $this->sanitise_group_node( $input['root'] )
+			$root = $input['root'] ?? array();
+			// The Elm admin app serialises the recursive condition tree to JSON
+			// and posts it as the single `root` form field (the bracket-nested
+			// shape WP would parse natively does not survive Elm's encoder).
+			// Decode here so the same `sanitise_group_node()` path runs for
+			// both wire encodings.
+			if ( is_string( $root ) && '' !== trim( $root ) ) {
+				$decoded = json_decode( $root, true );
+				if ( is_array( $decoded ) ) {
+					$root = $decoded;
+				}
+			}
+			$out['root'] = is_array( $root )
+				? $this->sanitise_group_node( $root )
 				: array();
 			return $out;
 		}
