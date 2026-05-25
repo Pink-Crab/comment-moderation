@@ -239,4 +239,68 @@ test.describe( 'admin scaffold', () => {
 			fullPage: true,
 		} );
 	} );
+
+	test( 'Stage 19: Settings → Comment Moderation page is reachable and prints the Elm mount node with localized bootstrap data', async ( {
+		page,
+	} ) => {
+		// Stage 19 registers the single admin screen under
+		// Settings → Comment Moderation via the perique-admin-menu module.
+		// The page itself only prints an escaped Elm-mount div and
+		// localises REST/nonce data onto the admin script. The Elm app
+		// (assets/js/admin.js) takes over from there.
+
+		// 1) Reachable via the canonical wp-admin slug, with the right H1.
+		await page.goto(
+			'/wp-admin/options-general.php?page=pinkcrab-comment-moderation'
+		);
+		await expect( page ).toHaveURL(
+			/options-general\.php\?page=pinkcrab-comment-moderation/
+		);
+		await expect(
+			page.getByRole( 'heading', {
+				name: /Comment Moderation/i,
+				level: 1,
+			} )
+		).toBeVisible();
+
+		// 2) The Elm mount node is rendered (Elm boots into it).
+		await expect( page.locator( '#pccm-admin-root' ) ).toBeAttached();
+
+		// 3) Bootstrap REST/nonce data has been localised onto window.
+		const bootstrap = await page.evaluate(
+			() =>
+				/** @type {any} */ ( window ).pccmAdminData || null
+		);
+		expect( bootstrap ).not.toBeNull();
+		expect( bootstrap.mountId ).toBe( 'pccm-admin-root' );
+		expect( typeof bootstrap.nonce ).toBe( 'string' );
+		expect( bootstrap.nonce.length ).toBeGreaterThan( 0 );
+		expect( typeof bootstrap.restRoot ).toBe( 'string' );
+		// wp-env may run without pretty permalinks so the REST root can be
+		// either "…/wp-json/" or "…/index.php?rest_route=/" — both are valid.
+		expect( bootstrap.restRoot ).toMatch(
+			/(\/wp-json\/?|rest_route=\/)$/
+		);
+		expect( bootstrap.restNamespace ).toBe(
+			'pinkcrab-comment-moderation/v1'
+		);
+		expect( bootstrap.pageSlug ).toBe( 'pinkcrab-comment-moderation' );
+
+		// 4) Confirm the Settings submenu now exposes the page (proves the
+		//    perique-admin-menu module wired it under options-general.php).
+		await expect(
+			page.locator(
+				'#adminmenu a[href*="page=pinkcrab-comment-moderation"]'
+			)
+		).toHaveCount( 1 );
+
+		// Capture the primary changed screen for the routine commit.
+		await page.screenshot( {
+			path: path.resolve(
+				__dirname,
+				'../../../../.karkinos/shots/stage-19.png'
+			),
+			fullPage: true,
+		} );
+	} );
 } );

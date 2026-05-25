@@ -32,4 +32,8 @@ return array(
 	// matching comments to the rule's outcome (rebuild spec §9).
 	\PinkCrab\Comment_Moderation\Application\Engine\Comment_Engine::class,
 
+	// Settings → Comment Moderation admin page (rebuild spec §3). Prints
+	// an Elm-mount div and localises REST/nonce data for the Elm app.
+	\PinkCrab\Comment_Moderation\Presentation\Page\Admin_Page::class,
+
 );

@@ -17,6 +17,7 @@ namespace PinkCrab\Comment_Moderation;
 use PinkCrab\Comment_Moderation\Migration\Comment_Rule_001;
 use PinkCrab\Perique\Application\App_Factory;
 use PinkCrab\Perique\Migration\Module\Perique_Migrations;
+use PinkCrab\Perique_Admin_Menu\Module\Admin_Menu;
 use PinkCrab\Plugin_Lifecycle\Plugin_Life_Cycle;
 
 /**
@@ -67,6 +68,7 @@ final class Plugin_Bootstrap {
 					->set_migration_log_key( 'pinkcrab_comment_moderation_migrations' )
 					->add_migration( Comment_Rule_001::class )
 			)
+			->module( Admin_Menu::class )
 			->boot();
 	}
 }

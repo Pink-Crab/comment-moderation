@@ -137,6 +137,34 @@ class Test_Plugin_Config extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox It should be possible to get the plugin base URL without supplying a sub-path
+	 */
+	public function test_plugin_url_returns_base_when_no_relative_path(): void {
+		$config = new Plugin_Config( $this->make_app_config() );
+
+		$this->assertSame(
+			'https://example.org/wp-content/plugins/my-plugin/',
+			$config->plugin_url()
+		);
+	}
+
+	/**
+	 * @testdox It should be possible to build a URL for any file inside the plugin directory via the config helper
+	 */
+	public function test_plugin_url_concatenates_relative_path(): void {
+		$config = new Plugin_Config( $this->make_app_config() );
+
+		$this->assertSame(
+			'https://example.org/wp-content/plugins/my-plugin/assets/js/admin.js',
+			$config->plugin_url( 'assets/js/admin.js' )
+		);
+		$this->assertSame(
+			'https://example.org/wp-content/plugins/my-plugin/assets/js/admin.js',
+			$config->plugin_url( '/assets/js/admin.js' )
+		);
+	}
+
+	/**
 	 * @testdox It should be possible to build a filesystem path for a specific asset by passing its relative path to the config helper class
 	 */
 	public function test_asset_path_concatenates_relative_path(): void {

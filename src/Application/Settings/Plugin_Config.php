@@ -71,6 +71,24 @@ final class Plugin_Config {
 	}
 
 	/**
+	 * Absolute URL to a file inside the plugin directory (the value behind
+	 * `url.plugin` in `config/settings.php`).
+	 *
+	 * @param string $relative Optional path appended to the plugin base URL.
+	 *                         Leading slashes are stripped.
+	 *
+	 * @return string
+	 */
+	public function plugin_url( string $relative = '' ): string {
+		$base = $this->app_config->url( 'plugin' );
+		Assert::string( $base, 'App_Config "plugin" url must be configured as a string in config/settings.php.' );
+		if ( '' === $relative ) {
+			return $base;
+		}
+		return rtrim( $base, '/' ) . '/' . ltrim( $relative, '/' );
+	}
+
+	/**
 	 * Absolute URL to a file inside `assets/build/`.
 	 *
 	 * @param string $relative Optional path appended to the assets base URL.
