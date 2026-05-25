@@ -130,4 +130,32 @@ test.describe( 'admin scaffold', () => {
 			fullPage: true,
 		} );
 	} );
+
+	test( 'plugin remains active after Stage 15 fail-safe rule evaluators land', async ( {
+		page,
+	} ) => {
+		// Stage 15 implements the fail-safe rule evaluators in
+		// src/Domain/Engine/ (Rule_Evaluator + Comment_Submission). It is
+		// pure domain logic with no admin wiring or comment-hook
+		// integration yet — those follow in later stages. The available
+		// end-to-end claim is therefore the same as the previous pre-UI
+		// stages: the plugin still autoloads, every new class can be
+		// instantiated by the autoloader at boot, and WordPress reports
+		// the plugin as active. The evaluator's behaviour itself is
+		// exercised by the PHPUnit suite at
+		// tests/Unit/Domain/Engine/Test_Rule_Evaluator.php.
+		await page.goto( '/wp-admin/plugins.php' );
+		await expect( page ).toHaveURL( /plugins\.php/ );
+		await expect(
+			page.getByRole( 'row', { name: /PinkCrab Comment Moderation/i } )
+		).toBeVisible();
+
+		await page.screenshot( {
+			path: path.resolve(
+				__dirname,
+				'../../../../.karkinos/shots/stage-15.png'
+			),
+			fullPage: true,
+		} );
+	} );
 } );
