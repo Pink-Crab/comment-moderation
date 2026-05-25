@@ -23,6 +23,14 @@ module.exports = defineConfig( {
 		[ 'html', { outputFolder: 'playwright-report', open: 'never' } ],
 	],
 	globalSetup: require.resolve( './tests/e2e/global-setup.js' ),
+	webServer: {
+		command: 'npm run wp-env start',
+		url: `${ BASE_URL }/wp-login.php`,
+		reuseExistingServer: true,
+		timeout: 300_000,
+		stdout: 'pipe',
+		stderr: 'pipe',
+	},
 	use: {
 		baseURL: BASE_URL,
 		trace: 'on-first-retry',

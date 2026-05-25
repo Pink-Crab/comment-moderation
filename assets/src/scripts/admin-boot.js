@@ -11,9 +11,9 @@
 		return;
 	}
 
-	var data = window.pccmAdminData || {};
-	var mountId = data.mountId || 'pccm-admin-root';
-	var node = document.getElementById( mountId );
+	const data = window.pccmAdminData || {};
+	const mountId = data.mountId || 'pccm-admin-root';
+	const node = document.getElementById( mountId );
 	if ( ! node ) {
 		return;
 	}
@@ -27,7 +27,7 @@
 	}
 
 	window.Elm.Main.init( {
-		node: node,
+		node,
 		flags: {
 			ajaxUrl: data.ajaxUrl || '',
 			ajaxNonce: data.ajaxNonce || '',
