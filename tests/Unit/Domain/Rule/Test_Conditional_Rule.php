@@ -120,4 +120,56 @@ class Test_Conditional_Rule extends WP_UnitTestCase {
 
 		$this->assertSame( array( 'name' ), $rule->comment_parts()->values() );
 	}
+
+	/**
+	 * @testdox It should be possible to expose every value passed into the Conditional_Rule constructor via its accessors
+	 */
+	public function test_accessors_return_constructor_values(): void {
+		$root  = Condition_Group::any_of(
+			new Condition( Comment_Part::url(), Operator::ends_with(), '.ru' ),
+		);
+		$stats = Usage_Stats::fresh( new DateTimeImmutable( '2026-05-12 09:00:00' ) );
+		$rule  = $this->make_rule(
+			array(
+				'id'          => 99,
+				'name'        => 'Russian URL trap',
+				'description' => 'Catches URLs ending in .ru.',
+				'root'        => $root,
+				'response'    => Response::trash(),
+				'usage_stats' => $stats,
+			)
+		);
+
+		$this->assertSame( 99, $rule->id() );
+		$this->assertSame( 'Russian URL trap', $rule->name() );
+		$this->assertSame( 'Catches URLs ending in .ru.', $rule->description() );
+		$this->assertSame( $root, $rule->root() );
+		$this->assertTrue( $rule->response()->equals( Response::trash() ) );
+		$this->assertSame( $stats, $rule->usage_stats() );
+	}
+
+	/**
+	 * @testdox It should be possible to surface comment parts from a deeply nested condition tree through Conditional_Rule
+	 */
+	public function test_comment_parts_walks_deeply_nested_tree(): void {
+		$rule = $this->make_rule(
+			array(
+				'root' => Condition_Group::all_of(
+					new Condition( Comment_Part::content(), Operator::contains(), 'crypto' ),
+					Condition_Group::any_of(
+						new Condition( Comment_Part::email(), Operator::wildcard(), '*@gmail.com' ),
+						Condition_Group::all_of(
+							new Condition( Comment_Part::url(), Operator::ends_with(), '.ru' ),
+							new Condition( Comment_Part::user_agent(), Operator::contains(), 'curl' ),
+						),
+					),
+				),
+			)
+		);
+
+		$this->assertSame(
+			array( 'email', 'url', 'user_agent', 'content' ),
+			$rule->comment_parts()->values()
+		);
+	}
 }

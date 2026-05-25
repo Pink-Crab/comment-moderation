@@ -58,4 +58,26 @@ test.describe( 'admin scaffold', () => {
 			fullPage: true,
 		} );
 	} );
+
+	test( 'plugin remains active after Stage 10 domain-model unit tests land', async ( {
+		page,
+	} ) => {
+		// Stage 10 only adds PHPUnit coverage for the rule / condition-tree
+		// domain model — no admin wiring exists yet. The available end-to-end
+		// claim is the same as stage 9: the plugin still autoloads and stays
+		// active on the plugins screen.
+		await page.goto( '/wp-admin/plugins.php' );
+		await expect( page ).toHaveURL( /plugins\.php/ );
+		await expect(
+			page.getByRole( 'row', { name: /PinkCrab Comment Moderation/i } )
+		).toBeVisible();
+
+		await page.screenshot( {
+			path: path.resolve(
+				__dirname,
+				'../../../../.karkinos/shots/stage-10.png'
+			),
+			fullPage: true,
+		} );
+	} );
 } );

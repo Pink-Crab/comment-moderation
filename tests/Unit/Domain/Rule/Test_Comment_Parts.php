@@ -155,4 +155,14 @@ class Test_Comment_Parts extends WP_UnitTestCase {
 
 		$this->assertSame( array( 'name', 'content' ), $values );
 	}
+
+	/**
+	 * @testdox It should be possible to reject an unknown stored value when rehydrating a Comment_Parts collection via from_values()
+	 */
+	public function test_from_values_rejects_unknown_value(): void {
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Unknown comment part: "subject".' );
+
+		Comment_Parts::from_values( array( 'email', 'subject' ) );
+	}
 }

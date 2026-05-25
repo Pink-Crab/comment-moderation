@@ -147,4 +147,68 @@ class Test_Condition_Group extends WP_UnitTestCase {
 
 		$this->assertSame( array( 'name', 'email', 'content' ), $group->comment_parts()->values() );
 	}
+
+	/**
+	 * @testdox It should be possible to walk a three-level deep condition tree in declared order via all_conditions()
+	 */
+	public function test_all_conditions_descends_through_multiple_nesting_levels(): void {
+		$top_leaf       = new Condition( Comment_Part::content(), Operator::contains(), 'crypto' );
+		$middle_leaf    = new Condition( Comment_Part::name(), Operator::is(), 'bob' );
+		$inner_leaf_one = new Condition( Comment_Part::email(), Operator::ends_with(), '@spam.tld' );
+		$inner_leaf_two = new Condition( Comment_Part::url(), Operator::starts_with(), 'http://evil' );
+
+		$tree = Condition_Group::all_of(
+			$top_leaf,
+			Condition_Group::any_of(
+				$middle_leaf,
+				Condition_Group::all_of( $inner_leaf_one, $inner_leaf_two ),
+			),
+		);
+
+		$this->assertFalse( $tree->is_flat() );
+		$this->assertSame(
+			array( $top_leaf, $middle_leaf, $inner_leaf_one, $inner_leaf_two ),
+			$tree->all_conditions()
+		);
+		$this->assertSame(
+			array( 'name', 'email', 'url', 'content' ),
+			$tree->comment_parts()->values()
+		);
+	}
+
+	/**
+	 * @testdox It should be possible to reject a Condition_Group child that is a nested group via the same type guard
+	 */
+	public function test_rejects_invalid_child_inside_array_of_real_nodes(): void {
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Condition_Group: child at index 1 must be a Condition or Condition_Group.' );
+
+		new Condition_Group(
+			Combinator::any(),
+			array(
+				new Condition( Comment_Part::name(), Operator::is(), 'bob' ),
+				42,
+			)
+		);
+	}
+
+	/**
+	 * @testdox It should be possible to reindex children passed with non-sequential keys so accessing by position still works
+	 */
+	public function test_constructor_reindexes_children(): void {
+		$first  = new Condition( Comment_Part::name(), Operator::is(), 'bob' );
+		$second = new Condition( Comment_Part::email(), Operator::contains(), 'gmail' );
+
+		$group = new Condition_Group(
+			Combinator::all(),
+			array(
+				10 => $first,
+				42 => $second,
+			)
+		);
+
+		$this->assertSame( array( 0, 1 ), array_keys( $group->children() ) );
+		$this->assertSame( $first, $group->children()[0] );
+		$this->assertSame( $second, $group->children()[1] );
+	}
 }
