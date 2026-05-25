@@ -1,33 +1,31 @@
-name: WP 6.7 (PHP 8.0-8.3)
+name: WordPress 6.7 Test Suite [PHP8.0-8.5]
 
 on:
-  pull_request:
   push:
-    branches:
-      - main
-      - master
-      - trunk
+    branches: [ master ]
+  pull_request:
+    branches: [ master, develop ]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        php: ['8.0', '8.2', '8.3', '8.5']
-
+        operating-system: [ubuntu-latest]
+        php-versions: ['8.0', '8.1', '8.2', '8.3', '8.4', '8.5']
+    runs-on: ${{ matrix.operating-system }}
     services:
-      mysql:
-        image: mysql:8.0
+      mysql-service:
+        image: mysql:8.4
         env:
-          MYSQL_ROOT_PASSWORD: root
+          MYSQL_ROOT_PASSWORD: 'root'
           MYSQL_DATABASE: wordpress_test
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping --silent"
+          --health-cmd="healthcheck.sh --connect || mysqladmin ping -uroot -proot"
           --health-interval=10s
-          --health-timeout=5s
+          --health-timeout=10s
           --health-retries=10
 
     env:
@@ -35,26 +33,33 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up PHP ${{ matrix.php }}
+        uses: actions/checkout@v2
+      - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ matrix.php }}
-          tools: composer:v2
-          coverage: xdebug
-          extensions: mysqli
+          php-version: ${{ matrix.php-versions }}
+          extensions: mbstring, intl, pcov, mysqli
+          ini-values: post_max_size=256M, log_errors=1
+          tools: pecl
 
-      - name: Pin WordPress to 6.7
-        run: composer require --dev --no-update "roots/wordpress:6.7.*" "wp-phpunit/wp-phpunit:6.7.*"
+      - name: Check PHP Version
+        run: php -v
 
-      - name: Install Composer dependencies
-        uses: ramsey/composer-install@v3
-        with:
-          composer-options: '--ignore-platform-reqs --no-interaction'
+      - name: Clear existing composer
+        run: >
+          sudo rm -rf vendor
+          && rm -rf composer.lock
+      - name: Validate composer.json and composer.lock
+        run: composer validate
 
-      - name: PHP syntax check (lint)
-        run: find . -path ./vendor -prune -o -path ./node_modules -prune -o -name '*.php' -print0 | xargs -0 -n1 -P4 php -l
+      - name: Install dependencies
+        run: >
+          rm -rf composer.lock
+          && composer clearcache
+          && composer require php-stubs/wordpress-stubs:6.7.* --dev --no-update
+          && composer require roots/wordpress:6.7.* --dev --no-update
+          && composer require wp-phpunit/wp-phpunit:6.7.* --dev --no-update
+          && composer update --no-cache
 
       - name: phpcs
         run: composer lint:php:phpcs
@@ -65,12 +70,5 @@ jobs:
       - name: phpmd
         run: composer lint:php:phpmd
 
-      - name: Wait for MySQL
-        run: |
-          for i in $(seq 1 30); do
-            mysqladmin ping -h 127.0.0.1 -uroot -proot --silent && break
-            sleep 1
-          done
-
-      - name: Run PHPUnit
+      - name: phpunit
         run: composer coverage
