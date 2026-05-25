@@ -19,37 +19,19 @@
 		"npm": ">=10.0"
 	},
 	"devDependencies": {
-		"@csstools/postcss-sass": "^5.0.1",
-		"@wordpress/browserslist-config": "^6.8.1",
-		"@wordpress/postcss-plugins-preset": "^5.8.3",
-		"@wordpress/scripts": "^30.0.6",
-		"eslint-config-prettier": "^10.1.8",
-		"eslint-plugin-import": "^2.32.0",
-		"eslint-plugin-jest": "^29.15.2",
-		"eslint-plugin-jsdoc": "^63.0.0",
-		"eslint-plugin-prettier": "^5.5.5",
-		"npm-run-all": "^4.1.5",
-		"postcss-cli": "^10.1.0"
+		"@playwright/test": "^1.49.1",
+		"@wordpress/env": "^10.14.0",
+		"dotenv": "^16.4.7",
+		"elm": "^0.19.1-6",
+		"elm-format": "^0.8.7",
+		"elm-review": "^2.13.2"
 	},
-	"browserslist": [
-		"extends @wordpress/browserslist-config"
-	],
 	"scripts": {
-		"build": "npm-run-all --sequential build:scripts build:styles",
-		"build:scripts": "wp-scripts build assets/src/scripts/hello-world.js --output-path=assets/build/scripts",
-		"build:styles": "postcss \"assets/src/styles/**/*.scss\" --base assets/src/styles --dir assets/build/styles --ext .css",
-		"start": "npm-run-all --parallel start:scripts start:styles",
-		"start:scripts": "wp-scripts start assets/src/scripts/hello-world.js --output-path=assets/build/scripts",
-		"start:styles": "postcss \"assets/src/styles/**/*.scss\" --base assets/src/styles --dir assets/build/styles --ext .css --watch",
-		"format": "npm-run-all --sequential format:scripts format:styles",
-		"format:scripts": "wp-scripts format assets/src/scripts --no-error-on-unmatched-pattern",
-		"format:styles": "npm run lint:styles -- --fix",
-		"lint": "npm-run-all --sequential lint:scripts lint:styles lint:pkg-json",
-		"lint:scripts": "wp-scripts lint-js assets/src/scripts --no-error-on-unmatched-pattern",
-		"lint:styles": "wp-scripts lint-style \"assets/src/styles/**/*.{css,sass,scss}\" --allow-empty-input",
-		"lint:pkg-json": "wp-scripts lint-pkg-json",
-		"check-engines": "wp-scripts check-engines",
-		"check-licenses": "wp-scripts check-licenses",
-		"packages-update": "wp-scripts packages-update"
+		"build": "elm make assets/elm/Main.elm --optimize --output=assets/js/admin.js",
+		"lint": "elm-format --validate assets/elm && elm-review",
+		"test:e2e": "playwright test",
+		"test:e2e:ui": "playwright test --ui",
+		"test:e2e:headed": "playwright test --headed",
+		"wp-env": "wp-env"
 	}
 }

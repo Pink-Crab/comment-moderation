@@ -38,3 +38,13 @@ Thumbs.db
 # Build output (composer build → dist/, with temp `_build.XXXXXX` work dirs).
 /dist/
 /_build.*/
+
+# Elm + Playwright toolchain.
+/elm-stuff/
+/test-results/
+/playwright-report/
+/artifacts/
+review/elm-stuff/
+tests/e2e/.env
+tests/e2e/.auth/
+assets/js/admin.js

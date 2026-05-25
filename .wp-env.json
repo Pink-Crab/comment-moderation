@@ -1,0 +1,15 @@
+{
+	"core": null,
+	"plugins": [
+		"."
+	],
+	"port": 57881,
+	"testsPort": 57882,
+	"config": {
+		"WP_DEBUG": true,
+		"SCRIPT_DEBUG": true
+	},
+	"mappings": {
+		"wp-content/mu-plugins": "./tests/e2e/mu-plugins"
+	}
+}
