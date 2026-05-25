@@ -1,4 +1,4 @@
-name: WordPress 7.0 Test Suite [PHP8.0-8.5]
+name: WordPress 6.6 Test Suite [PHP8.0-8.5]
 
 on:
   push:
@@ -56,9 +56,9 @@ jobs:
         run: >
           rm -rf composer.lock
           && composer clearcache
-          && composer require php-stubs/wordpress-stubs:7.0.* --dev --no-update
-          && composer require roots/wordpress:7.0.* --dev --no-update
-          && composer require wp-phpunit/wp-phpunit:7.0.* --dev --no-update
+          && composer require php-stubs/wordpress-stubs:6.6.* --dev --no-update
+          && composer require roots/wordpress:6.6.* --dev --no-update
+          && composer require wp-phpunit/wp-phpunit:6.6.* --dev --no-update
           && composer update --no-cache
 
       - name: phpcs
