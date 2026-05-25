@@ -35,4 +35,27 @@ test.describe( 'admin scaffold', () => {
 			fullPage: true,
 		} );
 	} );
+
+	test( 'plugin remains active after Stage 9 conditional rule builder model lands', async ( {
+		page,
+	} ) => {
+		// Stage 9 introduces the recursive Condition_Group / Operator /
+		// refactored Condition / Conditional_Rule domain model. It is pure
+		// PHP — no admin screen wiring yet — so the only end-to-end claim
+		// available is that loading the plugin (and therefore autoloading
+		// every class added in this stage) does not fatal WordPress.
+		await page.goto( '/wp-admin/plugins.php' );
+		await expect( page ).toHaveURL( /plugins\.php/ );
+		await expect(
+			page.getByRole( 'row', { name: /PinkCrab Comment Moderation/i } )
+		).toBeVisible();
+
+		await page.screenshot( {
+			path: path.resolve(
+				__dirname,
+				'../../../../.karkinos/shots/stage-9.png'
+			),
+			fullPage: true,
+		} );
+	} );
 } );

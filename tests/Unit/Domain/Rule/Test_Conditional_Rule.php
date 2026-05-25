@@ -10,10 +10,12 @@ declare( strict_types = 1 );
 namespace PinkCrab\Comment_Moderation\Tests\Unit\Domain\Rule;
 
 use DateTimeImmutable;
-use InvalidArgumentException;
 use PinkCrab\Comment_Moderation\Domain\Rule\Comment_Part;
+use PinkCrab\Comment_Moderation\Domain\Rule\Combinator;
 use PinkCrab\Comment_Moderation\Domain\Rule\Condition;
+use PinkCrab\Comment_Moderation\Domain\Rule\Condition_Group;
 use PinkCrab\Comment_Moderation\Domain\Rule\Conditional_Rule;
+use PinkCrab\Comment_Moderation\Domain\Rule\Operator;
 use PinkCrab\Comment_Moderation\Domain\Rule\Response;
 use PinkCrab\Comment_Moderation\Domain\Rule\Rule;
 use PinkCrab\Comment_Moderation\Domain\Rule\Rule_Type;
@@ -21,8 +23,9 @@ use PinkCrab\Comment_Moderation\Domain\Rule\Usage_Stats;
 use WP_UnitTestCase;
 
 /**
- * Proves Conditional_Rule satisfies the Rule contract, requires at least one
- * condition, and reports the union of its conditions' comment parts.
+ * Proves Conditional_Rule satisfies the Rule contract, wraps a root
+ * Condition_Group, and reports the union of every reachable leaf's comment
+ * parts.
  *
  * @group unit
  */
@@ -36,9 +39,9 @@ class Test_Conditional_Rule extends WP_UnitTestCase {
 			'id'          => null,
 			'name'        => 'Crypto Gmail trap',
 			'description' => null,
-			'conditions'  => array(
-				new Condition( Comment_Part::email(), '*@gmail.com' ),
-				new Condition( Comment_Part::content(), '*crypto*' ),
+			'root'        => Condition_Group::all_of(
+				new Condition( Comment_Part::email(), Operator::wildcard(), '*@gmail.com' ),
+				new Condition( Comment_Part::content(), Operator::contains(), 'crypto' ),
 			),
 			'response'    => Response::pending(),
 			'usage_stats' => Usage_Stats::fresh( new DateTimeImmutable( '2026-05-01' ) ),
@@ -49,7 +52,7 @@ class Test_Conditional_Rule extends WP_UnitTestCase {
 			$args['id'],
 			$args['name'],
 			$args['description'],
-			$args['conditions'],
+			$args['root'],
 			$args['response'],
 			$args['usage_stats']
 		);
@@ -70,56 +73,51 @@ class Test_Conditional_Rule extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox It should be possible to read the conditions back from a Conditional_Rule in the order they were supplied
+	 * @testdox It should be possible to read the root condition group back from a Conditional_Rule
 	 */
-	public function test_conditions_are_exposed_in_supplied_order(): void {
-		$first  = new Condition( Comment_Part::email(), '*@gmail.com' );
-		$second = new Condition( Comment_Part::content(), '*crypto*' );
+	public function test_exposes_root_group(): void {
+		$root = Condition_Group::any_of(
+			new Condition( Comment_Part::name(), Operator::is(), 'spammer' ),
+			new Condition( Comment_Part::url(), Operator::ends_with(), '.ru' ),
+		);
 
-		$rule = $this->make_rule( array( 'conditions' => array( $first, $second ) ) );
+		$rule = $this->make_rule( array( 'root' => $root ) );
 
-		$this->assertSame( array( $first, $second ), $rule->conditions() );
+		$this->assertSame( $root, $rule->root() );
 	}
 
 	/**
-	 * @testdox It should be possible to confirm a Conditional_Rule reports the union of its conditions' comment parts in canonical order
+	 * @testdox It should be possible to confirm a Conditional_Rule reports the union of its tree's comment parts in canonical order
 	 */
-	public function test_comment_parts_is_union_of_conditions(): void {
+	public function test_comment_parts_is_union_of_tree_leaves(): void {
 		$rule = $this->make_rule(
 			array(
-				'conditions' => array(
-					new Condition( Comment_Part::content(), '*crypto*' ),
-					new Condition( Comment_Part::email(), '*@gmail.com' ),
+				'root' => Condition_Group::all_of(
+					new Condition( Comment_Part::content(), Operator::contains(), 'crypto' ),
+					Condition_Group::any_of(
+						new Condition( Comment_Part::email(), Operator::wildcard(), '*@gmail.com' ),
+						new Condition( Comment_Part::name(), Operator::is(), 'bob' ),
+					),
 				),
 			)
 		);
 
-		$this->assertSame( array( 'email', 'content' ), $rule->comment_parts()->values() );
+		$this->assertSame( array( 'name', 'email', 'content' ), $rule->comment_parts()->values() );
 	}
 
 	/**
-	 * @testdox It should be possible to confirm duplicate condition parts produce a single entry in the rule's comment parts
+	 * @testdox It should be possible to confirm duplicate condition parts across the tree produce a single entry in the rule's comment parts
 	 */
-	public function test_comment_parts_deduplicates_repeated_conditions(): void {
+	public function test_comment_parts_deduplicates_repeated_leaves(): void {
 		$rule = $this->make_rule(
 			array(
-				'conditions' => array(
-					new Condition( Comment_Part::name(), '*bob*' ),
-					new Condition( Comment_Part::name(), '*robert*' ),
+				'root' => Condition_Group::all_of(
+					new Condition( Comment_Part::name(), Operator::contains(), 'bob' ),
+					new Condition( Comment_Part::name(), Operator::contains(), 'robert' ),
 				),
 			)
 		);
 
 		$this->assertSame( array( 'name' ), $rule->comment_parts()->values() );
-	}
-
-	/**
-	 * @testdox It should be possible to reject a Conditional_Rule built with zero conditions
-	 */
-	public function test_rejects_empty_conditions(): void {
-		$this->expectException( InvalidArgumentException::class );
-		$this->expectExceptionMessage( 'Conditional_Rule: at least one condition is required.' );
-
-		$this->make_rule( array( 'conditions' => array() ) );
 	}
 }
