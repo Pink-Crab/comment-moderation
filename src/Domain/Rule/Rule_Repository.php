@@ -16,6 +16,8 @@ declare( strict_types = 1 );
 
 namespace PinkCrab\Comment_Moderation\Domain\Rule;
 
+use DateTimeImmutable;
+
 /**
  * CRUD + filtered-listing contract for moderation rules.
  *
@@ -95,4 +97,19 @@ interface Rule_Repository {
 	 * @return integer
 	 */
 	public function count( Rule_Filter $filter ): int;
+
+	/**
+	 * Atomically bump the matched rule's hit count and stamp `last_used`
+	 * (rebuild spec §9: "that rule's 'times used' count is incremented and its
+	 * 'last used' time stamped"). Implemented as a single conditional UPDATE
+	 * so two concurrent comment submissions cannot lose a count between a
+	 * read-modify-write. `last_updated` is left untouched — only an admin edit
+	 * moves that forward (§6).
+	 *
+	 * @param integer           $id   Primary key of the rule that fired.
+	 * @param DateTimeImmutable $when Wall-clock instant of the hit.
+	 *
+	 * @return boolean True when a row was updated.
+	 */
+	public function record_hit( int $id, DateTimeImmutable $when ): bool;
 }

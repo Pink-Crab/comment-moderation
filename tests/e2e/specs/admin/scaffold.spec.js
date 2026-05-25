@@ -159,6 +159,34 @@ test.describe( 'admin scaffold', () => {
 		} );
 	} );
 
+	test( 'plugin remains active after Stage 17 invisible comment engine lands', async ( {
+		page,
+	} ) => {
+		// Stage 17 implements the invisible comment engine: hooks
+		// `pre_comment_approved`, walks the stored rule list first-match-wins,
+		// records the matched rule's stats, fires `pccm_comment_failed_rule`,
+		// and diverts the comment to the matched rule's outcome. There is
+		// still no admin screen — the engine itself never paints UI. The
+		// available end-to-end claim is therefore the same shape as the
+		// preceding pre-UI stages: registering Comment_Engine as a Hookable
+		// and wiring its dependencies through Perique's DI container does
+		// not break plugin activation. The engine's actual behaviour is
+		// exercised by tests/Integration/Engine/Test_Comment_Engine.php.
+		await page.goto( '/wp-admin/plugins.php' );
+		await expect( page ).toHaveURL( /plugins\.php/ );
+		await expect(
+			page.getByRole( 'row', { name: /PinkCrab Comment Moderation/i } )
+		).toBeVisible();
+
+		await page.screenshot( {
+			path: path.resolve(
+				__dirname,
+				'../../../../.karkinos/shots/stage-17.png'
+			),
+			fullPage: true,
+		} );
+	} );
+
 	test( 'plugin remains active after Stage 16 rule-evaluator unit tests land', async ( {
 		page,
 	} ) => {

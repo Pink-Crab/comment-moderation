@@ -249,6 +249,46 @@ class Test_Wpdb_Rule_Repository extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox It should be possible to atomically bump a rule's hit counter and stamp last_used without moving last_updated
+	 */
+	public function test_record_hit_bumps_counter_and_preserves_last_updated(): void {
+		$saved          = $this->repo->save( $this->make_regex_rule() );
+		$before_updated = $saved->usage_stats()->last_updated();
+
+		$first  = new DateTimeImmutable( '2026-05-10 09:00:00', new DateTimeZone( 'UTC' ) );
+		$second = new DateTimeImmutable( '2026-05-10 10:30:00', new DateTimeZone( 'UTC' ) );
+
+		$this->assertTrue( $this->repo->record_hit( (int) $saved->id(), $first ) );
+		$this->assertTrue( $this->repo->record_hit( (int) $saved->id(), $second ) );
+
+		$reloaded = $this->repo->find( (int) $saved->id() );
+		$this->assertInstanceOf( Regex_Rule::class, $reloaded );
+		$this->assertSame( 2, $reloaded->usage_stats()->times_used() );
+		$this->assertNotNull( $reloaded->usage_stats()->last_used() );
+		$this->assertSame(
+			$second->getTimestamp(),
+			$reloaded->usage_stats()->last_used()->getTimestamp(),
+			'last_used should reflect the most recent hit.'
+		);
+		$this->assertSame(
+			$before_updated->getTimestamp(),
+			$reloaded->usage_stats()->last_updated()->getTimestamp(),
+			'record_hit must never advance last_updated (rebuild spec §6).'
+		);
+	}
+
+	/**
+	 * @testdox It should report false when record_hit is asked to bump a rule that no longer exists
+	 */
+	public function test_record_hit_returns_false_for_missing_rule(): void {
+		$missing = $this->repo->record_hit(
+			999999,
+			new DateTimeImmutable( '2026-05-10 09:00:00', new DateTimeZone( 'UTC' ) )
+		);
+		$this->assertFalse( $missing );
+	}
+
+	/**
 	 * @testdox It should be possible to delete a rule by id and confirm it is gone from a subsequent find
 	 */
 	public function test_delete_removes_a_rule(): void {

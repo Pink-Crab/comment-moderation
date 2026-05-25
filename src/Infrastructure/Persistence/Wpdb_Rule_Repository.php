@@ -95,6 +95,31 @@ final class Wpdb_Rule_Repository implements Rule_Repository {
 	) {}
 
 	/**
+	 * Atomically bump `times_used` by one and stamp `last_used`. Implemented
+	 * as a single conditional UPDATE so two concurrent submissions cannot
+	 * lose a hit between a read-modify-write. `last_updated` is intentionally
+	 * not touched — only an admin edit moves that forward (rebuild spec §6).
+	 *
+	 * @param integer           $id   Primary key of the rule that fired.
+	 * @param DateTimeImmutable $when Wall-clock instant of the hit.
+	 *
+	 * @return boolean True when a row was updated.
+	 */
+	public function record_hit( int $id, DateTimeImmutable $when ): bool {
+		$table    = $this->table();
+		$prepared = $this->wpdb->prepare(
+			"UPDATE `{$table}` SET times_used = times_used + 1, last_used = %s WHERE id = %d",
+			$when->format( self::DATETIME_FORMAT ),
+			$id
+		);
+		if ( ! is_string( $prepared ) ) {
+			return false;
+		}
+		$updated = $this->wpdb->query( $prepared );
+		return is_int( $updated ) && $updated > 0;
+	}
+
+	/**
 	 * Insert a new rule or update an existing one (decided by `$rule->id()`).
 	 *
 	 * @param Rule $rule Rule to save.
