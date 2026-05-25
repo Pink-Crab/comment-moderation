@@ -44,6 +44,15 @@ return array(
 		),
 	),
 
+	// Bind the optional Akismet co-operation port (rebuild spec §10) to the
+	// production gateway that delegates to the real `\Akismet` class. The
+	// gateway is stateless and `class_exists()` is cheap; sharing the
+	// instance keeps the listener and any future consumer in lock-step.
+	\PinkCrab\Comment_Moderation\Application\Integration\Akismet\Akismet_Gateway::class => array(
+		'instanceOf' => \PinkCrab\Comment_Moderation\Infrastructure\Akismet\Plugin_Akismet_Gateway::class,
+		'shared'     => true,
+	),
+
 	// 2. Shared (singleton).
 	// \PinkCrab\Comment_Moderation\Application\Services\Cache_Service::class => array(
 	//     'shared' => true,

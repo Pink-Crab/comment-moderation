@@ -32,6 +32,11 @@ return array(
 	// matching comments to the rule's outcome (rebuild spec §9).
 	\PinkCrab\Comment_Moderation\Application\Engine\Comment_Engine::class,
 
+	// Optional Akismet co-operation (rebuild spec §10). No-op when Akismet
+	// is missing or the `pccm_akismet_enabled` filter has been switched off
+	// — both checks happen lazily inside the listener.
+	\PinkCrab\Comment_Moderation\Application\Integration\Akismet\Akismet_Integration::class,
+
 	// Settings → Comment Moderation admin page (rebuild spec §3). Prints
 	// an Elm-mount div and localises REST/nonce data for the Elm app.
 	\PinkCrab\Comment_Moderation\Presentation\Page\Admin_Page::class,
