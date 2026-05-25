@@ -29,16 +29,18 @@ return array(
 	//     'instanceOf' => \PinkCrab\Comment_Moderation\Infrastructure\Some_Implementation::class,
 	// ),
 
-	// Bind the Rule_Repository port to its wpdb-backed implementation; pass
-	// the global $wpdb in as a construct param since Perique does not
-	// auto-wire globals (App_Config is auto-wired).
+	// Bind the Rule_Repository port to its wpdb-backed implementation. The
+	// substitution makes Dice resolve the constructor's `wpdb` parameter via
+	// `$GLOBALS['wpdb']` lazily on every build (Perique's `'*'` substitution
+	// is NOT inherited by class-specific rules in this version of Dice, so
+	// we have to declare it explicitly on the binding). `shared: true` keeps
+	// a single repository instance across the AJAX controller, the comment
+	// engine, and any future consumer.
 	\PinkCrab\Comment_Moderation\Domain\Rule\Rule_Repository::class    => array(
-		'instanceOf' => \PinkCrab\Comment_Moderation\Infrastructure\Persistence\Wpdb_Rule_Repository::class,
-	),
-	\PinkCrab\Comment_Moderation\Infrastructure\Persistence\Wpdb_Rule_Repository::class => array(
-		'shared'          => true,
-		'constructParams' => array(
-			array( \Dice\Dice::INSTANCE => static fn(): \wpdb => $GLOBALS['wpdb'] ),
+		'instanceOf'    => \PinkCrab\Comment_Moderation\Infrastructure\Persistence\Wpdb_Rule_Repository::class,
+		'shared'        => true,
+		'substitutions' => array(
+			\wpdb::class => array( \Dice\Dice::GLOBAL => 'wpdb' ),
 		),
 	),
 

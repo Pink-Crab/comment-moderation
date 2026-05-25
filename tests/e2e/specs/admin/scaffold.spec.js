@@ -303,4 +303,170 @@ test.describe( 'admin scaffold', () => {
 			fullPage: true,
 		} );
 	} );
+
+	test( 'Stage 20: admin AJAX endpoints accept signed requests and reject unsigned ones', async ( {
+		page,
+	} ) => {
+		// Stage 20 wires the six admin AJAX endpoints (list / get / create /
+		// update / delete / clear) behind the Comment Moderation screen. Each
+		// endpoint verifies a pinkcrab/wp-nonce token, runs the filterable
+		// capability check, sanitises the payload at the boundary, and
+		// responds with escaped JSON. This spec exercises that the bootstrap
+		// localises the nonce + ajaxUrl + ajaxActions onto the page, that a
+		// signed `create_rule` round-trips through wp-admin/admin-ajax.php
+		// and persists, and that an unsigned call to the same endpoint is
+		// rejected with the spec's security-check message.
+		await page.goto(
+			'/wp-admin/options-general.php?page=pinkcrab-comment-moderation'
+		);
+		await expect( page ).toHaveURL(
+			/options-general\.php\?page=pinkcrab-comment-moderation/
+		);
+		await expect(
+			page.getByRole( 'heading', {
+				name: /Comment Moderation/i,
+				level: 1,
+			} )
+		).toBeVisible();
+
+		// 1) The page bootstraps the new AJAX fields onto window so the Elm
+		//    app can authenticate its admin-ajax calls back to WordPress.
+		const bootstrap = await page.evaluate(
+			() =>
+				/** @type {any} */ ( window ).pccmAdminData || null
+		);
+		expect( bootstrap ).not.toBeNull();
+		expect( typeof bootstrap.ajaxUrl ).toBe( 'string' );
+		expect( bootstrap.ajaxUrl ).toMatch( /admin-ajax\.php$/ );
+		expect( typeof bootstrap.ajaxNonce ).toBe( 'string' );
+		expect( bootstrap.ajaxNonce.length ).toBeGreaterThan( 0 );
+		expect( bootstrap.ajaxActions ).toMatchObject( {
+			list: 'pinkcrab_comment_moderation_list_rules',
+			get: 'pinkcrab_comment_moderation_get_rule',
+			create: 'pinkcrab_comment_moderation_create_rule',
+			update: 'pinkcrab_comment_moderation_update_rule',
+			delete: 'pinkcrab_comment_moderation_delete_rule',
+			clear: 'pinkcrab_comment_moderation_clear_rules',
+		} );
+
+		// 2) Clear any rules a prior run may have left behind so the assertions
+		//    below own the table state.
+		await page.evaluate( async ( data ) => {
+			const params = new URLSearchParams();
+			params.set( 'action', data.ajaxActions.clear );
+			params.set( '_wpnonce', data.ajaxNonce );
+			await fetch( data.ajaxUrl, {
+				method: 'POST',
+				credentials: 'include',
+				body: params,
+			} );
+		}, bootstrap );
+
+		// 3) Signed `create_rule` POST goes through admin-ajax and reports
+		//    `success: true` with the Rule_Created message.
+		const created = await page.evaluate( async ( data ) => {
+			const params = new URLSearchParams();
+			params.set( 'action', data.ajaxActions.create );
+			params.set( '_wpnonce', data.ajaxNonce );
+			params.set( 'type', 'regex' );
+			params.set( 'name', 'E2E block casino' );
+			params.set( 'description', 'Created by playwright stage 20' );
+			params.set( 'pattern', '/casino/i' );
+			params.append( 'comment_parts[]', 'content' );
+			params.set( 'response', 'spam' );
+			const response = await fetch( data.ajaxUrl, {
+				method: 'POST',
+				credentials: 'include',
+				body: params,
+			} );
+			return response.json();
+		}, bootstrap );
+		expect(
+			created,
+			'create_rule should succeed'
+		).toEqual( expect.objectContaining( { success: true } ) );
+		expect( created.data.message ).toBe( 'Rule created' );
+		expect( created.data.rule ).toMatchObject( {
+			type: 'regex',
+			name: 'E2E block casino',
+			pattern: '/casino/i',
+			response: 'spam',
+		} );
+		const createdId = created.data.rule.id;
+		expect( typeof createdId ).toBe( 'number' );
+
+		// 4) Signed `list_rules` returns the rule + the pagination metadata
+		//    that drives the "Show More Rules" button.
+		const listed = await page.evaluate( async ( data ) => {
+			const params = new URLSearchParams();
+			params.set( 'action', data.ajaxActions.list );
+			params.set( '_wpnonce', data.ajaxNonce );
+			params.set( 'page', '1' );
+			const response = await fetch( data.ajaxUrl, {
+				method: 'POST',
+				credentials: 'include',
+				body: params,
+			} );
+			return response.json();
+		}, bootstrap );
+		expect( listed.success ).toBe( true );
+		expect( listed.data.page_size ).toBe( 25 );
+		expect( listed.data.total ).toBeGreaterThanOrEqual( 1 );
+		expect( listed.data.has_more ).toBe( false );
+		expect(
+			listed.data.rules.find(
+				( /** @type {any} */ rule ) => rule.id === createdId
+			)
+		).toBeTruthy();
+
+		// 5) Signed `get_rule` (the deep-link-to-edit path) returns the full
+		//    payload for the just-created id.
+		const fetched = await page.evaluate(
+			async ( { data, id } ) => {
+				const params = new URLSearchParams();
+				params.set( 'action', data.ajaxActions.get );
+				params.set( '_wpnonce', data.ajaxNonce );
+				params.set( 'id', String( id ) );
+				const response = await fetch( data.ajaxUrl, {
+					method: 'POST',
+					credentials: 'include',
+					body: params,
+				} );
+				return response.json();
+			},
+			{ data: bootstrap, id: createdId }
+		);
+		expect( fetched.success ).toBe( true );
+		expect( fetched.data.rule.id ).toBe( createdId );
+		expect( fetched.data.rule.pattern ).toBe( '/casino/i' );
+
+		// 6) An unsigned call to the same `create_rule` action is rejected
+		//    with the spec's security-check message — proves the nonce
+		//    preflight runs and the endpoint is not CSRFable.
+		const unsigned = await page.evaluate( async ( data ) => {
+			const params = new URLSearchParams();
+			params.set( 'action', data.ajaxActions.create );
+			params.set( 'type', 'regex' );
+			params.set( 'pattern', '/casino/i' );
+			params.append( 'comment_parts[]', 'content' );
+			params.set( 'response', 'spam' );
+			const response = await fetch( data.ajaxUrl, {
+				method: 'POST',
+				credentials: 'include',
+				body: params,
+			} );
+			return { status: response.status, body: await response.json() };
+		}, bootstrap );
+		expect( unsigned.body.success ).toBe( false );
+		expect( unsigned.body.data.message ).toBe( 'Security check failed.' );
+
+		// Capture the primary changed screen for the routine commit.
+		await page.screenshot( {
+			path: path.resolve(
+				__dirname,
+				'../../../../.karkinos/shots/stage-20.png'
+			),
+			fullPage: true,
+		} );
+	} );
 } );

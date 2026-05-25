@@ -21,6 +21,7 @@ declare( strict_types = 1 );
 namespace PinkCrab\Comment_Moderation\Presentation\Page;
 
 use PinkCrab\Comment_Moderation\Application\Settings\Plugin_Config;
+use PinkCrab\Comment_Moderation\Presentation\Ajax\Rule_Ajax_Controller;
 use PinkCrab\Perique_Admin_Menu\Page\Menu_Page;
 use PinkCrab\Perique_Admin_Menu\Page\Page;
 
@@ -170,6 +171,19 @@ final class Admin_Page extends Menu_Page {
 				'restNamespace' => $this->config->rest_namespace(),
 				'nonce'         => wp_create_nonce( 'wp_rest' ),
 				'pageSlug'      => self::PAGE_SLUG,
+				// Bootstrap for the stage-20 admin AJAX endpoints — the Elm app
+				// posts each request to `ajaxUrl` with `_wpnonce: ajaxNonce` so
+				// the controller's nonce + capability preflight can verify it.
+				'ajaxUrl'       => esc_url_raw( admin_url( 'admin-ajax.php' ) ),
+				'ajaxNonce'     => Rule_Ajax_Controller::create_nonce(),
+				'ajaxActions'   => array(
+					'list'   => Rule_Ajax_Controller::ACTION_LIST,
+					'get'    => Rule_Ajax_Controller::ACTION_GET,
+					'create' => Rule_Ajax_Controller::ACTION_CREATE,
+					'update' => Rule_Ajax_Controller::ACTION_UPDATE,
+					'delete' => Rule_Ajax_Controller::ACTION_DELETE,
+					'clear'  => Rule_Ajax_Controller::ACTION_CLEAR,
+				),
 			)
 		);
 	}

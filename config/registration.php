@@ -36,4 +36,8 @@ return array(
 	// an Elm-mount div and localises REST/nonce data for the Elm app.
 	\PinkCrab\Comment_Moderation\Presentation\Page\Admin_Page::class,
 
+	// Admin AJAX endpoints behind the management screen (rebuild spec §3,
+	// §6, §7, §8) — create / update / delete / clear / list / get.
+	\PinkCrab\Comment_Moderation\Presentation\Ajax\Rule_Ajax_Controller::class,
+
 );
