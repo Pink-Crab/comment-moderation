@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: ['##MIN_PHP_VERSION##', '8.2', '8.3']
+        php: ['8.0', '8.2', '8.3']
         wp: ['6.4', '6.5', 'latest']
 
     services:
@@ -71,7 +71,7 @@ jobs:
         run: composer coverage
 
       - name: Upload coverage
-        if: matrix.php == '##MIN_PHP_VERSION##' && matrix.wp == 'latest'
+        if: matrix.php == '8.0' && matrix.wp == 'latest'
         uses: actions/upload-artifact@v4
         with:
           name: coverage-clover

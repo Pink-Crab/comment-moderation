@@ -14,8 +14,8 @@
  * Examples are commented below — uncomment, adapt, or remove as needed.
  * See https://perique.info/ → DI for the full rule reference.
  *
- * @since   ##PLUGIN_VERSION##
- * @package ##NAMESPACE##
+ * @since   0.1.0
+ * @package PinkCrab\Comment_Moderation
  */
 
 declare( strict_types = 1 );
@@ -25,30 +25,30 @@ defined( 'ABSPATH' ) || exit;
 return array(
 
 	// 1. Interface / abstract binding (global).
-	// \##NAMESPACE##\Domain\Some_Interface::class => array(
-	//     'instanceOf' => \##NAMESPACE##\Infrastructure\Some_Implementation::class,
+	// \PinkCrab\Comment_Moderation\Domain\Some_Interface::class => array(
+	//     'instanceOf' => \PinkCrab\Comment_Moderation\Infrastructure\Some_Implementation::class,
 	// ),
 
 	// 2. Shared (singleton).
-	// \##NAMESPACE##\Application\Services\Cache_Service::class => array(
+	// \PinkCrab\Comment_Moderation\Application\Services\Cache_Service::class => array(
 	//     'shared' => true,
 	// ),
 
 	// 3. Per-consumer substitution — overrides global interface binding for
 	//    only this one class.
-	// \##NAMESPACE##\Application\Services\Foo_Service::class => array(
+	// \PinkCrab\Comment_Moderation\Application\Services\Foo_Service::class => array(
 	//     'substitutions' => array(
-	//         \##NAMESPACE##\Domain\Some_Interface::class
-	//             => \##NAMESPACE##\Infrastructure\Other_Implementation::class,
+	//         \PinkCrab\Comment_Moderation\Domain\Some_Interface::class
+	//             => \PinkCrab\Comment_Moderation\Infrastructure\Other_Implementation::class,
 	//     ),
 	// ),
 
 	// 4. Constructor arguments (mix of scalars + container references).
-	// \##NAMESPACE##\Application\Services\Api_Client::class => array(
+	// \PinkCrab\Comment_Moderation\Application\Services\Api_Client::class => array(
 	//     'shared'          => true,
 	//     'constructParams' => array(
 	//         'https://api.example.com',
-	//         array( \Dice\Dice::CONSTANT => '##CONSTANT_PREFIX##VERSION' ),
+	//         array( \Dice\Dice::CONSTANT => 'PINKCRAB_COMMENT_MODERATION_VERSION' ),
 	//     ),
 	// ),
 

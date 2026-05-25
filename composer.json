@@ -1,14 +1,14 @@
 {
-	"name": "##COMPOSER_PACKAGE##",
+	"name": "pinkcrab/comment-moderation",
 	"type": "wordpress-plugin",
-	"description": "##PLUGIN_DESCRIPTION##",
-	"homepage": "##PLUGIN_URI##",
-	"license": "##LICENSE##",
+	"description": "Rule-based comment moderation engine for WordPress.",
+	"homepage": "https://github.com/Pink-Crab/comment-moderation",
+	"license": "GPL-3.0-or-later",
 	"authors": [
 		{
-			"name": "##AUTHOR_NAME##",
-			"email": "##AUTHOR_EMAIL##",
-			"homepage": "##AUTHOR_URI##"
+			"name": "PinkCrab",
+			"email": "hello@pinkcrab.co.uk",
+			"homepage": "https://github.com/Pink-Crab"
 		}
 	],
 	"repositories": [
@@ -26,7 +26,7 @@
 		}
 	],
 	"require": {
-		"php": ">=##MIN_PHP_VERSION##",
+		"php": ">=8.0",
 		"ext-json": "*",
 		"pinkcrab/perique-framework-core": "^2.1",
 		"webmozart/assert": "^1.11"
@@ -46,12 +46,13 @@
 	},
 	"autoload": {
 		"psr-4": {
-			"##NAMESPACE_ESCAPED##\\": ["src/", "migrations/"]
+			"PinkCrab\\Comment_Moderation\\": "src/",
+			"PinkCrab\\Comment_Moderation\\Migration\\": "migrations/"
 		}
 	},
 	"autoload-dev": {
 		"psr-4": {
-			"##NAMESPACE_ESCAPED##\\Tests\\": "tests/"
+			"PinkCrab\\Comment_Moderation\\Tests\\": "tests/"
 		}
 	},
 	"scripts": {

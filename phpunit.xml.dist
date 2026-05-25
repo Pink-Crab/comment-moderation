@@ -9,7 +9,7 @@
 
 	<testsuites>
 		<!-- Default suite (composer test): everything. -->
-		<testsuite name="##PLUGIN_SLUG##">
+		<testsuite name="pinkcrab-comment-moderation">
 			<directory prefix="Test_" suffix=".php">./tests/Unit</directory>
 			<directory prefix="Test_" suffix=".php">./tests/Integration</directory>
 		</testsuite>

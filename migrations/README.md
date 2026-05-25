@@ -2,7 +2,7 @@
 
 Database schema migrations live here. The scaffold ships **core Perique only**,
 so the migrations module is NOT enabled out of the box. The folder, its PSR-4
-mapping in [composer.json](../composer.json) (`"##NAMESPACE##\\": ["src/", "migrations/"]`),
+mapping in [composer.json](../composer.json) (`"PinkCrab\Comment_Moderation\\": ["src/", "migrations/"]`),
 and its `.gitkeep` are committed so it's a one-step add when you need it.
 
 ## Enabling the migration module
@@ -22,20 +22,20 @@ hooks into activation/deactivation/uninstall to create/seed/drop tables.
    ```php
    use PinkCrab\Plugin_Lifecycle\Module\Plugin_Life_Cycle;
    use PinkCrab\Perique\Migration\Module\Perique_Migrations;
-   use ##NAMESPACE##\Create_Things_Table; // your migration class
+   use PinkCrab\Comment_Moderation\Create_Things_Table; // your migration class
 
-   ( new App_Factory( ##CONSTANT_PREFIX##PATH ) )
+   ( new App_Factory( PINKCRAB_COMMENT_MODERATION_PATH ) )
        ->default_setup()
        // ...
        ->module(
            Plugin_Life_Cycle::class,
            fn( Plugin_Life_Cycle $m ): Plugin_Life_Cycle => $m
-               ->plugin_base_file( ##CONSTANT_PREFIX##PATH . '##PLUGIN_SLUG##.php' )
+               ->plugin_base_file( PINKCRAB_COMMENT_MODERATION_PATH . 'pinkcrab-comment-moderation.php' )
        )
        ->module(
            Perique_Migrations::class,
            fn( Perique_Migrations $m ): Perique_Migrations => $m
-               ->set_migration_log_key( '##FUNCTION_PREFIX##migrations' )
+               ->set_migration_log_key( 'pinkcrab_comment_moderation_migrations' )
                ->add_migration( Create_Things_Table::class )
        )
        ->boot();
@@ -46,7 +46,7 @@ hooks into activation/deactivation/uninstall to create/seed/drop tables.
 
    ```php
    <?php
-   namespace ##NAMESPACE##;
+   namespace PinkCrab\Comment_Moderation;
 
    use PinkCrab\Perique\Application\App_Config;
    use PinkCrab\Perique\Migration\Migration;
@@ -84,7 +84,7 @@ hooks into activation/deactivation/uninstall to create/seed/drop tables.
 
    ```php
    'db_tables' => array(
-       'things' => $GLOBALS['wpdb']->prefix . '##FUNCTION_PREFIX##things',
+       'things' => $GLOBALS['wpdb']->prefix . 'pinkcrab_comment_moderation_things',
    ),
    ```
 

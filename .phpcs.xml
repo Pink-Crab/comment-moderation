@@ -1,6 +1,11 @@
 <?xml version="1.0"?>
-<ruleset name="##PLUGIN_NAME##" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="vendor/squizlabs/php_codesniffer/phpcs.xsd">
-	<description>Coding standard ruleset for ##PLUGIN_NAME##.</description>
+<ruleset name="PinkCrab Comment Moderation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="vendor/squizlabs/php_codesniffer/phpcs.xsd">
+	<description>Coding standard ruleset for PinkCrab Comment Moderation.</description>
+
+	<!-- Files / directories scanned. -->
+	<file>src</file>
+	<file>views</file>
+	<file>migrations</file>
 
 	<!-- Paths excluded from scanning. -->
 	<exclude-pattern>/vendor/*</exclude-pattern>
@@ -19,7 +24,7 @@
 	<rule ref="WordPress.WP.I18n">
 		<properties>
 			<property name="text_domain" type="array">
-				<element value="##TEXT_DOMAIN##"/>
+				<element value="pinkcrab-comment-moderation"/>
 			</property>
 		</properties>
 	</rule>
@@ -28,9 +33,9 @@
 	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
 		<properties>
 			<property name="prefixes" type="array">
-				<element value="##FUNCTION_PREFIX##"/>
-				<element value="##CONSTANT_PREFIX##"/>
-				<element value="##NAMESPACE##"/>
+				<element value="pinkcrab_comment_moderation"/>
+				<element value="PINKCRAB_COMMENT_MODERATION_"/>
+				<element value="PinkCrab\Comment_Moderation"/>
 			</property>
 		</properties>
 	</rule>

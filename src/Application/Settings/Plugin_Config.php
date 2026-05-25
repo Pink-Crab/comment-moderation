@@ -2,13 +2,13 @@
 /**
  * Plugin_Config — typed accessor over Perique's App_Config.
  *
- * @since   ##PLUGIN_VERSION##
- * @package ##NAMESPACE##\Application\Settings
+ * @since   0.1.0
+ * @package PinkCrab\Comment_Moderation\Application\Settings
  */
 
 declare( strict_types = 1 );
 
-namespace ##NAMESPACE##\Application\Settings;
+namespace PinkCrab\Comment_Moderation\Application\Settings;
 
 use PinkCrab\Perique\Application\App_Config;
 
@@ -31,7 +31,7 @@ final class Plugin_Config {
 	 * accessible without instantiating, and so phpstan can prove the value
 	 * is always a string literal.
 	 */
-	public const TEXT_DOMAIN = '##TEXT_DOMAIN##';
+	public const TEXT_DOMAIN = 'pinkcrab-comment-moderation';
 
 	public function __construct(
 		private App_Config $app_config

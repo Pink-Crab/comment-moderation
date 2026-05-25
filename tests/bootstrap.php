@@ -15,7 +15,7 @@
  *   - The plugin is activated through `activate_plugin()` inside
  *     `muplugins_loaded` — the same path WordPress would take in production.
  *
- * @package ##NAMESPACE##\Tests
+ * @package PinkCrab\Comment_Moderation\Tests
  */
 
 declare( strict_types = 1 );
@@ -47,13 +47,14 @@ if ( ! is_dir( $_phpunit_dir ) ) {
 require_once $_phpunit_dir . '/includes/functions.php';
 
 // Activate the plugin during WP's load sequence so Perique boots and registers
-// before any test method runs. We look up the slug at runtime so this file
-// survives renames after scaffold-init.
+// before any test method runs. The plugin directory is discovered at runtime
+// — the same checkout works whether it's cloned to `pinkcrab-comment-moderation/`
+// locally or `issue-<N>/` under the CI/routine layout.
 tests_add_filter(
 	'muplugins_loaded',
 	static function (): void {
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		activate_plugin( '##PLUGIN_SLUG##/##PLUGIN_SLUG##.php' );
+		activate_plugin( basename( dirname( __DIR__ ) ) . '/pinkcrab-comment-moderation.php' );
 	}
 );
 

@@ -2,23 +2,23 @@
 /**
  * Hello_World — example Hookable.
  *
- * @since   ##PLUGIN_VERSION##
- * @package ##NAMESPACE##\Presentation\Hook
+ * @since   0.1.0
+ * @package PinkCrab\Comment_Moderation\Presentation\Hook
  */
 
 declare( strict_types = 1 );
 
-namespace ##NAMESPACE##\Presentation\Hook;
+namespace PinkCrab\Comment_Moderation\Presentation\Hook;
 
 use PinkCrab\Loader\Hook_Loader;
 use PinkCrab\Perique\Interfaces\Hookable;
 use PinkCrab\Perique\Services\View\View;
 use Webmozart\Assert\Assert;
-use ##NAMESPACE##\Application\Settings\Plugin_Config;
-use ##NAMESPACE##\Presentation\View\Component\Hello_World_Component;
+use PinkCrab\Comment_Moderation\Application\Settings\Plugin_Config;
+use PinkCrab\Comment_Moderation\Presentation\View\Component\Hello_World_Component;
 
 /**
- * The one example feature: a `[##FUNCTION_PREFIX##hello name="…"]` shortcode
+ * The one example feature: a `[pinkcrab_comment_moderation_hello name="…"]` shortcode
  * that renders the Hello_World_Component template, plus matching front-end
  * script + style enqueueing.
  *
@@ -36,8 +36,8 @@ use ##NAMESPACE##\Presentation\View\Component\Hello_World_Component;
  */
 final class Hello_World implements Hookable {
 
-	private const SHORTCODE_TAG = '##FUNCTION_PREFIX##hello';
-	private const ASSET_HANDLE  = '##PLUGIN_SLUG##-hello-world';
+	private const SHORTCODE_TAG = 'pinkcrab_comment_moderation_hello';
+	private const ASSET_HANDLE  = 'pinkcrab-comment-moderation-hello-world';
 
 	public function __construct(
 		private View $view,
@@ -68,7 +68,7 @@ final class Hello_World implements Hookable {
 
 		// Validate via the bundled, scoped third-party — proves the build's
 		// scoper rewrote `Webmozart\Assert\Assert` to
-		// `##NAMESPACE##\Vendor\Webmozart\Assert\Assert` in dist/ without
+		// `PinkCrab\Comment_Moderation\Vendor\Webmozart\Assert\Assert` in dist/ without
 		// breaking anything here in src/.
 		Assert::string( $atts['name'] );
 

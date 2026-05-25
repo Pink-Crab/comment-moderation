@@ -9,17 +9,17 @@
  * Do NOT require this file at runtime — the real values are set by the main
  * plugin file's `define()` calls.
  *
- * @since   ##PLUGIN_VERSION##
- * @package ##NAMESPACE##
+ * @since   0.1.0
+ * @package PinkCrab\Comment_Moderation
  */
 
 declare( strict_types = 1 );
 
-const ##CONSTANT_PREFIX##BASENAME = '';
-const ##CONSTANT_PREFIX##PATH     = '';
-const ##CONSTANT_PREFIX##URL      = '';
-const ##CONSTANT_PREFIX##VERSION  = '';
-const ##CONSTANT_PREFIX##MINIMUM_VERSIONS = array(
+const PINKCRAB_COMMENT_MODERATION_BASENAME = '';
+const PINKCRAB_COMMENT_MODERATION_PATH     = '';
+const PINKCRAB_COMMENT_MODERATION_URL      = '';
+const PINKCRAB_COMMENT_MODERATION_VERSION  = '';
+const PINKCRAB_COMMENT_MODERATION_MINIMUM_VERSIONS = array(
 	'wp'  => '',
 	'php' => '',
 );

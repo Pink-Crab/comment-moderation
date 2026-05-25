@@ -10,7 +10,7 @@
  * actually need.
  */
 
-const SELECTOR = '.##PLUGIN_SLUG##-hello-world';
+const SELECTOR = '.pinkcrab-comment-moderation-hello-world';
 
 const mount = () => {
 	document.querySelectorAll( SELECTOR ).forEach( ( el ) => {

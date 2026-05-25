@@ -2,16 +2,16 @@
 /**
  * Plugin_Config unit tests.
  *
- * @package ##NAMESPACE##\Tests\Unit\Application\Settings
+ * @package PinkCrab\Comment_Moderation\Tests\Unit\Application\Settings
  */
 
 declare( strict_types = 1 );
 
-namespace ##NAMESPACE##\Tests\Unit\Application\Settings;
+namespace PinkCrab\Comment_Moderation\Tests\Unit\Application\Settings;
 
 use PinkCrab\Perique\Application\App_Config;
 use WP_UnitTestCase;
-use ##NAMESPACE##\Application\Settings\Plugin_Config;
+use PinkCrab\Comment_Moderation\Application\Settings\Plugin_Config;
 
 /**
  * Proves the test harness boots, the autoloader resolves the namespace, and
@@ -86,8 +86,9 @@ class Test_Plugin_Config extends WP_UnitTestCase {
 	public function test_asset_url_returns_base_when_no_relative_path(): void {
 		$config = new Plugin_Config( $this->make_app_config() );
 
+		// App_Config (Perique ^2.1) trailing-slashes url/path getters.
 		$this->assertSame(
-			'https://example.org/wp-content/plugins/my-plugin/assets/build',
+			'https://example.org/wp-content/plugins/my-plugin/assets/build/',
 			$config->asset_url()
 		);
 	}
@@ -123,6 +124,6 @@ class Test_Plugin_Config extends WP_UnitTestCase {
 	public function test_view_path_returns_configured_value(): void {
 		$config = new Plugin_Config( $this->make_app_config() );
 
-		$this->assertSame( '/var/www/plugin/views', $config->view_path() );
+		$this->assertSame( '/var/www/plugin/views/', $config->view_path() );
 	}
 }

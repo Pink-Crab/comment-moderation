@@ -2,14 +2,12 @@ includes:
     - vendor/a8cteam51/team51-configs/quality-assurance/phpstan.dist.neon
 
 parameters:
+    level: 8
     bootstrapFiles:
         - type-defs.php
     paths:
         - src
-        - tests
-        - config
-        - functions.php
-        - perique-bootstrap.php
+        - migrations
     excludePaths:
         - vendor
         - node_modules

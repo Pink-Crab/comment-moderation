@@ -9,7 +9,7 @@
  * DB credentials come from env vars (typically populated from tests/.env;
  * see tests/.env_sample for the template).
  *
- * @package ##NAMESPACE##\Tests
+ * @package PinkCrab\Comment_Moderation\Tests
  */
 
 declare( strict_types = 1 );
@@ -19,7 +19,7 @@ declare( strict_types = 1 );
 define( 'ABSPATH', dirname( __DIR__ ) . '/wordpress/' );
 
 // WP_PLUGIN_DIR points at the directory that CONTAINS our plugin folder, so
-// activate_plugin('##PLUGIN_SLUG##/##PLUGIN_SLUG##.php') in tests/bootstrap.php
+// activate_plugin('pinkcrab-comment-moderation/pinkcrab-comment-moderation.php') in tests/bootstrap.php
 // resolves to this plugin's real on-disk location — not the wp-phpunit
 // install's empty plugins folder.
 define( 'WP_PLUGIN_DIR', dirname( __DIR__, 2 ) );
@@ -37,7 +37,7 @@ $table_prefix = getenv( 'WP_TESTS_TABLE_PREFIX' ) ?: 'wptests_';
 
 define( 'WP_TESTS_DOMAIN', 'example.org' );
 define( 'WP_TESTS_EMAIL',  'admin@example.org' );
-define( 'WP_TESTS_TITLE',  '##PLUGIN_NAME## Tests' );
+define( 'WP_TESTS_TITLE',  'PinkCrab Comment Moderation Tests' );
 
 define( 'WP_PHP_BINARY', 'php' );
 

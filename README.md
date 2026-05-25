@@ -13,7 +13,7 @@ Opinionated starter template for WordPress plugins built on the
 |-------------------|------------------------------------------------------------------------------------------------------------------|
 | Bootstrap         | `App_Factory` wiring in `perique-bootstrap.php`, pre-autoload requirement checks inline in the main plugin file. |
 | Architecture      | Clean-layered `src/Application`, `src/Domain`, `src/Infrastructure`, `src/Presentation`.                         |
-| Example feature   | `[##FUNCTION_PREFIX##hello]` shortcode → Hookable → Component → template. Exercises DI, View, and asset pipeline. |
+| Example feature   | `[pinkcrab_comment_moderation_hello]` shortcode → Hookable → Component → template. Exercises DI, View, and asset pipeline. |
 | Configs           | `config/{settings,di,registration}.php` triplet.                                                                 |
 | Quality           | `team51-configs` extension for phpstan, phpcs, phpmd. `type-defs.php` constant stubs for static analysis.        |
 | Tests             | PHPUnit + WP-PHPUnit bootstrap, one passing example unit test with `@testdox`.                                    |
@@ -62,7 +62,7 @@ npm run build
 ```
 
 Activate the plugin in WordPress. Visit any page with
-`[##FUNCTION_PREFIX##hello name="…"]` in its content to confirm the full
+`[pinkcrab_comment_moderation_hello name="…"]` in its content to confirm the full
 pipeline (shortcode → Hookable → Component → template + script + style)
 works end-to-end.
 
@@ -80,15 +80,15 @@ once token substitution has happened. The setup script itself uses
 Defined in [.scaffold/manifest.json](.scaffold/manifest.json). See the
 manifest's inline `label` / `description` / `example` / `validate` fields.
 
-Required: `##PLUGIN_NAME##`, `##PLUGIN_SLUG##`, `##PLUGIN_DESCRIPTION##`,
-`##NAMESPACE##`, `##COMPOSER_PACKAGE##`, `##AUTHOR_NAME##`.
+Required: `PinkCrab Comment Moderation`, `pinkcrab-comment-moderation`, `Rule-based comment moderation engine for WordPress.`,
+`PinkCrab\Comment_Moderation`, `pinkcrab/comment-moderation`, `PinkCrab`.
 
-Auto-derived (no prompt): `##NAMESPACE_ESCAPED##` (composer.json's `\\`
-form), `##YEAR##` (current year).
+Auto-derived (no prompt): `PinkCrab\\Comment_Moderation` (composer.json's `\\`
+form), `2026` (current year).
 
-Defaulted from another token: `##PLUGIN_SLUG##` (kebab of name),
-`##TEXT_DOMAIN##` (= slug), `##FUNCTION_PREFIX##` (slug snake_case + `_`),
-`##CONSTANT_PREFIX##` (function prefix uppercased), `##REST_NAMESPACE##`
+Defaulted from another token: `pinkcrab-comment-moderation` (kebab of name),
+`pinkcrab-comment-moderation` (= slug), `pinkcrab_comment_moderation_` (slug snake_case + `_`),
+`PINKCRAB_COMMENT_MODERATION_` (function prefix uppercased), `pinkcrab-comment-moderation/v1`
 (slug + `/v1`).
 
 ## License

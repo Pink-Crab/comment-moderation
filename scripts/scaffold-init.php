@@ -292,7 +292,7 @@ if ( ! empty( $manifest['renames'] ) && is_array( $manifest['renames'] ) ) {
 			continue;
 		}
 		// `from` is the LITERAL filesystem path — the file is named with the
-		// placeholder still present (e.g. `##PLUGIN_SLUG##.php` on disk).
+		// placeholder still present (e.g. `pinkcrab-comment-moderation.php` on disk).
 		// `to` is templated and gets resolved to the final filename.
 		$from = $root_real . '/' . $from_template;
 		$to   = $root_real . '/' . replace_tokens( $to_template, $resolved );
@@ -417,7 +417,7 @@ if ( $is_dry_run ) {
 	echo "  1. composer install\n";
 	echo "  2. npm install\n";
 	echo "  3. npm run build\n";
-	echo "  4. Activate the plugin in WordPress and visit a page with [" . ( $resolved['##FUNCTION_PREFIX##'] ?? 'plugin_prefix_' ) . "hello name=\"You\"]\n";
+	echo "  4. Activate the plugin in WordPress and visit a page with [" . ( $resolved['pinkcrab_comment_moderation_'] ?? 'plugin_prefix_' ) . "hello name=\"You\"]\n";
 }
 
 exit( 0 );

@@ -1,29 +1,33 @@
 {
-	"name": "##PLUGIN_SLUG##",
-	"version": "##PLUGIN_VERSION##",
-	"description": "##PLUGIN_DESCRIPTION##",
+	"name": "pinkcrab-comment-moderation",
+	"version": "0.1.0",
+	"description": "Rule-based comment moderation engine for WordPress.",
 	"author": {
-		"name": "##AUTHOR_NAME##",
-		"homepage": "##AUTHOR_URI##"
+		"name": "PinkCrab",
+		"homepage": "https://github.com/Pink-Crab"
 	},
-	"license": "##LICENSE##",
+	"license": "GPL-2.0-or-later",
 	"keywords": [
 		"wordpress",
 		"perique"
 	],
-	"homepage": "##PLUGIN_URI##",
-	"repository": "##PLUGIN_URI##",
-	"bugs": "##PLUGIN_URI##/issues",
+	"homepage": "https://github.com/Pink-Crab/comment-moderation",
+	"repository": "https://github.com/Pink-Crab/comment-moderation",
+	"bugs": "https://github.com/Pink-Crab/comment-moderation/issues",
 	"engines": {
 		"node": ">=20.0",
 		"npm": ">=10.0"
 	},
-	"dependencies": {},
 	"devDependencies": {
 		"@csstools/postcss-sass": "^5.0.1",
 		"@wordpress/browserslist-config": "^6.8.1",
 		"@wordpress/postcss-plugins-preset": "^5.8.3",
 		"@wordpress/scripts": "^30.0.6",
+		"eslint-config-prettier": "^10.1.8",
+		"eslint-plugin-import": "^2.32.0",
+		"eslint-plugin-jest": "^29.15.2",
+		"eslint-plugin-jsdoc": "^63.0.0",
+		"eslint-plugin-prettier": "^5.5.5",
 		"npm-run-all": "^4.1.5",
 		"postcss-cli": "^10.1.0"
 	},

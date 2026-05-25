@@ -20,7 +20,7 @@
  * src/ files keep their original namespace and only their references to
  * vendor classes get rewritten.
  *
- * @package ##NAMESPACE##
+ * @package PinkCrab\Comment_Moderation
  */
 
 declare( strict_types = 1 );
@@ -69,14 +69,15 @@ $finders = array(
 // Example — a plugin that integrates with WooCommerce + ACF:
 //
 //   return PHP_Scoper_Helper::for_wordpress( 'woocommerce', 'acf-pro' )
-//       ->prefix( '##NAMESPACE##\\Vendor' )
+//       ->prefix( 'PinkCrab\\Comment_Moderation\\Vendor' )
 //       ...
 //
 // Or point at any other stub file directly with `->with( $path )`:
 //
 //   ->with( __DIR__ . '/stubs/my-third-party.php' )
 return PHP_Scoper_Helper::for_wordpress()
-	->prefix( '##NAMESPACE##\\Vendor' )
+	->prefix( 'PinkCrab\\Comment_Moderation\\Vendor' )
 	->finders( $finders )
 	->first_party_from_composer( __DIR__ . '/composer.json' )
+	->with_namespaces( 'PinkCrab\\Comment_Moderation' )
 	->config();

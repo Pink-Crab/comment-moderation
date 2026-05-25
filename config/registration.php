@@ -15,8 +15,8 @@
  * Migrations) registers additional middleware and lets you list the matching
  * class types here too (Post_Type, Route_Controller, Menu_Page, etc.).
  *
- * @since   ##PLUGIN_VERSION##
- * @package ##NAMESPACE##
+ * @since   0.1.0
+ * @package PinkCrab\Comment_Moderation
  */
 
 declare( strict_types = 1 );
@@ -26,6 +26,6 @@ defined( 'ABSPATH' ) || exit;
 return array(
 
 	// Hookables (core middleware — no module required).
-	\##NAMESPACE##\Presentation\Hook\Hello_World::class,
+	\PinkCrab\Comment_Moderation\Presentation\Hook\Hello_World::class,
 
 );

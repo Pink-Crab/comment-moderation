@@ -1,18 +1,12 @@
-// Hello_World shortcode styles.
-//
-// Compiled by PostCSS (entry in package.json's build:styles) from
-// assets/src/styles/hello-world.scss → assets/build/styles/hello-world.css.
-// Enqueued by src/Presentation/Hook/Hello_World.php::enqueue_assets().
-
-.##PLUGIN_SLUG##-hello-world {
+.pinkcrab-comment-moderation-hello-world {
 	padding: 0.5em 1em;
-	border: 1px solid currentColor;
+	border: 1px solid currentcolor;
 	border-radius: 4px;
 	font-family: system-ui, sans-serif;
 
 	// The `is-mounted` class is added by hello-world.js once the DOM is
 	// ready — proves the JS pipeline is wired up end-to-end.
 	&.is-mounted {
-		color: rebeccapurple;
+		color: #639;
 	}
 }

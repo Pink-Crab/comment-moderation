@@ -2,7 +2,7 @@
 
 Top-level `views/` is the default Perique view path. `App_Factory::default_setup()`
 sets it to `{base_path}/views`, which `perique-bootstrap.php` resolves to this
-folder via `new App_Factory( ##CONSTANT_PREFIX##PATH )`. You can override it in
+folder via `new App_Factory( PINKCRAB_COMMENT_MODERATION_PATH )`. You can override it in
 `config/settings.php` (`path.view` / `url.view`) if you need to.
 
 ## Layout

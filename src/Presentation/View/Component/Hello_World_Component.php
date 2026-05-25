@@ -2,15 +2,15 @@
 /**
  * Hello_World_Component — a minimal Perique Component.
  *
- * @since   ##PLUGIN_VERSION##
- * @package ##NAMESPACE##\Presentation\View\Component
+ * @since   0.1.0
+ * @package PinkCrab\Comment_Moderation\Presentation\View\Component
  */
 
 declare( strict_types = 1 );
 
-namespace ##NAMESPACE##\Presentation\View\Component;
+namespace PinkCrab\Comment_Moderation\Presentation\View\Component;
 
-use PinkCrab\Perique\Services\View\Component;
+use PinkCrab\Perique\Services\View\Component\Component;
 
 /**
  * Demonstrates the View Component pattern.

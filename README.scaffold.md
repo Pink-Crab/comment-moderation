@@ -1,10 +1,10 @@
-# ##PLUGIN_NAME##
+# PinkCrab Comment Moderation
 
-##PLUGIN_DESCRIPTION##
+Rule-based comment moderation engine for WordPress.
 
-- **Requires WordPress:** ##MIN_WP_VERSION##
-- **Requires PHP:** ##MIN_PHP_VERSION##
-- **License:** ##LICENSE##
+- **Requires WordPress:** 6.0
+- **Requires PHP:** 8.0
+- **License:** GPLv3
 
 Built on the [PinkCrab Perique](https://perique.info/) framework.
 
@@ -43,7 +43,7 @@ Source lives under [assets/src/](assets/src/) (`scripts/`, `styles/`).
 
 `composer build` produces a scoped, `--no-dev` release into `dist/`. Every
 PHP class, function, and constant inside `vendor/` is prefixed with
-`##NAMESPACE##\Vendor`, so this plugin's bundled dependencies cannot
+`PinkCrab\Comment_Moderation\Vendor`, so this plugin's bundled dependencies cannot
 collide with another plugin's at runtime — even if both ship the same
 library at different versions.
 
@@ -87,8 +87,8 @@ the shortcode end-to-end).
 ## Project structure
 
 ```
-##PLUGIN_SLUG##/
-├── ##PLUGIN_SLUG##.php       # WordPress plugin entry — header, constants, requirement checks
+pinkcrab-comment-moderation/
+├── pinkcrab-comment-moderation.php       # WordPress plugin entry — header, constants, requirement checks
 ├── functions.php             # Prefixed helper functions (loaded BEFORE Perique boots)
 ├── perique-bootstrap.php     # App_Factory()->...->boot()
 ├── type-defs.php             # Constant stubs for phpstan
@@ -125,4 +125,4 @@ for the catalogue.
 
 ## License
 
-##LICENSE##. See [LICENSE](LICENSE).
+GPLv3. See [LICENSE](LICENSE).
