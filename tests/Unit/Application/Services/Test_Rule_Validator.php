@@ -202,6 +202,22 @@ class Test_Rule_Validator extends WP_UnitTestCase {
 		$this->assertContains( 'Wildcard rules has no fields selected.', $result->errors() );
 	}
 
+	/**
+	 * @testdox It should be possible to reject a wildcard rule whose ticked comment parts include an unknown token
+	 */
+	public function test_wildcard_unknown_comment_part_fails(): void {
+		$result = $this->validator->validate(
+			array(
+				'type'          => 'wildcard',
+				'pattern'       => '*foo*',
+				'comment_parts' => array( 'email', 'banana' ),
+			)
+		);
+
+		$this->assertFalse( $result->is_valid() );
+		$this->assertContains( 'Unknown comment part: "banana".', $result->errors() );
+	}
+
 	// ---------------------------------------------------------------------
 	// IP Range
 	// ---------------------------------------------------------------------
@@ -561,6 +577,56 @@ class Test_Rule_Validator extends WP_UnitTestCase {
 		$this->assertFalse( $result->is_valid() );
 		$this->assertContains(
 			'Condition #1: "/[broken/" is not a valid regex expression.',
+			$result->errors()
+		);
+	}
+
+	/**
+	 * @testdox It should be possible to reject a conditional rule whose DOES NOT MATCH leaf carries an uncompilable regex
+	 */
+	public function test_conditional_does_not_match_value_must_be_valid_regex(): void {
+		$result = $this->validator->validate(
+			array(
+				'type' => 'conditional',
+				'root' => array(
+					'combinator' => 'and',
+					'children'   => array(
+						array(
+							'part'     => 'content',
+							'operator' => 'does_not_match',
+							'value'    => '/[broken/',
+						),
+					),
+				),
+			)
+		);
+
+		$this->assertFalse( $result->is_valid() );
+		$this->assertContains(
+			'Condition #1: "/[broken/" is not a valid regex expression.',
+			$result->errors()
+		);
+	}
+
+	/**
+	 * @testdox It should be possible to reject a conditional rule whose child node is not an array
+	 */
+	public function test_conditional_malformed_child_node_fails(): void {
+		$result = $this->validator->validate(
+			array(
+				'type' => 'conditional',
+				'root' => array(
+					'combinator' => 'and',
+					'children'   => array(
+						'not-an-array',
+					),
+				),
+			)
+		);
+
+		$this->assertFalse( $result->is_valid() );
+		$this->assertContains(
+			'Condition #1: malformed condition entry.',
 			$result->errors()
 		);
 	}
