@@ -187,6 +187,32 @@ test.describe( 'admin scaffold', () => {
 		} );
 	} );
 
+	test( 'plugin remains active after Stage 18 engine integration tests land', async ( {
+		page,
+	} ) => {
+		// Stage 18 only adds PHPUnit integration coverage for the Stage 17
+		// Comment_Engine — first-match-wins ordering, pingback/trackback
+		// pass-through, fail-safe handling of a malformed rule, and the
+		// no-match transparency contract. No production code changes, no
+		// admin wiring, no UI. The available end-to-end claim is therefore
+		// unchanged from prior pre-UI stages: the plugin still autoloads and
+		// WordPress reports it as active. The engine's behavioural coverage
+		// itself lives in tests/Integration/Engine/Test_Comment_Engine.php.
+		await page.goto( '/wp-admin/plugins.php' );
+		await expect( page ).toHaveURL( /plugins\.php/ );
+		await expect(
+			page.getByRole( 'row', { name: /PinkCrab Comment Moderation/i } )
+		).toBeVisible();
+
+		await page.screenshot( {
+			path: path.resolve(
+				__dirname,
+				'../../../../.karkinos/shots/stage-18.png'
+			),
+			fullPage: true,
+		} );
+	} );
+
 	test( 'plugin remains active after Stage 16 rule-evaluator unit tests land', async ( {
 		page,
 	} ) => {

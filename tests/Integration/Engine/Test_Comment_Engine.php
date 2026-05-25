@@ -472,4 +472,80 @@ class Test_Comment_Engine extends WP_UnitTestCase {
 		$this->assertNotNull( $reloaded );
 		$this->assertSame( 1, $reloaded->usage_stats()->times_used() );
 	}
+
+	/**
+	 * @testdox It should treat a malformed regex rule as a no-fire and keep walking the list so a later valid rule still matches
+	 */
+	public function test_malformed_rule_is_fail_safe_and_does_not_block_remaining_rules(): void {
+		// Rebuild spec §4 fail-safe: an unrunnable PCRE must not abort the
+		// engine — the rule is treated as "passed" and the next rule is given
+		// its turn. Regex_Rule's constructor only forbids an empty pattern, so
+		// a syntactically broken delimiter pair persists to the DB cleanly and
+		// blows up at preg_match() time, exactly as a real misconfigured rule
+		// would in production.
+		$broken = $this->repo->save(
+			new Regex_Rule(
+				null,
+				'Broken regex',
+				null,
+				'/[unterminated',
+				Comment_Parts::of( Comment_Part::content() ),
+				Response::trash(),
+				$this->fresh_stats()
+			)
+		);
+		$valid  = $this->repo->save(
+			new Wildcard_Rule(
+				null,
+				'Block spam domain',
+				null,
+				'*@spam-domain.tld',
+				Comment_Parts::of( Comment_Part::email() ),
+				Response::spam(),
+				$this->fresh_stats()
+			)
+		);
+
+		$result = $this->engine->filter_pre_comment_approved(
+			1,
+			$this->commentdata( array( 'comment_author_email' => 'bob@spam-domain.tld' ) )
+		);
+
+		$this->assertSame(
+			'spam',
+			$result,
+			'Malformed rule must fail-safe to "did not fire" so the next valid rule still gets a chance to match (spec §4 / §9.5).'
+		);
+
+		$broken_reloaded = $this->repo->find( (int) $broken->id() );
+		$valid_reloaded  = $this->repo->find( (int) $valid->id() );
+		$this->assertNotNull( $broken_reloaded );
+		$this->assertNotNull( $valid_reloaded );
+		$this->assertSame( 0, $broken_reloaded->usage_stats()->times_used(), 'Fail-safe path must not credit the broken rule with a hit.' );
+		$this->assertSame( 1, $valid_reloaded->usage_stats()->times_used(), 'The later valid rule is the one that fired and its stats must reflect that.' );
+	}
+
+	/**
+	 * @testdox It should fail-safe to "no rule fired" when the only rule errors and pass the original approval through
+	 */
+	public function test_malformed_only_rule_returns_original_approval(): void {
+		// Same fail-safe contract as above, but here the broken rule is the
+		// only rule on the site: the engine must return WordPress's original
+		// approval untouched rather than accidentally diverting every comment.
+		$this->repo->save(
+			new Regex_Rule(
+				null,
+				'Broken regex',
+				null,
+				'/[unterminated',
+				Comment_Parts::of( Comment_Part::content() ),
+				Response::trash(),
+				$this->fresh_stats()
+			)
+		);
+
+		$result = $this->engine->filter_pre_comment_approved( 1, $this->commentdata() );
+
+		$this->assertSame( 1, $result, 'A site whose only rule is malformed must still let legitimate comments through (spec §4 fail-safe).' );
+	}
 }
