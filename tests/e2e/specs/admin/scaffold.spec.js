@@ -158,4 +158,31 @@ test.describe( 'admin scaffold', () => {
 			fullPage: true,
 		} );
 	} );
+
+	test( 'plugin remains active after Stage 16 rule-evaluator unit tests land', async ( {
+		page,
+	} ) => {
+		// Stage 16 only adds PHPUnit coverage for the Stage 15 fail-safe
+		// rule evaluators — including the three-level mixed-combinator case
+		// mirroring the spec's worked expression
+		// `EMAIL HAS APPLE OR TREE AND (NAME IS (SAM OR REBECCA) OR EMAIL IS FOO)`.
+		// No production code changes, no admin wiring, no UI. The available
+		// end-to-end claim is therefore unchanged from prior pre-UI stages:
+		// the plugin still autoloads and WordPress reports it as active.
+		// The new evaluator coverage itself lives in
+		// tests/Unit/Domain/Engine/Test_Rule_Evaluator.php.
+		await page.goto( '/wp-admin/plugins.php' );
+		await expect( page ).toHaveURL( /plugins\.php/ );
+		await expect(
+			page.getByRole( 'row', { name: /PinkCrab Comment Moderation/i } )
+		).toBeVisible();
+
+		await page.screenshot( {
+			path: path.resolve(
+				__dirname,
+				'../../../../.karkinos/shots/stage-16.png'
+			),
+			fullPage: true,
+		} );
+	} );
 } );

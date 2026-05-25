@@ -543,6 +543,122 @@ class Test_Rule_Evaluator extends WP_UnitTestCase {
 		);
 	}
 
+	/**
+	 * @testdox It should be possible to evaluate the spec's worked nested expression `EMAIL HAS APPLE OR TREE AND (NAME IS (SAM OR REBECCA) OR EMAIL IS FOO)` correctly across a three-level tree of mixed combinators
+	 *
+	 * @SuppressWarnings("PHPMD.ExcessiveMethodLength")
+	 */
+	public function test_conditional_three_level_mixed_nesting_matches_spec_expression(): void {
+		// The expression in the rebuild spec example:
+		//
+		//   EMAIL HAS APPLE OR TREE AND (NAME IS (SAM OR REBECCA) OR EMAIL IS FOO)
+		//
+		// parsed (with the customary "AND binds tighter than nothing here" reading
+		// the spec uses — both halves of the outer AND are explicitly grouped) as:
+		//
+		//   AND(
+		//     OR( email HAS apple, email HAS tree ),                       ← group A
+		//     OR(                                                          ← group B
+		//       OR( name IS sam, name IS rebecca ),                        ← group B.1
+		//       email IS foo                                               ← leaf B.2
+		//     )
+		//   )
+		//
+		// Both outer AND legs must match; each leg is itself an OR; one leg of
+		// the right-hand OR is itself a nested OR. That gives a three-level
+		// tree with two combinators interleaved, which is the case stage 16
+		// asks the evaluator to handle.
+		$rule = new Conditional_Rule(
+			null,
+			null,
+			null,
+			Condition_Group::all_of(
+				Condition_Group::any_of(
+					new Condition( Comment_Part::email(), Operator::contains(), 'apple' ),
+					new Condition( Comment_Part::email(), Operator::contains(), 'tree' ),
+				),
+				Condition_Group::any_of(
+					Condition_Group::any_of(
+						new Condition( Comment_Part::name(), Operator::is(), 'sam' ),
+						new Condition( Comment_Part::name(), Operator::is(), 'rebecca' ),
+					),
+					new Condition( Comment_Part::email(), Operator::is(), 'foo' ),
+				),
+			),
+			Response::pending(),
+			self::stats()
+		);
+
+		// Fires: left OR satisfied by "apple" + right OR satisfied by name=sam.
+		$this->assertTrue(
+			$this->evaluator->fires(
+				$rule,
+				$this->submission(
+					array(
+						'name'  => 'sam',
+						'email' => 'sam@apple-mail.com',
+					)
+				)
+			)
+		);
+
+		// Fires: left OR satisfied by "tree" + right OR satisfied by name=rebecca
+		// reached via the nested inner OR.
+		$this->assertTrue(
+			$this->evaluator->fires(
+				$rule,
+				$this->submission(
+					array(
+						'name'  => 'rebecca',
+						'email' => 'rebecca@tree-house.com',
+					)
+				)
+			)
+		);
+
+		// Does NOT fire: outer AND fails — left OR has no "apple" or "tree"
+		// substring in the email, even though the right-hand OR is satisfied
+		// (name=sam matches the nested inner OR).
+		$this->assertFalse(
+			$this->evaluator->fires(
+				$rule,
+				$this->submission(
+					array(
+						'name'  => 'sam',
+						'email' => 'sam@nothing-special.com',
+					)
+				)
+			)
+		);
+
+		// Does NOT fire: outer AND fails — left OR satisfied via "tree" but
+		// the right OR has neither a matching name (sam/rebecca) nor email=foo.
+		$this->assertFalse(
+			$this->evaluator->fires(
+				$rule,
+				$this->submission(
+					array(
+						'name'  => 'Alice',
+						'email' => 'alice@tree-house.com',
+					)
+				)
+			)
+		);
+
+		// Does NOT fire: outer AND fails — neither leg satisfied.
+		$this->assertFalse(
+			$this->evaluator->fires(
+				$rule,
+				$this->submission(
+					array(
+						'name'  => 'Alice',
+						'email' => 'alice@example.com',
+					)
+				)
+			)
+		);
+	}
+
 	// ---------------------------------------------------------------------
 	// Conditional rule — every step-9 operator
 	// ---------------------------------------------------------------------
