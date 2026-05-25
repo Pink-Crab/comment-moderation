@@ -14,7 +14,10 @@ declare( strict_types = 1 );
 
 namespace PinkCrab\Comment_Moderation;
 
+use PinkCrab\Comment_Moderation\Migration\Comment_Rule_001;
 use PinkCrab\Perique\Application\App_Factory;
+use PinkCrab\Perique\Migration\Module\Perique_Migrations;
+use PinkCrab\Plugin_Lifecycle\Plugin_Life_Cycle;
 
 /**
  * Boots the Perique application using the three config arrays in `config/`.
@@ -53,6 +56,17 @@ final class Plugin_Bootstrap {
 			->di_rules( require $this->plugin_path . 'config/di.php' )
 			->app_config( require $this->plugin_path . 'config/settings.php' )
 			->registration_classes( require $this->plugin_path . 'config/registration.php' )
+			->module(
+				Plugin_Life_Cycle::class,
+				fn( Plugin_Life_Cycle $m ): Plugin_Life_Cycle => $m
+					->plugin_base_file( $this->plugin_path . 'pinkcrab-comment-moderation.php' )
+			)
+			->module(
+				Perique_Migrations::class,
+				fn( Perique_Migrations $m ): Perique_Migrations => $m
+					->set_migration_log_key( 'pinkcrab_comment_moderation_migrations' )
+					->add_migration( Comment_Rule_001::class )
+			)
 			->boot();
 	}
 }

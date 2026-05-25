@@ -47,7 +47,7 @@ return array(
 
 	// Custom database table aliases. Read with `$config->db_tables( 'alias' )`.
 	'db_tables'  => array(
-		// 'my_table' => $GLOBALS['wpdb']->prefix . 'pinkcrab_comment_moderation_my_table',
+		'rules' => $GLOBALS['wpdb']->prefix . 'pccm_rules',
 	),
 
 	// Custom post type aliases. Read with `$config->post_types( 'alias' )`.
