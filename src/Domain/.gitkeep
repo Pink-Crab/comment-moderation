@@ -1,0 +1,3 @@
+# Domain layer — entities, value objects, repository interfaces, domain services.
+# Pure PHP, no WordPress / no infrastructure dependencies. Interfaces only;
+# implementations live in src/Infrastructure/ and are bound via config/di.php.

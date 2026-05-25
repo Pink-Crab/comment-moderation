@@ -1,0 +1,3 @@
+# Application services — orchestration / business-logic services that
+# coordinate domain entities and infrastructure. Typed, DI-injectable.
+# Usually shared (singleton) — declare via config/di.php → `shared => true`.

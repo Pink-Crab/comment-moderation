@@ -1,0 +1,136 @@
+{
+	"name": "perique-plugin-scaffold",
+	"version": "1.0.0",
+	"description": "Opinionated scaffold for PinkCrab Perique 2.1.* plugins. scripts/scaffold-init.php prompts for or reads the placeholders below and rewrites the tree.",
+	"placeholders": [
+		{
+			"token": "##PLUGIN_NAME##",
+			"label": "Plugin name",
+			"description": "Human-readable name shown in the WordPress admin plugins list.",
+			"example": "My Awesome Plugin",
+			"required": true
+		},
+		{
+			"token": "##PLUGIN_SLUG##",
+			"label": "Plugin slug",
+			"description": "kebab-case slug used for the main file name, default text domain, REST namespace prefix, and CSS class prefix on the hello-world demo.",
+			"validate": "^[a-z][a-z0-9-]*$",
+			"default_from": { "token": "##PLUGIN_NAME##", "transform": "kebab" },
+			"required": true
+		},
+		{
+			"token": "##PLUGIN_DESCRIPTION##",
+			"label": "Plugin description",
+			"description": "One-line description for the plugin header and composer.json.",
+			"required": true
+		},
+		{
+			"token": "##PLUGIN_URI##",
+			"label": "Plugin URI",
+			"description": "Homepage URL for the plugin (header + package.json).",
+			"example": "https://github.com/acme/my-plugin",
+			"required": false
+		},
+		{
+			"token": "##PLUGIN_VERSION##",
+			"label": "Initial version",
+			"default": "0.1.0",
+			"validate": "^\\d+\\.\\d+\\.\\d+"
+		},
+		{
+			"token": "##NAMESPACE##",
+			"label": "PSR-4 namespace",
+			"description": "Top-level PHP namespace using SINGLE backslashes (e.g. Acme\\MyPlugin). The setup script also derives ##NAMESPACE_ESCAPED## with doubled backslashes for composer.json.",
+			"example": "Acme\\MyPlugin",
+			"validate": "^[A-Z][A-Za-z0-9_]*(\\\\[A-Z][A-Za-z0-9_]*)+$",
+			"required": true,
+			"derived": {
+				"##NAMESPACE_ESCAPED##": "json_escape"
+			}
+		},
+		{
+			"token": "##TEXT_DOMAIN##",
+			"label": "Text domain",
+			"description": "Used for translation lookups. Defaults to the plugin slug.",
+			"default_from": { "token": "##PLUGIN_SLUG##" },
+			"validate": "^[a-z][a-z0-9-]*$"
+		},
+		{
+			"token": "##FUNCTION_PREFIX##",
+			"label": "Function prefix",
+			"description": "snake_case with trailing underscore, prefixed to every global function (e.g. myplugin_get_plugin_instance).",
+			"example": "myplugin_",
+			"default_from": { "token": "##PLUGIN_SLUG##", "transform": "snake_underscore" },
+			"validate": "^[a-z][a-z0-9_]*_$"
+		},
+		{
+			"token": "##CONSTANT_PREFIX##",
+			"label": "Constant prefix",
+			"description": "UPPER_CASE with trailing underscore, prefixed to every global constant (e.g. MYPLUGIN_VERSION).",
+			"default_from": { "token": "##FUNCTION_PREFIX##", "transform": "upper" }
+		},
+		{
+			"token": "##COMPOSER_PACKAGE##",
+			"label": "Composer package",
+			"description": "vendor/package identifier for composer.json.",
+			"example": "acme/my-plugin",
+			"validate": "^[a-z0-9]([_.-]?[a-z0-9]+)*/[a-z0-9](([_.]?|-{0,2})[a-z0-9]+)*$",
+			"required": true
+		},
+		{
+			"token": "##AUTHOR_NAME##",
+			"label": "Author name",
+			"required": true
+		},
+		{
+			"token": "##AUTHOR_EMAIL##",
+			"label": "Author email",
+			"validate": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"
+		},
+		{
+			"token": "##AUTHOR_URI##",
+			"label": "Author URI"
+		},
+		{
+			"token": "##MIN_WP_VERSION##",
+			"label": "Minimum WordPress version",
+			"default": "6.4",
+			"validate": "^\\d+\\.\\d+$"
+		},
+		{
+			"token": "##MIN_PHP_VERSION##",
+			"label": "Minimum PHP version",
+			"default": "8.1",
+			"validate": "^\\d+\\.\\d+$"
+		},
+		{
+			"token": "##REST_NAMESPACE##",
+			"label": "REST API namespace",
+			"description": "Namespace registered with WordPress REST (e.g. my-plugin/v1).",
+			"default_from": { "token": "##PLUGIN_SLUG##", "suffix": "/v1" }
+		},
+		{
+			"token": "##LICENSE##",
+			"label": "License",
+			"default": "GPL-2.0-or-later"
+		},
+		{
+			"token": "##YEAR##",
+			"label": "Copyright year",
+			"auto": "current_year"
+		}
+	],
+	"renames": [
+		{ "from": "##PLUGIN_SLUG##.php", "to": "##PLUGIN_SLUG##.php" }
+	],
+	"post_init": {
+		"delete": [
+			".scaffold/",
+			"scripts/scaffold-init.php",
+			"README.md"
+		],
+		"rename": [
+			{ "from": "README.scaffold.md", "to": "README.md" }
+		]
+	}
+}

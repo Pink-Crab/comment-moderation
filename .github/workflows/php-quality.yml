@@ -1,0 +1,47 @@
+name: PHP Quality
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
+      - trunk
+
+jobs:
+  quality:
+    name: PHP ${{ matrix.php }} — lint, phpcs, phpstan, phpmd
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['##MIN_PHP_VERSION##', '8.2', '8.3']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up PHP ${{ matrix.php }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          tools: composer:v2
+          coverage: none
+
+      - name: Install Composer dependencies
+        uses: ramsey/composer-install@v3
+        with:
+          composer-options: '--ignore-platform-reqs --no-interaction'
+
+      - name: PHP syntax check (lint)
+        run: find . -path ./vendor -prune -o -path ./node_modules -prune -o -name '*.php' -print0 | xargs -0 -n1 -P4 php -l
+
+      - name: phpcs
+        run: composer lint:php:phpcs
+
+      - name: phpstan
+        run: composer lint:php:phpstan
+
+      - name: phpmd
+        run: composer lint:php:phpmd

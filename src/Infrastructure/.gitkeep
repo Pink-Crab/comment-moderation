@@ -1,0 +1,3 @@
+# Infrastructure layer — repository implementations, external integrations,
+# wpdb-backed persistence, HTTP clients. The concrete code your interfaces
+# in src/Domain/ need. Wired up in config/di.php with `instanceOf` rules.

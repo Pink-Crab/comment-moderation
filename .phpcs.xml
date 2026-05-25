@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<ruleset name="##PLUGIN_NAME##" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="vendor/squizlabs/php_codesniffer/phpcs.xsd">
+	<description>Coding standard ruleset for ##PLUGIN_NAME##.</description>
+
+	<!-- Paths excluded from scanning. -->
+	<exclude-pattern>/vendor/*</exclude-pattern>
+	<exclude-pattern>/node_modules/*</exclude-pattern>
+	<exclude-pattern>/wordpress/*</exclude-pattern>
+	<exclude-pattern>/assets/build/*</exclude-pattern>
+	<exclude-pattern>/coverage-report/*</exclude-pattern>
+	<exclude-pattern>/tests/*</exclude-pattern>
+	<!-- One-shot init script — runs pre-composer-install, deleted by post_init. -->
+	<exclude-pattern>/scripts/scaffold-init.php</exclude-pattern>
+
+	<!-- Extend the team51 ruleset. -->
+	<rule ref="./vendor/a8cteam51/team51-configs/quality-tools/phpcs.xml.dist"/>
+
+	<!-- Pin the text domain. -->
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array">
+				<element value="##TEXT_DOMAIN##"/>
+			</property>
+		</properties>
+	</rule>
+
+	<!-- Pin the global prefixes (functions, constants, namespace). -->
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<properties>
+			<property name="prefixes" type="array">
+				<element value="##FUNCTION_PREFIX##"/>
+				<element value="##CONSTANT_PREFIX##"/>
+				<element value="##NAMESPACE##"/>
+			</property>
+		</properties>
+	</rule>
+</ruleset>

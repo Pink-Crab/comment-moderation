@@ -1,0 +1,51 @@
+{
+	"name": "##PLUGIN_SLUG##",
+	"version": "##PLUGIN_VERSION##",
+	"description": "##PLUGIN_DESCRIPTION##",
+	"author": {
+		"name": "##AUTHOR_NAME##",
+		"homepage": "##AUTHOR_URI##"
+	},
+	"license": "##LICENSE##",
+	"keywords": [
+		"wordpress",
+		"perique"
+	],
+	"homepage": "##PLUGIN_URI##",
+	"repository": "##PLUGIN_URI##",
+	"bugs": "##PLUGIN_URI##/issues",
+	"engines": {
+		"node": ">=20.0",
+		"npm": ">=10.0"
+	},
+	"dependencies": {},
+	"devDependencies": {
+		"@csstools/postcss-sass": "^5.0.1",
+		"@wordpress/browserslist-config": "^6.8.1",
+		"@wordpress/postcss-plugins-preset": "^5.8.3",
+		"@wordpress/scripts": "^30.0.6",
+		"npm-run-all": "^4.1.5",
+		"postcss-cli": "^10.1.0"
+	},
+	"browserslist": [
+		"extends @wordpress/browserslist-config"
+	],
+	"scripts": {
+		"build": "npm-run-all --sequential build:scripts build:styles",
+		"build:scripts": "wp-scripts build assets/src/scripts/hello-world.js --output-path=assets/build/scripts",
+		"build:styles": "postcss \"assets/src/styles/**/*.scss\" --base assets/src/styles --dir assets/build/styles --ext .css",
+		"start": "npm-run-all --parallel start:scripts start:styles",
+		"start:scripts": "wp-scripts start assets/src/scripts/hello-world.js --output-path=assets/build/scripts",
+		"start:styles": "postcss \"assets/src/styles/**/*.scss\" --base assets/src/styles --dir assets/build/styles --ext .css --watch",
+		"format": "npm-run-all --sequential format:scripts format:styles",
+		"format:scripts": "wp-scripts format assets/src/scripts --no-error-on-unmatched-pattern",
+		"format:styles": "npm run lint:styles -- --fix",
+		"lint": "npm-run-all --sequential lint:scripts lint:styles lint:pkg-json",
+		"lint:scripts": "wp-scripts lint-js assets/src/scripts --no-error-on-unmatched-pattern",
+		"lint:styles": "wp-scripts lint-style \"assets/src/styles/**/*.{css,sass,scss}\" --allow-empty-input",
+		"lint:pkg-json": "wp-scripts lint-pkg-json",
+		"check-engines": "wp-scripts check-engines",
+		"check-licenses": "wp-scripts check-licenses",
+		"packages-update": "wp-scripts packages-update"
+	}
+}

@@ -1,14 +1,40 @@
-# Wordpress - ignore core, configuration, examples, uploads and logs.
-# https://github.com/github/gitignore/blob/main/WordPress.gitignore
+# Composer.
+/vendor/
 
-wordpress
-composer.lock
-.vscode
-vendor
+# Node.
+/node_modules/
 
-# Tests 
-tests/.env
-.phpunit.result.cache
-coverage.xml
-coverage
-coverage-report
+# Test artifacts.
+/wordpress/
+/clover.xml
+/coverage-report/
+/.phpunit.result.cache
+/tests/.env
+
+# Built assets — committed empty so the dir exists pre-build, but contents are generated.
+/assets/build/*
+!/assets/build/.gitkeep
+
+# OS.
+.DS_Store
+Thumbs.db
+
+# Editor / IDE.
+.idea/
+.vscode/*
+!.vscode/settings.shared.json
+.claude/
+*.swp
+*.swo
+
+# Logs.
+*.log
+
+# Scratch / sandbox area for testing the scaffold itself.
+# Clone the repo into here (e.g. `tmp/clone/`) and dry-run scripts/scaffold-init.php
+# against it without touching the source.
+/tmp/
+
+# Build output (composer build → dist/, with temp `_build.XXXXXX` work dirs).
+/dist/
+/_build.*/

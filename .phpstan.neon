@@ -1,0 +1,20 @@
+includes:
+    - vendor/a8cteam51/team51-configs/quality-assurance/phpstan.dist.neon
+
+parameters:
+    bootstrapFiles:
+        - type-defs.php
+    paths:
+        - src
+        - tests
+        - config
+        - functions.php
+        - perique-bootstrap.php
+    excludePaths:
+        - vendor
+        - node_modules
+        - assets/build
+        - wordpress
+        - scripts/scaffold-init.php
+    ignoreErrors:
+        # Add project-specific phpstan ignores here.

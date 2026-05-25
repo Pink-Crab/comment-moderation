@@ -1,0 +1,93 @@
+{
+	"name": "##COMPOSER_PACKAGE##",
+	"type": "wordpress-plugin",
+	"description": "##PLUGIN_DESCRIPTION##",
+	"homepage": "##PLUGIN_URI##",
+	"license": "##LICENSE##",
+	"authors": [
+		{
+			"name": "##AUTHOR_NAME##",
+			"email": "##AUTHOR_EMAIL##",
+			"homepage": "##AUTHOR_URI##"
+		}
+	],
+	"repositories": [
+		{
+			"type": "vcs",
+			"url": "https://github.com/a8cteam51/team51-configs"
+		},
+		{
+			"type": "vcs",
+			"url": "git@github.com:Pink-Crab/PHPScoper-Helper.git"
+		},
+		{
+			"type": "composer",
+			"url": "https://wpackagist.org"
+		}
+	],
+	"require": {
+		"php": ">=##MIN_PHP_VERSION##",
+		"ext-json": "*",
+		"pinkcrab/perique-framework-core": "^2.1",
+		"webmozart/assert": "^1.11"
+	},
+	"require-dev": {
+		"a8cteam51/team51-configs": "dev-trunk",
+		"phpunit/phpunit": "^9.0",
+		"wp-phpunit/wp-phpunit": "6.9.*",
+		"roots/wordpress": "6.9.*",
+		"yoast/phpunit-polyfills": "^2.0",
+		"php-stubs/wordpress-stubs": "6.9.*",
+		"gin0115/wpunit-helpers": "~1",
+		"vlucas/phpdotenv": "^5.4",
+		"roave/security-advisories": "dev-latest",
+		"humbug/php-scoper": "^0.18",
+		"pinkcrab/php-scoper-helper": "dev-main"
+	},
+	"autoload": {
+		"psr-4": {
+			"##NAMESPACE_ESCAPED##\\": ["src/", "migrations/"]
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"##NAMESPACE_ESCAPED##\\Tests\\": "tests/"
+		}
+	},
+	"scripts": {
+		"lint:php": [
+			"@lint:php:phpcs",
+			"@lint:php:phpstan",
+			"@lint:php:phpmd"
+		],
+		"lint:php:phpcs": "phpcs --standard=./.phpcs.xml --basepath=. ./ -v",
+		"lint:php:phpstan": "phpstan analyse -c ./.phpstan.neon -v --memory-limit=1G",
+		"lint:php:phpmd": "phpmd ./ ansi ./.phpmd.xml -v",
+		"format:php": "phpcbf --standard=./.phpcs.xml --basepath=. ./ -v",
+		"test": "vendor/bin/phpunit --colors=always --testdox",
+		"coverage": "vendor/bin/phpunit --colors=always --testdox --coverage-clover clover.xml",
+		"build": "bash scripts/build.sh",
+		"packages-install": "@composer install --ignore-platform-reqs --no-interaction",
+		"packages-update": [
+			"@composer clear-cache",
+			"@composer update --prefer-stable --ignore-platform-reqs --no-interaction"
+		]
+	},
+	"config": {
+		"allow-plugins": {
+			"composer/*": true,
+			"dealerdirect/phpcodesniffer-composer-installer": true,
+			"phpstan/extension-installer": true,
+			"roots/wordpress-core-installer": true
+		}
+	},
+	"minimum-stability": "beta",
+	"prefer-stable": true,
+	"extra": {
+		"installer-paths": {
+			"vendor/wpackagist-plugin/{$name}/": [
+				"type:wordpress-plugin"
+			]
+		}
+	}
+}

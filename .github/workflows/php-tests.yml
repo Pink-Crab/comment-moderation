@@ -1,0 +1,79 @@
+name: PHP Tests
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
+      - trunk
+
+jobs:
+  tests:
+    name: PHP ${{ matrix.php }} / WP ${{ matrix.wp }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['##MIN_PHP_VERSION##', '8.2', '8.3']
+        wp: ['6.4', '6.5', 'latest']
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wordpress_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      WP_TESTS_DB_NAME: wordpress_test
+      WP_TESTS_DB_USER: root
+      WP_TESTS_DB_PASSWORD: root
+      WP_TESTS_DB_HOST: 127.0.0.1
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up PHP ${{ matrix.php }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          tools: composer:v2
+          coverage: xdebug
+          extensions: mysqli
+
+      - name: Pin WordPress to ${{ matrix.wp }}
+        if: matrix.wp != 'latest'
+        run: composer require --dev --no-update "roots/wordpress:${{ matrix.wp }}.*" "wp-phpunit/wp-phpunit:${{ matrix.wp }}.*"
+
+      - name: Install Composer dependencies
+        uses: ramsey/composer-install@v3
+        with:
+          composer-options: '--ignore-platform-reqs --no-interaction'
+
+      - name: Wait for MySQL
+        run: |
+          for i in $(seq 1 30); do
+            mysqladmin ping -h 127.0.0.1 -uroot -proot --silent && break
+            sleep 1
+          done
+
+      - name: Run PHPUnit
+        run: composer coverage
+
+      - name: Upload coverage
+        if: matrix.php == '##MIN_PHP_VERSION##' && matrix.wp == 'latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-clover
+          path: clover.xml
+          if-no-files-found: ignore
