@@ -22,3 +22,13 @@ parameters:
         - scripts/scaffold-init.php
     ignoreErrors:
         # Add project-specific phpstan ignores here.
+        #
+        # `wpdb::prepare()` is stubbed as accepting `literal-string`. The
+        # repository builds its SQL by interpolating the trusted table name
+        # (from App_Config) and a pre-built WHERE clause whose user inputs
+        # are bound by `prepare()` itself. The interpolated value is a
+        # plugin-controlled identifier — never user input — so the query
+        # string is safe but no longer typed as `literal-string`.
+        -
+            message: '#^Parameter \#1 \$query of method wpdb::prepare\(\) expects literal-string, non-falsy-string given\.$#'
+            path: src/Infrastructure/Persistence/Wpdb_Rule_Repository.php

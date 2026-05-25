@@ -29,6 +29,19 @@ return array(
 	//     'instanceOf' => \PinkCrab\Comment_Moderation\Infrastructure\Some_Implementation::class,
 	// ),
 
+	// Bind the Rule_Repository port to its wpdb-backed implementation; pass
+	// the global $wpdb in as a construct param since Perique does not
+	// auto-wire globals (App_Config is auto-wired).
+	\PinkCrab\Comment_Moderation\Domain\Rule\Rule_Repository::class    => array(
+		'instanceOf' => \PinkCrab\Comment_Moderation\Infrastructure\Persistence\Wpdb_Rule_Repository::class,
+	),
+	\PinkCrab\Comment_Moderation\Infrastructure\Persistence\Wpdb_Rule_Repository::class => array(
+		'shared'          => true,
+		'constructParams' => array(
+			array( \Dice\Dice::INSTANCE => static fn(): \wpdb => $GLOBALS['wpdb'] ),
+		),
+	),
+
 	// 2. Shared (singleton).
 	// \PinkCrab\Comment_Moderation\Application\Services\Cache_Service::class => array(
 	//     'shared' => true,

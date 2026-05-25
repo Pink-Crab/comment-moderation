@@ -80,4 +80,29 @@ test.describe( 'admin scaffold', () => {
 			fullPage: true,
 		} );
 	} );
+
+	test( 'plugin remains active after Stage 11 wpdb-backed rule repository lands', async ( {
+		page,
+	} ) => {
+		// Stage 11 adds the $wpdb-backed Rule_Repository (CRUD + filter +
+		// pagination), wired into the DI container. There is still no admin
+		// screen consuming it, so the available end-to-end claim is that the
+		// repository binding does not break autoloading or activation —
+		// proved by the plugin row still appearing as active on the plugins
+		// screen. The repository's actual behaviour is exercised by the
+		// PHPUnit integration suite under tests/Integration/Repository/.
+		await page.goto( '/wp-admin/plugins.php' );
+		await expect( page ).toHaveURL( /plugins\.php/ );
+		await expect(
+			page.getByRole( 'row', { name: /PinkCrab Comment Moderation/i } )
+		).toBeVisible();
+
+		await page.screenshot( {
+			path: path.resolve(
+				__dirname,
+				'../../../../.karkinos/shots/stage-11.png'
+			),
+			fullPage: true,
+		} );
+	} );
 } );
