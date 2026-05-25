@@ -27,7 +27,7 @@
 		"elm-review": "^2.13.2"
 	},
 	"scripts": {
-		"build": "elm make assets/elm/Main.elm --optimize --output=assets/js/admin.js",
+		"build": "elm make assets/elm/Main.elm --optimize --output=assets/js/admin.elm.js && node scripts/bundle-admin.js",
 		"lint": "elm-format --validate assets/elm && elm-review",
 		"test:e2e": "playwright test",
 		"test:e2e:ui": "playwright test --ui",

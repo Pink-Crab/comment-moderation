@@ -154,6 +154,13 @@ final class Admin_Page extends Menu_Page {
 	public function enqueue( Page $page ): void {
 		unset( $page );
 
+		wp_enqueue_style(
+			self::ASSET_HANDLE,
+			$this->config->plugin_url( 'assets/css/admin.css' ),
+			array(),
+			$this->config->version()
+		);
+
 		wp_enqueue_script(
 			self::ASSET_HANDLE,
 			$this->config->plugin_url( 'assets/js/admin.js' ),
