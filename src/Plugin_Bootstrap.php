@@ -34,6 +34,8 @@ final class Plugin_Bootstrap {
 	/**
 	 * Absolute plugin directory path (trailing slash), used to resolve the
 	 * config files and seed Perique's path resolution.
+	 *
+	 * @var string
 	 */
 	private string $plugin_path;
 

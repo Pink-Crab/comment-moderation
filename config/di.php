@@ -26,7 +26,7 @@ return array(
 
 	// 1. Interface / abstract binding (global).
 	// \PinkCrab\Comment_Moderation\Domain\Some_Interface::class => array(
-	//     'instanceOf' => \PinkCrab\Comment_Moderation\Infrastructure\Some_Implementation::class,
+	// 'instanceOf' => \PinkCrab\Comment_Moderation\Infrastructure\Some_Implementation::class,
 	// ),
 
 	// Bind the Rule_Repository port to its wpdb-backed implementation. The
@@ -55,25 +55,25 @@ return array(
 
 	// 2. Shared (singleton).
 	// \PinkCrab\Comment_Moderation\Application\Services\Cache_Service::class => array(
-	//     'shared' => true,
+	// 'shared' => true,
 	// ),
 
 	// 3. Per-consumer substitution — overrides global interface binding for
-	//    only this one class.
+	// only this one class.
 	// \PinkCrab\Comment_Moderation\Application\Services\Foo_Service::class => array(
-	//     'substitutions' => array(
-	//         \PinkCrab\Comment_Moderation\Domain\Some_Interface::class
-	//             => \PinkCrab\Comment_Moderation\Infrastructure\Other_Implementation::class,
-	//     ),
+	// 'substitutions' => array(
+	// \PinkCrab\Comment_Moderation\Domain\Some_Interface::class
+	// => \PinkCrab\Comment_Moderation\Infrastructure\Other_Implementation::class,
+	// ),
 	// ),
 
 	// 4. Constructor arguments (mix of scalars + container references).
 	// \PinkCrab\Comment_Moderation\Application\Services\Api_Client::class => array(
-	//     'shared'          => true,
-	//     'constructParams' => array(
-	//         'https://api.example.com',
-	//         array( \Dice\Dice::CONSTANT => 'PINKCRAB_COMMENT_MODERATION_VERSION' ),
-	//     ),
+	// 'shared'          => true,
+	// 'constructParams' => array(
+	// 'https://api.example.com',
+	// array( \Dice\Dice::CONSTANT => 'PINKCRAB_COMMENT_MODERATION_VERSION' ),
+	// ),
 	// ),
 
 );

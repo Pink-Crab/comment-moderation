@@ -29,6 +29,8 @@ final class Comment_Rule_001 extends Migration {
 	/**
 	 * App config — used to resolve the prefixed table name from the
 	 * `rules` alias registered in config/settings.php.
+	 *
+	 * @var App_Config
 	 */
 	private App_Config $app_config;
 
