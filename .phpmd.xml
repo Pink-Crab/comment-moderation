@@ -2,8 +2,8 @@
 <ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://phpmd.org/xml/ruleset_xml_schema_1.0.0.xsd">
 	<description>PHP Mess Detector ruleset for PinkCrab Comment Moderation.</description>
 
-	<!-- Extend the shared team51 ruleset. -->
-	<rule ref="./vendor/a8cteam51/team51-configs/quality-assurance/phpmd.dist.xml">
+	<!-- Extend the shared Pink-Crab qa-configs ruleset. -->
+	<rule ref="./vendor/pink-crab/qa-configs/quality-assurance/phpmd.dist.xml">
 		<!-- Add per-project exclusions here, e.g.: -->
 		<!-- <exclude name="CyclomaticComplexity"/> -->
 	</rule>

@@ -11,7 +11,7 @@
     }],
     "repositories": [{
             "type": "vcs",
-            "url": "https://github.com/a8cteam51/team51-configs"
+            "url": "https://github.com/Pink-Crab/qa-configs"
         },
         {
             "type": "vcs",
@@ -32,7 +32,7 @@
         "pinkcrab/wp-nonce": "^0.1.0"
     },
     "require-dev": {
-        "a8cteam51/team51-configs": "*",
+        "pink-crab/qa-configs": "^1.0",
         "phpunit/phpunit": "^9.0",
         "wp-phpunit/wp-phpunit": "6.9.*",
         "roots/wordpress": "6.9.*",

@@ -1,5 +1,5 @@
 includes:
-    - vendor/a8cteam51/team51-configs/quality-assurance/phpstan.dist.neon
+    - vendor/pink-crab/qa-configs/quality-assurance/phpstan.dist.neon
 
 parameters:
     level: 8

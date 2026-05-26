@@ -21,8 +21,8 @@
 	<!-- One-shot init script — runs pre-composer-install, deleted by post_init. -->
 	<exclude-pattern>/scripts/scaffold-init.php</exclude-pattern>
 
-	<!-- Extend the team51 ruleset. -->
-	<rule ref="./vendor/a8cteam51/team51-configs/quality-tools/phpcs.xml.dist"/>
+	<!-- Extend the Pink-Crab qa-configs ruleset. -->
+	<rule ref="./vendor/pink-crab/qa-configs/quality-assurance/phpcs.dist.xml"/>
 
 	<!-- The Perique config files (di.php, settings.php) ship with commented
 	     template examples for DI rules / meta aliases. The Squiz heuristic
