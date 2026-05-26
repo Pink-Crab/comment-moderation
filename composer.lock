@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2e9adcdb6b9b79460d0de012ee88389a",
+    "content-hash": "f0ef68b7982274f9282360306c1f0e84",
     "packages": [
         {
             "name": "gin0115/dice",
@@ -718,72 +718,6 @@
         }
     ],
     "packages-dev": [
-        {
-            "name": "a8cteam51/team51-configs",
-            "version": "dev-trunk",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/a8cteam51/team51-configs.git",
-                "reference": "1f025c367e0287886d1f7490618950131fa8d491"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/a8cteam51/team51-configs/zipball/1f025c367e0287886d1f7490618950131fa8d491",
-                "reference": "1f025c367e0287886d1f7490618950131fa8d491",
-                "shasum": ""
-            },
-            "require": {
-                "ext-json": "*",
-                "johnbillion/wp-compat": "^1",
-                "php": ">=8.3",
-                "phpcompatibility/phpcompatibility-wp": "*",
-                "phpmd/phpmd": "^2",
-                "phpstan/extension-installer": "^1",
-                "phpstan/phpstan": "^2",
-                "phpstan/phpstan-deprecation-rules": "^2",
-                "phpstan/phpstan-strict-rules": "^2",
-                "swissspidy/phpstan-no-private": "^1",
-                "szepeviktor/phpstan-wordpress": "^2",
-                "wp-coding-standards/wpcs": "^3"
-            },
-            "require-dev": {
-                "composer/composer": "^2"
-            },
-            "default-branch": true,
-            "type": "library",
-            "autoload": {
-                "classmap": [
-                    "composer"
-                ]
-            },
-            "scripts": {
-                "generate-autoloader": [
-                    "@composer dump-autoload --ignore-platform-reqs -o"
-                ],
-                "packages-install": [
-                    "@composer install --ignore-platform-reqs --no-interaction"
-                ],
-                "packages-update": [
-                    "@composer clear-cache",
-                    "@composer update --prefer-stable --ignore-platform-reqs --no-interaction"
-                ]
-            },
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Contributors",
-                    "homepage": "https://github.com/a8cteam51/team51-configs/graphs/contributors"
-                }
-            ],
-            "description": "A collection of shared configuration files for Team51 projects.",
-            "support": {
-                "source": "https://github.com/a8cteam51/team51-configs/tree/trunk",
-                "issues": "https://github.com/a8cteam51/team51-configs/issues"
-            },
-            "time": "2025-05-25T15:59:20+00:00"
-        },
         {
             "name": "automattic/jetpack-constants",
             "version": "v3.0.10",
@@ -3612,11 +3546,76 @@
             "time": "2026-01-27T05:45:00+00:00"
         },
         {
+            "name": "pink-crab/qa-configs",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Pink-Crab/qa-configs.git",
+                "reference": "e7b3dbe6ad1bedcda55c0cf8c1b8d11b8da58f1b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Pink-Crab/qa-configs/zipball/e7b3dbe6ad1bedcda55c0cf8c1b8d11b8da58f1b",
+                "reference": "e7b3dbe6ad1bedcda55c0cf8c1b8d11b8da58f1b",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "johnbillion/wp-compat": "^1",
+                "php": ">=8.0 <8.6",
+                "phpcompatibility/phpcompatibility-wp": "*",
+                "phpmd/phpmd": "^2",
+                "phpstan/extension-installer": "^1",
+                "phpstan/phpstan": "^2",
+                "phpstan/phpstan-deprecation-rules": "^2",
+                "phpstan/phpstan-strict-rules": "^2",
+                "swissspidy/phpstan-no-private": "^1",
+                "szepeviktor/phpstan-wordpress": "^2",
+                "wp-coding-standards/wpcs": "^3"
+            },
+            "require-dev": {
+                "composer/composer": "^2"
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "composer"
+                ]
+            },
+            "scripts": {
+                "generate-autoloader": [
+                    "@composer dump-autoload --ignore-platform-reqs -o"
+                ],
+                "packages-install": [
+                    "@composer install --ignore-platform-reqs --no-interaction"
+                ],
+                "packages-update": [
+                    "@composer clear-cache",
+                    "@composer update --prefer-stable --ignore-platform-reqs --no-interaction"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Contributors",
+                    "homepage": "https://github.com/Pink-Crab/qa-configs/graphs/contributors"
+                }
+            ],
+            "description": "A collection of shared configuration files for Pink-Crab projects.",
+            "support": {
+                "source": "https://github.com/Pink-Crab/qa-configs/tree/1.0.0",
+                "issues": "https://github.com/Pink-Crab/qa-configs/issues"
+            },
+            "time": "2026-05-26T09:40:24+00:00"
+        },
+        {
             "name": "pinkcrab/php-scoper-helper",
             "version": "dev-main",
             "source": {
                 "type": "git",
-                "url": "git@github.com:Pink-Crab/PHPScoper-Helper.git",
+                "url": "https://github.com/Pink-Crab/PHPScoper-Helper.git",
                 "reference": "d006b685bee1494d77294cb332c4e2727bb8634b"
             },
             "dist": {
@@ -3676,7 +3675,11 @@
                 "stubs",
                 "wordpress"
             ],
-            "time": "2026-05-16T02:08:54+00:00"
+            "support": {
+                "source": "https://github.com/Pink-Crab/PHPScoper-Helper/tree/main",
+                "issues": "https://github.com/Pink-Crab/PHPScoper-Helper/issues"
+            },
+            "time": "2026-05-16T02:17:31+00:00"
         },
         {
             "name": "psr/event-dispatcher",
@@ -6824,16 +6827,16 @@
         },
         {
             "name": "symfony/polyfill-intl-grapheme",
-            "version": "v1.37.0",
+            "version": "v1.38.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-intl-grapheme.git",
-                "reference": "4864388bfbd3001ce88e234fab652acd91fdc57e"
+                "reference": "9c862df890f7c833b1101ac5578ec4dcf199efb5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-intl-grapheme/zipball/4864388bfbd3001ce88e234fab652acd91fdc57e",
-                "reference": "4864388bfbd3001ce88e234fab652acd91fdc57e",
+                "url": "https://api.github.com/repos/symfony/polyfill-intl-grapheme/zipball/9c862df890f7c833b1101ac5578ec4dcf199efb5",
+                "reference": "9c862df890f7c833b1101ac5578ec4dcf199efb5",
                 "shasum": ""
             },
             "require": {
@@ -6882,7 +6885,7 @@
                 "shim"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-intl-grapheme/tree/v1.37.0"
+                "source": "https://github.com/symfony/polyfill-intl-grapheme/tree/v1.38.0"
             },
             "funding": [
                 {
@@ -6902,20 +6905,20 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-04-26T13:13:48+00:00"
+            "time": "2026-05-25T12:39:52+00:00"
         },
         {
             "name": "symfony/polyfill-intl-normalizer",
-            "version": "v1.37.0",
+            "version": "v1.38.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-intl-normalizer.git",
-                "reference": "3833d7255cc303546435cb650316bff708a1c75c"
+                "reference": "2d446c214bdbe5b71bde5011b060a05fece3ae6b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-intl-normalizer/zipball/3833d7255cc303546435cb650316bff708a1c75c",
-                "reference": "3833d7255cc303546435cb650316bff708a1c75c",
+                "url": "https://api.github.com/repos/symfony/polyfill-intl-normalizer/zipball/2d446c214bdbe5b71bde5011b060a05fece3ae6b",
+                "reference": "2d446c214bdbe5b71bde5011b060a05fece3ae6b",
                 "shasum": ""
             },
             "require": {
@@ -6967,7 +6970,7 @@
                 "shim"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-intl-normalizer/tree/v1.37.0"
+                "source": "https://github.com/symfony/polyfill-intl-normalizer/tree/v1.38.0"
             },
             "funding": [
                 {
@@ -6987,20 +6990,20 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-09-09T11:45:10+00:00"
+            "time": "2026-05-25T13:48:31+00:00"
         },
         {
             "name": "symfony/polyfill-mbstring",
-            "version": "v1.37.0",
+            "version": "v1.38.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-mbstring.git",
-                "reference": "6a21eb99c6973357967f6ce3708cd55a6bec6315"
+                "reference": "6b177d03d2eb04a6c9d01bab9818fb93a30ce7fd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/6a21eb99c6973357967f6ce3708cd55a6bec6315",
-                "reference": "6a21eb99c6973357967f6ce3708cd55a6bec6315",
+                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/6b177d03d2eb04a6c9d01bab9818fb93a30ce7fd",
+                "reference": "6b177d03d2eb04a6c9d01bab9818fb93a30ce7fd",
                 "shasum": ""
             },
             "require": {
@@ -7052,7 +7055,7 @@
                 "shim"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-mbstring/tree/v1.37.0"
+                "source": "https://github.com/symfony/polyfill-mbstring/tree/v1.38.0"
             },
             "funding": [
                 {
@@ -7072,7 +7075,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-04-10T17:25:58+00:00"
+            "time": "2026-05-25T14:08:27+00:00"
         },
         {
             "name": "symfony/polyfill-php80",
@@ -7160,16 +7163,16 @@
         },
         {
             "name": "symfony/polyfill-php84",
-            "version": "v1.37.0",
+            "version": "v1.38.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-php84.git",
-                "reference": "88486db2c389b290bf87ff1de7ebc1e13e42bb06"
+                "reference": "a0e0aca0368801ec79f8791dea9a7c12af527c93"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-php84/zipball/88486db2c389b290bf87ff1de7ebc1e13e42bb06",
-                "reference": "88486db2c389b290bf87ff1de7ebc1e13e42bb06",
+                "url": "https://api.github.com/repos/symfony/polyfill-php84/zipball/a0e0aca0368801ec79f8791dea9a7c12af527c93",
+                "reference": "a0e0aca0368801ec79f8791dea9a7c12af527c93",
                 "shasum": ""
             },
             "require": {
@@ -7216,7 +7219,7 @@
                 "shim"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-php84/tree/v1.37.0"
+                "source": "https://github.com/symfony/polyfill-php84/tree/v1.38.0"
             },
             "funding": [
                 {
@@ -7236,7 +7239,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-04-10T18:47:49+00:00"
+            "time": "2026-05-25T12:12:52+00:00"
         },
         {
             "name": "symfony/service-contracts",
@@ -8188,7 +8191,6 @@
     "aliases": [],
     "minimum-stability": "beta",
     "stability-flags": {
-        "a8cteam51/team51-configs": 20,
         "pinkcrab/php-scoper-helper": 20,
         "roave/security-advisories": 20
     },
