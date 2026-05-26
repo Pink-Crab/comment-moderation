@@ -40,6 +40,10 @@ jobs:
           WP_USERNAME: admin
           WP_PASSWORD: password
 
+      - name: wp-env logs (on failure)
+        if: failure()
+        run: npx wp-env logs --debug 2>&1 | tail -200
+
       - name: Upload test artifacts
         if: failure()
         uses: actions/upload-artifact@v4
