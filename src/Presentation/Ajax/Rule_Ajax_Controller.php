@@ -674,6 +674,7 @@ final class Rule_Ajax_Controller implements Hookable {
 	 * @param integer|null        $id    Existing id for an update, null for a new rule.
 	 *
 	 * @return Rule
+	 * @throws InvalidArgumentException If the rule type is not recognised.
 	 */
 	private function build_rule( array $input, ?int $id ): Rule {
 		$name        = '' !== (string) $input['name'] ? (string) $input['name'] : null;

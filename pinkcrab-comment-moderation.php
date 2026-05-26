@@ -5,6 +5,7 @@
  * @since   0.1.0
  * @author  PinkCrab
  * @license GPLv3
+ * @package PinkCrab\Comment_Moderation
  *
  * @wordpress-plugin
  * Plugin Name:       PinkCrab Comment Moderation

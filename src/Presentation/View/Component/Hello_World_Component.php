@@ -34,6 +34,8 @@ final class Hello_World_Component extends Component {
 
 	/**
 	 * The name to greet. Read inside the template as `$this->name`.
+	 *
+	 * @var string
 	 */
 	public string $name;
 

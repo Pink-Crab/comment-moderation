@@ -21,13 +21,12 @@ defined( 'ABSPATH' ) || exit;
 // Sample helper — uncomment to use, copy the pattern for your own helpers.
 // ---------------------------------------------------------------------------
 
-// if ( ! function_exists( 'pinkcrab_comment_moderation_say_hello' ) ) {
-//     /**
-//      * Return a friendly greeting. Replace me with something useful.
-//      *
-//      * @param string $name Who to greet.
-//      */
-//     function pinkcrab_comment_moderation_say_hello( string $name = 'World' ): string {
-//         return sprintf( 'Hello, %s!', $name );
-//     }
-// }
+/*
+if ( ! function_exists( 'pinkcrab_comment_moderation_say_hello' ) ) {
+	// Return a friendly greeting. Replace me with something useful.
+	// @param string $name Who to greet.
+	function pinkcrab_comment_moderation_say_hello( string $name = 'World' ): string {
+		return sprintf( 'Hello, %s!', $name );
+	}
+}
+*/
