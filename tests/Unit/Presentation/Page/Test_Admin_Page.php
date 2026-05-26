@@ -170,7 +170,7 @@ class Test_Admin_Page extends WP_UnitTestCase {
 			$this->assertIsString( $data );
 			$this->assertStringContainsString( Admin_Page::LOCALIZE_OBJECT, $data );
 			$this->assertStringContainsString( Admin_Page::MOUNT_ID, $data );
-			$this->assertStringContainsString( 'pccm/v1', $data, 'REST namespace should be localized.' );
+			$this->assertMatchesRegularExpression( '~"restNamespace":"pccm\\\\?/v1"~', $data, 'REST namespace should be localized.' );
 			$this->assertStringContainsString( '"nonce"', $data );
 		} finally {
 			wp_dequeue_script( Admin_Page::ASSET_HANDLE );
