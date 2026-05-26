@@ -42,7 +42,7 @@ jobs:
 
       - name: wp-env logs (on failure)
         if: failure()
-        run: npx wp-env logs --debug 2>&1 | tail -200
+        run: timeout 20 npx wp-env logs --debug 2>&1 | tail -200 || true
 
       - name: Upload test artifacts
         if: failure()
