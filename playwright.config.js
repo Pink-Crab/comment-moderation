@@ -16,8 +16,9 @@ module.exports = defineConfig( {
 	outputDir: './test-results',
 	fullyParallel: false,
 	forbidOnly: !! process.env.CI,
-	retries: process.env.CI ? 2 : 0,
+	retries: process.env.CI ? 1 : 0,
 	workers: 1,
+	timeout: 15_000,
 	reporter: [
 		[ 'list' ],
 		[ 'html', { outputFolder: 'playwright-report', open: 'never' } ],
