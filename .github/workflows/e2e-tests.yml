@@ -33,6 +33,33 @@ jobs:
       - name: Start wp-env
         run: npx wp-env start
 
+      - name: Pre-test wp-env diagnostics
+        run: |
+          set +e
+          echo "=== WP core version ==="
+          npx wp-env run cli wp core version
+          echo
+          echo "=== Active plugins ==="
+          npx wp-env run cli wp plugin list --status=active --format=table
+          echo
+          echo "=== All plugins (any status) ==="
+          npx wp-env run cli wp plugin list --format=table
+          echo
+          echo "=== Administrator users ==="
+          npx wp-env run cli wp user list --role=administrator --fields=ID,user_login,user_email,roles --format=table
+          echo
+          echo "=== Plugin bootstrap reachable ==="
+          npx wp-env run cli wp eval 'echo class_exists("PinkCrab\\Comment_Moderation\\Plugin_Bootstrap") ? "Plugin_Bootstrap class loaded\n" : "Plugin_Bootstrap MISSING\n";'
+          echo
+          echo "=== Direct curl: unauth GET on options-general?page=pinkcrab-comment-moderation ==="
+          curl -sS -o /tmp/curl-page.html -w "HTTP %{http_code}  size=%{size_download}\n" "http://localhost:57881/wp-admin/options-general.php?page=pinkcrab-comment-moderation"
+          echo "---first 40 lines---"
+          head -40 /tmp/curl-page.html
+          echo
+          echo "=== wp-env error log tail (pre-test) ==="
+          timeout 15 npx wp-env logs --debug 2>&1 | grep -iE "fatal|warning|notice|deprecated|error" | tail -40 || true
+          true
+
       - name: Run E2E tests
         run: npm run test:e2e
         env:
