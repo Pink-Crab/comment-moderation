@@ -26,6 +26,7 @@
 /.phpmd.xml             export-ignore
 /.phpstan.neon          export-ignore
 /.php-scoper.inc.php    export-ignore
+/.karkinos/             export-ignore
 /.scaffold/             export-ignore
 /phpunit.xml.dist       export-ignore
 /scripts/               export-ignore
