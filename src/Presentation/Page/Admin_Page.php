@@ -207,30 +207,40 @@ final class Admin_Page extends Menu_Page {
 			true
 		);
 
-		wp_localize_script(
-			self::ASSET_HANDLE,
-			self::LOCALIZE_OBJECT,
-			array(
-				'mountId'       => self::MOUNT_ID,
-				'restRoot'      => esc_url_raw( rest_url() ),
-				'restNamespace' => $this->config->rest_namespace(),
-				'nonce'         => wp_create_nonce( 'wp_rest' ),
-				'pageSlug'      => self::PAGE_SLUG,
-				// Bootstrap for the stage-20 admin AJAX endpoints — the Elm app
-				// posts each request to `ajaxUrl` with `_wpnonce: ajaxNonce` so
-				// the controller's nonce + capability preflight can verify it.
-				'ajaxUrl'       => esc_url_raw( admin_url( 'admin-ajax.php' ) ),
-				'ajaxNonce'     => Rule_Ajax_Controller::create_nonce(),
-				'ajaxActions'   => array(
-					'list'   => Rule_Ajax_Controller::ACTION_LIST,
-					'get'    => Rule_Ajax_Controller::ACTION_GET,
-					'create' => Rule_Ajax_Controller::ACTION_CREATE,
-					'update' => Rule_Ajax_Controller::ACTION_UPDATE,
-					'delete' => Rule_Ajax_Controller::ACTION_DELETE,
-					'clear'  => Rule_Ajax_Controller::ACTION_CLEAR,
-				),
-			)
+		$payload = array(
+			'mountId'       => self::MOUNT_ID,
+			'restRoot'      => esc_url_raw( rest_url() ),
+			'restNamespace' => $this->config->rest_namespace(),
+			'nonce'         => wp_create_nonce( 'wp_rest' ),
+			'pageSlug'      => self::PAGE_SLUG,
+			// Bootstrap for the stage-20 admin AJAX endpoints — the Elm app
+			// posts each request to `ajaxUrl` with `_wpnonce: ajaxNonce` so
+			// the controller's nonce + capability preflight can verify it.
+			'ajaxUrl'       => esc_url_raw( admin_url( 'admin-ajax.php' ) ),
+			'ajaxNonce'     => Rule_Ajax_Controller::create_nonce(),
+			'ajaxActions'   => array(
+				'list'   => Rule_Ajax_Controller::ACTION_LIST,
+				'get'    => Rule_Ajax_Controller::ACTION_GET,
+				'create' => Rule_Ajax_Controller::ACTION_CREATE,
+				'update' => Rule_Ajax_Controller::ACTION_UPDATE,
+				'delete' => Rule_Ajax_Controller::ACTION_DELETE,
+				'clear'  => Rule_Ajax_Controller::ACTION_CLEAR,
+			),
 		);
+
+		// Surface the `?pccm_edit={id}` deep-link to the Elm app so it can
+		// open the matching rule's edit form on load (rebuild spec §6
+		// "Direct link to a rule"). `absint()` normalises anything
+		// non-numeric to 0, so the Elm side gets a clean integer (0 = no
+		// deep-link). No nonce: this is a read-only navigation query var,
+		// not a state-changing action.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only navigation query var; capability gate is enforced upstream by the admin-menu module.
+		$edit_rule_id = isset( $_GET[ self::EDIT_QUERY_VAR ] ) ? absint( wp_unslash( $_GET[ self::EDIT_QUERY_VAR ] ) ) : 0;
+		if ( 0 !== $edit_rule_id ) {
+			$payload['editRuleId'] = $edit_rule_id;
+		}
+
+		wp_localize_script( self::ASSET_HANDLE, self::LOCALIZE_OBJECT, $payload );
 	}
 
 	/**

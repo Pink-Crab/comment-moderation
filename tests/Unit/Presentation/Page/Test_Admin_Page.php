@@ -178,6 +178,52 @@ class Test_Admin_Page extends WP_UnitTestCase {
 		}
 	}
 
+	/**
+	 * @testdox It should surface ?pccm_edit={id} from the request as editRuleId on the localized Elm bootstrap payload
+	 */
+	public function test_enqueue_surfaces_edit_query_var_to_payload(): void {
+		$page = new Admin_Page( $this->make_config() );
+
+		$original_get                          = $_GET;
+		$_GET[ Admin_Page::EDIT_QUERY_VAR ]    = '42';
+
+		try {
+			$page->enqueue( $page );
+
+			$data = wp_scripts()->get_data( Admin_Page::ASSET_HANDLE, 'data' );
+			$this->assertIsString( $data );
+			// `wp_localize_script` stringifies scalar payload values; the
+			// Elm runtime parses `editRuleId` back to an int on the JS side.
+			$this->assertMatchesRegularExpression( '~"editRuleId":"?42"?~', $data, 'editRuleId must be present and equal to 42 when ?pccm_edit=42 is in the request.' );
+		} finally {
+			$_GET = $original_get;
+			wp_dequeue_script( Admin_Page::ASSET_HANDLE );
+			wp_deregister_script( Admin_Page::ASSET_HANDLE );
+		}
+	}
+
+	/**
+	 * @testdox It should omit editRuleId from the localized payload when ?pccm_edit is absent or zero
+	 */
+	public function test_enqueue_omits_edit_rule_id_when_query_var_absent(): void {
+		$page = new Admin_Page( $this->make_config() );
+
+		$original_get = $_GET;
+		unset( $_GET[ Admin_Page::EDIT_QUERY_VAR ] );
+
+		try {
+			$page->enqueue( $page );
+
+			$data = wp_scripts()->get_data( Admin_Page::ASSET_HANDLE, 'data' );
+			$this->assertIsString( $data );
+			$this->assertStringNotContainsString( '"editRuleId"', $data, 'editRuleId must be absent (or zero) when no deep-link is in the request.' );
+		} finally {
+			$_GET = $original_get;
+			wp_dequeue_script( Admin_Page::ASSET_HANDLE );
+			wp_deregister_script( Admin_Page::ASSET_HANDLE );
+		}
+	}
+
 	// -----------------------------------------------------------------
 	// pccm_admin_page_html — replace / restyle the management screen.
 	// -----------------------------------------------------------------

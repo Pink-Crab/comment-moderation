@@ -181,19 +181,58 @@ test.describe( 'admin scaffold', () => {
 		} );
 	} );
 
-	test( 'plugin remains active after Stage 9 conditional rule builder model lands', async ( {
+	test( 'Stage 9: ?pccm_edit={id} from the URL is surfaced as editRuleId on the localized Elm bootstrap payload', async ( {
 		page,
 	} ) => {
-		// Stage 9 introduces the recursive Condition_Group / Operator /
-		// refactored Condition / Conditional_Rule domain model. It is pure
-		// PHP — no admin screen wiring yet — so the only end-to-end claim
-		// available is that loading the plugin (and therefore autoloading
-		// every class added in this stage) does not fatal WordPress.
-		await page.goto( '/wp-admin/plugins.php' );
-		await expect( page ).toHaveURL( /plugins\.php/ );
+		// Stage 9 wires the PHP side of the deep-link-to-edit flow
+		// (rebuild spec §6 "Direct link to a rule"). `Admin_Page::enqueue()`
+		// reads `$_GET['pccm_edit']` via `absint()` and adds it to the
+		// `pccmAdminData` payload as `editRuleId` so the Elm app can open
+		// the matching rule's edit pane on load. The Elm consumer is built
+		// in a later stage; the available e2e claim is therefore that the
+		// PHP boundary surfaces the value (and omits it when absent).
+
+		// 1) No deep-link in the URL → editRuleId is absent / zero.
+		await page.goto(
+			'/wp-admin/options-general.php?page=pinkcrab-comment-moderation'
+		);
 		await expect(
-			page.getByRole( 'row', { name: /PinkCrab Comment Moderation/i } )
+			page.getByRole( 'heading', {
+				name: /Comment Moderation/i,
+				level: 1,
+			} )
 		).toBeVisible();
+		const withoutDeepLink = await page.evaluate(
+			() =>
+				/** @type {any} */ ( window ).pccmAdminData || null
+		);
+		expect( withoutDeepLink ).not.toBeNull();
+		const editIdWhenAbsent = withoutDeepLink.editRuleId;
+		expect(
+			editIdWhenAbsent === undefined ||
+				editIdWhenAbsent === 0 ||
+				editIdWhenAbsent === '0',
+			'editRuleId must be absent or zero when ?pccm_edit is not in the request'
+		).toBeTruthy();
+
+		// 2) `?pccm_edit=42` in the URL → editRuleId is 42 on the payload.
+		await page.goto(
+			'/wp-admin/options-general.php?page=pinkcrab-comment-moderation&pccm_edit=42'
+		);
+		await expect(
+			page.getByRole( 'heading', {
+				name: /Comment Moderation/i,
+				level: 1,
+			} )
+		).toBeVisible();
+		const withDeepLink = await page.evaluate(
+			() =>
+				/** @type {any} */ ( window ).pccmAdminData || null
+		);
+		expect( withDeepLink ).not.toBeNull();
+		// wp_localize_script stringifies scalar payload values; the Elm
+		// runtime parses editRuleId back to an int on the JS side.
+		expect( Number( withDeepLink.editRuleId ) ).toBe( 42 );
 
 		await page.screenshot( {
 			path: path.resolve(
