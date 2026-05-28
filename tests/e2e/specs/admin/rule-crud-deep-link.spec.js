@@ -27,6 +27,16 @@ const SCREENSHOT_PATH = path.resolve(
 	'../../../../.karkinos/shots/stage-11.png'
 );
 
+// Stage 12 (the verify-end-to-end stage) re-runs this same spec as proof
+// the deep-link wiring still holds, and needs its own screenshot artifact
+// to file alongside stage-11's. Capturing both from the one run keeps the
+// fixtures truthful: the stage-12 image is the *same* successful editor
+// surface stage-11 asserted on, not a stale or unrelated re-shot.
+const STAGE_12_SCREENSHOT_PATH = path.resolve(
+	__dirname,
+	'../../../../.karkinos/shots/stage-12.png'
+);
+
 /**
  * Resolve the admin-ajax bootstrap the PHP page localises onto window.
  *
@@ -181,5 +191,9 @@ test.describe( 'comment moderation admin — deep-link to edit (stage 11)', () =
 			} )
 		).toBeVisible();
 		await page.screenshot( { path: SCREENSHOT_PATH, fullPage: true } );
+		await page.screenshot( {
+			path: STAGE_12_SCREENSHOT_PATH,
+			fullPage: true,
+		} );
 	} );
 } );
