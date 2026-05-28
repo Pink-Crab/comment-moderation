@@ -179,6 +179,32 @@ class Test_Admin_Page extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox It should bind wp_set_script_translations() to the admin bundle so i18n:makephp PHP files reach the Elm app
+	 */
+	public function test_enqueue_registers_script_translations_for_admin_bundle(): void {
+		$page = new Admin_Page( $this->make_config() );
+
+		$page->enqueue( $page );
+
+		try {
+			$registered = wp_scripts()->registered[ Admin_Page::ASSET_HANDLE ] ?? null;
+			$this->assertNotNull( $registered, 'Admin script must be registered for translations to attach.' );
+
+			// `wp_set_script_translations()` records the text domain on the
+			// registered WP_Dependency so WP can serve matching PHP files.
+			$this->assertSame( 'pinkcrab-comment-moderation', $registered->textdomain ?? null );
+
+			// And it records the directory it should scan for the i18n:makephp
+			// PHP files — the plugin's `languages/` folder, derived from the
+			// configured plugin path.
+			$this->assertSame( '/var/www/plugin/languages', $registered->translations_path ?? null );
+		} finally {
+			wp_dequeue_script( Admin_Page::ASSET_HANDLE );
+			wp_deregister_script( Admin_Page::ASSET_HANDLE );
+		}
+	}
+
+	/**
 	 * @testdox It should surface ?pccm_edit={id} from the request as editRuleId on the localized Elm bootstrap payload
 	 */
 	public function test_enqueue_surfaces_edit_query_var_to_payload(): void {

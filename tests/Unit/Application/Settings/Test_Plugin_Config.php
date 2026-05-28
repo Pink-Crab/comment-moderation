@@ -165,6 +165,32 @@ class Test_Plugin_Config extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox It should be possible to get the plugin base filesystem path without supplying a sub-path
+	 */
+	public function test_plugin_path_returns_base_when_no_relative_path(): void {
+		$config = new Plugin_Config( $this->make_app_config() );
+
+		$this->assertSame( '/var/www/plugin/', $config->plugin_path() );
+	}
+
+	/**
+	 * @testdox It should be possible to build a filesystem path for any file or directory inside the plugin (e.g. languages/) via the config helper class
+	 */
+	public function test_plugin_path_concatenates_relative_path(): void {
+		$config = new Plugin_Config( $this->make_app_config() );
+
+		$this->assertSame(
+			'/var/www/plugin/languages',
+			$config->plugin_path( 'languages' )
+		);
+		// Leading slashes on the relative path are stripped — only one between base and path.
+		$this->assertSame(
+			'/var/www/plugin/languages',
+			$config->plugin_path( '/languages' )
+		);
+	}
+
+	/**
 	 * @testdox It should be possible to build a filesystem path for a specific asset by passing its relative path to the config helper class
 	 */
 	public function test_asset_path_concatenates_relative_path(): void {

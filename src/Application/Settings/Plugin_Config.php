@@ -89,6 +89,27 @@ final class Plugin_Config {
 	}
 
 	/**
+	 * Absolute filesystem path to a file inside the plugin directory (the
+	 * value behind `path.plugin` in `config/settings.php`). Symmetrical with
+	 * {@see self::plugin_url()} — used by code that needs a directory path
+	 * (e.g. `wp_set_script_translations()` pointing at `languages/`) rather
+	 * than a URL.
+	 *
+	 * @param string $relative Optional path appended to the plugin base path.
+	 *                         Leading slashes are stripped.
+	 *
+	 * @return string
+	 */
+	public function plugin_path( string $relative = '' ): string {
+		$base = $this->app_config->path( 'plugin' );
+		Assert::string( $base, 'App_Config "plugin" path must be configured as a string in config/settings.php.' );
+		if ( '' === $relative ) {
+			return $base;
+		}
+		return rtrim( $base, '/' ) . '/' . ltrim( $relative, '/' );
+	}
+
+	/**
 	 * Absolute URL to a file inside `assets/build/`.
 	 *
 	 * @param string $relative Optional path appended to the assets base URL.

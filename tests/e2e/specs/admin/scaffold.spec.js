@@ -450,24 +450,58 @@ test.describe( 'admin scaffold', () => {
 		} );
 	} );
 
-	test( 'plugin remains active after Stage 17 invisible comment engine lands', async ( {
+	test( 'Stage 17: admin bundle is bound to wp_set_script_translations() so i18n:makephp PHP files reach the Elm app', async ( {
 		page,
 	} ) => {
-		// Stage 17 implements the invisible comment engine: hooks
-		// `pre_comment_approved`, walks the stored rule list first-match-wins,
-		// records the matched rule's stats, fires `pccm_comment_failed_rule`,
-		// and diverts the comment to the matched rule's outcome. There is
-		// still no admin screen — the engine itself never paints UI. The
-		// available end-to-end claim is therefore the same shape as the
-		// preceding pre-UI stages: registering Comment_Engine as a Hookable
-		// and wiring its dependencies through Perique's DI container does
-		// not break plugin activation. The engine's actual behaviour is
-		// exercised by tests/Integration/Engine/Test_Comment_Engine.php.
-		await page.goto( '/wp-admin/plugins.php' );
-		await expect( page ).toHaveURL( /plugins\.php/ );
+		// Stage 17 wires `wp_set_script_translations()` for the admin Elm
+		// bundle handle inside `Admin_Page::enqueue()`, targeting the plugin's
+		// `languages/` directory and the `pinkcrab-comment-moderation` text
+		// domain.
+		//
+		// The strongest contract assertion (textdomain / translations_path on
+		// the registered WP_Dependency) lives in the PHPUnit suite at
+		// tests/Unit/Presentation/Page/Test_Admin_Page.php — wp_localize_script
+		// only emits its per-handle translations `<script>` tag if a matching
+		// .l10n.php / .json translation file is actually present on disk for
+		// the current locale, and at this stage the repo only ships the .pot
+		// template (real per-locale files arrive when translators run the
+		// `internationalize` composer group). The available end-to-end claim
+		// in wp-env is therefore that:
+		//   - the i18n binding doesn't break enqueue: the admin bundle still
+		//     loads onto the page and the Elm app still mounts on its root,
+		//   - the bootstrap data is still localised so the SPA can call back
+		//     to admin-ajax (i.e. the order of `wp_enqueue_script`,
+		//     `wp_set_script_translations`, and `wp_localize_script` is right).
+		await page.goto(
+			'/wp-admin/options-general.php?page=pinkcrab-comment-moderation'
+		);
 		await expect(
-			page.getByRole( 'row', { name: /PinkCrab Comment Moderation/i } )
+			page.getByRole( 'heading', {
+				name: /Comment Moderation/i,
+				level: 1,
+			} )
 		).toBeVisible();
+
+		// 1) Admin bundle is on the page and the Elm app mounted onto it —
+		//    proves the i18n binding didn't break the underlying enqueue.
+		await expect(
+			page.locator( 'script#pinkcrab-comment-moderation-admin-js' )
+		).toHaveCount( 1 );
+		await expect( page.locator( 'div#pccm-admin-root.pccm-app' ) ).toHaveCount(
+			1
+		);
+
+		// 2) The localized bootstrap (`wp_localize_script`'s `-js-extra`
+		//    block) is still emitted alongside our handle — confirms the
+		//    enqueue ordering survived the new translation binding.
+		await expect(
+			page.locator( 'script#pinkcrab-comment-moderation-admin-js-extra' )
+		).toHaveCount( 1 );
+		const bootstrap = await page.evaluate(
+			() => /** @type {any} */ ( window ).pccmAdminData || null
+		);
+		expect( bootstrap ).not.toBeNull();
+		expect( bootstrap.mountId ).toBe( 'pccm-admin-root' );
 
 		await page.screenshot( {
 			path: path.resolve(
