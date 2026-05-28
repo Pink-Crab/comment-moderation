@@ -749,6 +749,53 @@ class Test_Rule_Ajax_Controller extends WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox It should never read the request payload from $_GET — raw_post() must return an empty array when $_POST is empty even if a full payload sits in $_GET
+	 */
+	public function test_raw_post_does_not_fall_back_to_get(): void {
+		// The change removes the historic `$_GET` fallback inside raw_post().
+		// Going through `_handleAjax` cannot exercise this directly because
+		// wp-phpunit's helper writes `action` into `$_POST` before dispatching
+		// (so `$_POST` is never empty during a real AJAX call in the harness).
+		// Calling raw_post() directly via reflection is the only way to assert
+		// the post-only contract — and it is the contract we care about: even
+		// if some upstream layer ever leaves `$_POST` empty, the controller
+		// must NOT silently honour `$_GET`-supplied fields.
+		$saved_post = $_POST;
+		$saved_get  = $_GET;
+		try {
+			$_POST = array();
+			$_GET  = array(
+				'type'          => Rule_Type::REGEX,
+				'name'          => 'Smuggled via GET',
+				'pattern'       => '/casino/i',
+				'comment_parts' => array( 'content' ),
+				'response'      => Response::SPAM,
+			);
+
+			$method = new \ReflectionMethod( Rule_Ajax_Controller::class, 'raw_post' );
+			$method->setAccessible( true );
+
+			$this->assertSame(
+				array(),
+				$method->invoke( $this->controller ),
+				'raw_post() must NOT fall back to $_GET when $_POST is empty.'
+			);
+
+			// And the positive control: when $_POST is populated, it IS read,
+			// so we have not regressed the happy path.
+			$_POST = array( 'pattern' => '/casino/i' );
+			$this->assertSame(
+				array( 'pattern' => '/casino/i' ),
+				$method->invoke( $this->controller ),
+				'raw_post() must still return $_POST when it is populated.'
+			);
+		} finally {
+			$_POST = $saved_post;
+			$_GET  = $saved_get;
+		}
+	}
+
+	/**
 	 * Build a representative Regex_Rule for fixture setup.
 	 *
 	 * @param array<string,mixed> $overrides Optional field overrides.

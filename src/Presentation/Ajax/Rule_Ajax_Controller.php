@@ -818,9 +818,11 @@ final class Rule_Ajax_Controller implements Hookable {
 	}
 
 	/**
-	 * Pull the entire request payload, preferring POST and falling back to
-	 * GET. The caller is responsible for sanitising whatever it reads — this
-	 * accessor is a raw input boundary.
+	 * Pull the entire request payload from `$_POST`. Returns an empty array
+	 * when `$_POST` is empty — the controller never reads from `$_GET`, so
+	 * GET-only requests deliberately surface as a missing payload (the
+	 * validator then rejects them). The caller is responsible for sanitising
+	 * whatever it reads — this accessor is a raw input boundary.
 	 *
 	 * Wrapped so tests / future routing can override the source in one place.
 	 *
@@ -829,14 +831,11 @@ final class Rule_Ajax_Controller implements Hookable {
 	private function raw_post(): array {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended,WordPress.Security.NonceVerification.Missing
 		// Nonce is verified in preflight() before any caller of raw_post() runs.
-		if ( array() !== $_POST ) {
-			return wp_unslash( $_POST );
+		if ( array() === $_POST ) {
+			return array();
 		}
-		if ( array() !== $_GET ) {
-			return wp_unslash( $_GET );
-		}
+		return wp_unslash( $_POST );
 		// phpcs:enable
-		return array();
 	}
 
 	/**
