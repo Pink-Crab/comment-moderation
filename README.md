@@ -89,7 +89,6 @@ the shortcode end-to-end).
 ```
 pinkcrab-comment-moderation/
 ├── pinkcrab-comment-moderation.php       # WordPress plugin entry — header, constants, requirement checks
-├── functions.php             # Prefixed helper functions (loaded BEFORE Perique boots)
 ├── perique-bootstrap.php     # App_Factory()->...->boot()
 ├── type-defs.php             # Constant stubs for phpstan
 ├── config/                   # App_Config, DI rules, registration class list

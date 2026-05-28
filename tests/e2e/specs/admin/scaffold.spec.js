@@ -53,6 +53,44 @@ test.describe( 'admin scaffold', () => {
 		} );
 	} );
 
+	test( 'Stage 3: plugin remains active after the empty functions.php helper-stub is retired', async ( {
+		page,
+	} ) => {
+		// Stage 3 deletes the scaffold's empty root `functions.php` helper-stub
+		// and removes the `require_once …/functions.php` line from the plugin
+		// entry file. No user-facing feature changes — the proof is that
+		// loading the entry file (with the require_once line gone) does not
+		// fatal, the plugin still autoloads, and the Settings → Comment
+		// Moderation page the rest of the rebuild lives on still mounts.
+		await page.goto( '/wp-admin/plugins.php' );
+		await expect( page ).toHaveURL( /plugins\.php/ );
+		await expect(
+			page.getByRole( 'row', { name: /PinkCrab Comment Moderation/i } )
+		).toBeVisible();
+
+		await page.goto(
+			'/wp-admin/options-general.php?page=pinkcrab-comment-moderation'
+		);
+		await expect( page ).toHaveURL(
+			/options-general\.php\?page=pinkcrab-comment-moderation/
+		);
+		await expect(
+			page.getByRole( 'heading', {
+				name: /Comment Moderation/i,
+				level: 1,
+			} )
+		).toBeVisible();
+		await expect( page.locator( '#pccm-admin-root' ) ).toBeAttached();
+
+		await page.screenshot( {
+			path: path.resolve(
+				__dirname,
+				'../../../../.karkinos/shots/stage-3.png'
+			),
+			fullPage: true,
+		} );
+	} );
+
 	test( 'dashboard is reachable for the logged-in administrator', async ( {
 		page,
 	} ) => {

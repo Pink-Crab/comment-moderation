@@ -118,6 +118,5 @@ if ( ! is_file( PINKCRAB_COMMENT_MODERATION_PATH . 'vendor/autoload.php' ) ) {
 // ---------------------------------------------------------------------------
 
 require_once PINKCRAB_COMMENT_MODERATION_PATH . 'vendor/autoload.php';
-require_once PINKCRAB_COMMENT_MODERATION_PATH . 'functions.php';
 
 ( new \PinkCrab\Comment_Moderation\Plugin_Bootstrap( PINKCRAB_COMMENT_MODERATION_PATH ) )->boot();
