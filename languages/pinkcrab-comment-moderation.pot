@@ -1,0 +1,476 @@
+# Copyright (C) 2026 PinkCrab
+# This file is distributed under the GPLv3.
+msgid ""
+msgstr ""
+"Project-Id-Version: PinkCrab Comment Moderation 0.1.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/pinkcrab-comment-moderation\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-05-28T10:35:12+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: pinkcrab-comment-moderation\n"
+
+#. Plugin Name of the plugin
+#: pinkcrab-comment-moderation.php:11
+msgid "PinkCrab Comment Moderation"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: pinkcrab-comment-moderation.php:12
+msgid "https://github.com/Pink-Crab/comment-moderation"
+msgstr ""
+
+#. Description of the plugin
+#: pinkcrab-comment-moderation.php:13
+msgid "Rule-based comment moderation engine for WordPress."
+msgstr ""
+
+#. Author of the plugin
+#: pinkcrab-comment-moderation.php:17
+msgid "PinkCrab"
+msgstr ""
+
+#. Author URI of the plugin
+#: pinkcrab-comment-moderation.php:18
+msgid "https://github.com/Pink-Crab"
+msgstr ""
+
+#. translators: 1: plugin name, 2: required PHP version, 3: current PHP version
+#: dist/pinkcrab-comment-moderation.php:60
+#: pinkcrab-comment-moderation.php:61
+#, php-format
+msgid "%1$s requires PHP %2$s or higher. You are running %3$s."
+msgstr ""
+
+#. translators: 1: plugin name, 2: required WP version, 3: current WP version
+#: dist/pinkcrab-comment-moderation.php:83
+#: pinkcrab-comment-moderation.php:84
+#, php-format
+msgid "%1$s requires WordPress %2$s or higher. You are running %3$s."
+msgstr ""
+
+#. translators: %s: plugin name
+#: dist/pinkcrab-comment-moderation.php:105
+#: pinkcrab-comment-moderation.php:106
+#, php-format
+msgid "%s is missing its composer dependencies. Run `composer install` from the plugin directory."
+msgstr ""
+
+#. translators: %s: name to greet
+#: dist/views/components/hello-world-component.php:25
+#, php-format
+msgid "Hello, %s!"
+msgstr ""
+
+#. translators: 1: outcome verb, 2: rule name, 3: rule description, 4: usage count.
+#: src/Application/Integration/Akismet/Akismet_Integration.php:250
+#, php-format
+msgid "Comment was %1$s by moderation rule: %2$s — %3$s (used %4$d time)"
+msgid_plural "Comment was %1$s by moderation rule: %2$s — %3$s (used %4$d times)"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: 1: outcome verb, 2: rule name, 3: usage count.
+#: src/Application/Integration/Akismet/Akismet_Integration.php:265
+#, php-format
+msgid "Comment was %1$s by moderation rule: %2$s (used %3$d time)"
+msgid_plural "Comment was %1$s by moderation rule: %2$s (used %3$d times)"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/Application/Integration/Akismet/Akismet_Integration.php:319
+msgid "marked as spam"
+msgstr ""
+
+#: src/Application/Integration/Akismet/Akismet_Integration.php:322
+msgid "moved to trash"
+msgstr ""
+
+#: src/Application/Integration/Akismet/Akismet_Integration.php:325
+msgid "held for review"
+msgstr ""
+
+#: src/Application/Integration/Akismet/Akismet_Integration.php:328
+msgid "marked as not spam"
+msgstr ""
+
+#: src/Application/Integration/Akismet/Akismet_Integration.php:330
+msgid "moderated"
+msgstr ""
+
+#: src/Application/Services/Rule_Validator.php:63
+msgid "Unknown rule type."
+msgstr ""
+
+#: src/Application/Services/Rule_Validator.php:81
+#: src/Application/Services/Rule_Validator.php:119
+msgid "Pattern must not be empty."
+msgstr ""
+
+#. translators: %s: the regex expression the admin entered.
+#: src/Application/Services/Rule_Validator.php:85
+#, php-format
+msgid "\"%s\" is not a valid regex expression."
+msgstr ""
+
+#: src/Application/Services/Rule_Validator.php:91
+msgid "Regex rules has no fields selected."
+msgstr ""
+
+#. translators: %s: the comment part token the admin submitted.
+#: src/Application/Services/Rule_Validator.php:96
+#: src/Application/Services/Rule_Validator.php:128
+#, php-format
+msgid "Unknown comment part: \"%s\"."
+msgstr ""
+
+#: src/Application/Services/Rule_Validator.php:123
+msgid "Wildcard rules has no fields selected."
+msgstr ""
+
+#: src/Application/Services/Rule_Validator.php:154
+msgid "Start IP address is not a valid IPv4 address."
+msgstr ""
+
+#: src/Application/Services/Rule_Validator.php:157
+msgid "End IP address is not a valid IPv4 address."
+msgstr ""
+
+#: src/Application/Services/Rule_Validator.php:164
+msgid "The network of the IP address (first 3 parts) must match."
+msgstr ""
+
+#: src/Application/Services/Rule_Validator.php:169
+msgid "Start IP address must be less than or equal to End IP address."
+msgstr ""
+
+#: src/Application/Services/Rule_Validator.php:193
+#: src/Application/Services/Rule_Validator.php:204
+msgid "Conditional rules must contain at least one condition."
+msgstr ""
+
+#: src/Application/Services/Rule_Validator.php:227
+msgid "Every condition group must contain at least one condition."
+msgstr ""
+
+#. translators: %d: 1-indexed condition number.
+#: src/Application/Services/Rule_Validator.php:259
+#, php-format
+msgid "Condition #%d: malformed condition entry."
+msgstr ""
+
+#. translators: %d: 1-indexed condition number.
+#: src/Application/Services/Rule_Validator.php:272
+#, php-format
+msgid "Condition #%d: must have a valid comment part."
+msgstr ""
+
+#. translators: %d: 1-indexed condition number.
+#: src/Application/Services/Rule_Validator.php:281
+#, php-format
+msgid "Condition #%d: must have a valid operator."
+msgstr ""
+
+#. translators: %d: 1-indexed condition number.
+#: src/Application/Services/Rule_Validator.php:289
+#, php-format
+msgid "Condition #%d: value must not be empty."
+msgstr ""
+
+#. translators: 1: 1-indexed condition number; 2: regex value the admin entered.
+#: src/Application/Services/Rule_Validator.php:298
+#, php-format
+msgid "Condition #%1$d: \"%2$s\" is not a valid regex expression."
+msgstr ""
+
+#: src/Presentation/Ajax/Rule_Ajax_Controller.php:188
+#: src/Presentation/Ajax/Rule_Ajax_Controller.php:225
+msgid "Rule not found."
+msgstr ""
+
+#: src/Presentation/Ajax/Rule_Ajax_Controller.php:244
+msgid "Missing rule id."
+msgstr ""
+
+#: src/Presentation/Ajax/Rule_Ajax_Controller.php:254
+msgid "Rule Deleted"
+msgstr ""
+
+#: src/Presentation/Ajax/Rule_Ajax_Controller.php:276
+msgid "All rules cleared"
+msgstr ""
+
+#: src/Presentation/Ajax/Rule_Ajax_Controller.php:315
+msgid "Rule created"
+msgstr ""
+
+#: src/Presentation/Ajax/Rule_Ajax_Controller.php:316
+msgid "Rule updated"
+msgstr ""
+
+#: src/Presentation/Ajax/Rule_Ajax_Controller.php:330
+msgid "Security check failed."
+msgstr ""
+
+#: src/Presentation/Ajax/Rule_Ajax_Controller.php:336
+msgid "You do not have permission to manage moderation rules."
+msgstr ""
+
+#: src/Presentation/Page/Admin_Page.php:150
+#: src/Presentation/Page/Admin_Page.php:159
+#: views/pages/admin-page.php:23
+msgid "Comment Moderation"
+msgstr ""
+
+#: src/Presentation/Page/Admin_Page.php:327
+msgid "Edit Rule"
+msgstr ""
+
+#: wordpress/wp-includes/blocks/widget-group/block.json
+msgctxt "block title"
+msgid "Widget Group"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Duotone name"
+msgid "Dark grayscale"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Duotone name"
+msgid "Grayscale"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Duotone name"
+msgid "Purple and yellow"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Duotone name"
+msgid "Blue and red"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Duotone name"
+msgid "Midnight"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Duotone name"
+msgid "Magenta and yellow"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Duotone name"
+msgid "Purple and green"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Duotone name"
+msgid "Blue and orange"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Gradient name"
+msgid "Vivid cyan blue to vivid purple"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Gradient name"
+msgid "Light green cyan to vivid green cyan"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Gradient name"
+msgid "Luminous vivid amber to luminous vivid orange"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Gradient name"
+msgid "Luminous vivid orange to vivid red"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Gradient name"
+msgid "Very light gray to cyan bluish gray"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Gradient name"
+msgid "Cool to warm spectrum"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Gradient name"
+msgid "Blush light purple"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Gradient name"
+msgid "Blush bordeaux"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Gradient name"
+msgid "Luminous dusk"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Gradient name"
+msgid "Pale ocean"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Gradient name"
+msgid "Electric grass"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Gradient name"
+msgid "Midnight"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Color name"
+msgid "Black"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Color name"
+msgid "Cyan bluish gray"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Color name"
+msgid "White"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Color name"
+msgid "Pale pink"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Color name"
+msgid "Vivid red"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Color name"
+msgid "Luminous vivid orange"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Color name"
+msgid "Luminous vivid amber"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Color name"
+msgid "Light green cyan"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Color name"
+msgid "Vivid green cyan"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Color name"
+msgid "Pale cyan blue"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Color name"
+msgid "Vivid cyan blue"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Color name"
+msgid "Vivid purple"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Aspect ratio name"
+msgid "Square - 1:1"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Aspect ratio name"
+msgid "Standard - 4:3"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Aspect ratio name"
+msgid "Portrait - 3:4"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Aspect ratio name"
+msgid "Classic - 3:2"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Aspect ratio name"
+msgid "Classic Portrait - 2:3"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Aspect ratio name"
+msgid "Wide - 16:9"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Aspect ratio name"
+msgid "Tall - 9:16"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Shadow name"
+msgid "Natural"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Shadow name"
+msgid "Deep"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Shadow name"
+msgid "Sharp"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Shadow name"
+msgid "Outlined"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Shadow name"
+msgid "Crisp"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Font size name"
+msgid "Small"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Font size name"
+msgid "Medium"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Font size name"
+msgid "Large"
+msgstr ""
+
+#: wordpress/wp-includes/theme.json
+msgctxt "Font size name"
+msgid "Extra Large"
+msgstr ""
