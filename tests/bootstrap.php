@@ -50,12 +50,21 @@ require_once $_phpunit_dir . '/includes/functions.php';
 // before any test method runs. The plugin directory is discovered at runtime
 // — the same checkout works whether it's cloned to `pinkcrab-comment-moderation/`
 // locally or `issue-<N>/` under the CI/routine layout.
+//
+// Activation runs on `after_setup_theme` rather than the earlier `muplugins_loaded`
+// because WordPress 6.7 routes `get_plugin_data()` — invoked by
+// `validate_plugin_requirements()` inside `activate_plugin()` — through
+// `_load_textdomain_just_in_time()`, which now emits a doing-it-wrong notice
+// whenever it runs before `after_setup_theme` has fired. Deferring activation
+// to that hook (still well before any test method runs) keeps the activation
+// lifecycle intact while staying inside the new WP 6.7+ load-timing contract.
 tests_add_filter(
-	'muplugins_loaded',
+	'after_setup_theme',
 	static function (): void {
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		activate_plugin( basename( dirname( __DIR__ ) ) . '/pinkcrab-comment-moderation.php' );
-	}
+	},
+	0
 );
 
 // Boot WordPress + the test framework.
