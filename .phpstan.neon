@@ -1,0 +1,43 @@
+includes:
+    - vendor/pink-crab/qa-configs/quality-assurance/phpstan.dist.neon
+
+parameters:
+    level: 8
+    bootstrapFiles:
+        - type-defs.php
+    # Tell johnbillion/wp-compat which file holds the plugin headers
+    # (Requires at least, etc.). Without this it falls back to
+    # `<cwd-basename>.php` / `plugin.php` / `style.css`, none of which exist
+    # — the rule then throws and PHPStan aborts with an internal error.
+    WPCompat:
+        pluginFile: pinkcrab-comment-moderation.php
+    paths:
+        - src
+        - migrations
+    excludePaths:
+        - vendor
+        - node_modules (?)
+        - assets/build
+        - wordpress
+        - scripts/scaffold-init.php
+    ignoreErrors:
+        # Add project-specific phpstan ignores here.
+        #
+        # `wpdb::prepare()` is stubbed as accepting `literal-string`. The
+        # repository builds its SQL by interpolating the trusted table name
+        # (from App_Config) and a pre-built WHERE clause whose user inputs
+        # are bound by `prepare()` itself. The interpolated value is a
+        # plugin-controlled identifier — never user input — so the query
+        # string is safe but no longer typed as `literal-string`.
+        -
+            message: '#^Parameter \#1 \$query of method wpdb::prepare\(\) expects literal-string, non-falsy-string given\.$#'
+            path: src/Infrastructure/Persistence/Wpdb_Rule_Repository.php
+        # App_Factory::module()'s callback parameter is typed as
+        # `callable(Module, ?Registration_Middleware): Module`, not narrowed
+        # to the `class-string<Module_Instance>` first argument. The Pink-Crab
+        # README for both perique-plugin-lifecycle and perique-migration shows
+        # the same `fn(Concrete $m): Concrete => $m->...` pattern, so the
+        # invariance error is a framework typing limitation, not a real bug.
+        -
+            message: '#^Parameter \#2 \$callback of method PinkCrab\\Perique\\Application\\App_Factory::module\(\) expects .* given\.$#'
+            path: src/Plugin_Bootstrap.php

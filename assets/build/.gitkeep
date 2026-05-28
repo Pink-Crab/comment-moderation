@@ -1,0 +1,3 @@
+# Keeps assets/build/ present in git pre-build.
+# The directory itself is ignored (.gitignore) except for this file —
+# `npm run build` writes scripts/ and styles/ subdirectories here.

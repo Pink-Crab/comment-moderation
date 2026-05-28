@@ -1,0 +1,4 @@
+# View_Model classes — small data containers packaging a template path + the
+# data it needs. Render with `$view->view_model( $vm )`. Use these when a
+# template is rendered from multiple call sites and you want to centralise
+# the (template path, data shape) contract.

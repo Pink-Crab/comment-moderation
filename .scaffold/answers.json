@@ -1,0 +1,19 @@
+{
+	"##PLUGIN_NAME##":        "PinkCrab Comment Moderation",
+	"##PLUGIN_SLUG##":        "pinkcrab-comment-moderation",
+	"##PLUGIN_DESCRIPTION##": "Rule-based comment moderation engine for WordPress.",
+	"##PLUGIN_URI##":         "https://github.com/Pink-Crab/comment-moderation",
+	"##PLUGIN_VERSION##":     "0.1.0",
+	"##NAMESPACE##":          "PinkCrab\\Comment_Moderation",
+	"##TEXT_DOMAIN##":        "pinkcrab-comment-moderation",
+	"##FUNCTION_PREFIX##":    "pinkcrab_comment_moderation_",
+	"##CONSTANT_PREFIX##":    "PINKCRAB_COMMENT_MODERATION_",
+	"##COMPOSER_PACKAGE##":   "pinkcrab/comment-moderation",
+	"##AUTHOR_NAME##":        "PinkCrab",
+	"##AUTHOR_EMAIL##":       "hello@pinkcrab.co.uk",
+	"##AUTHOR_URI##":         "https://github.com/Pink-Crab",
+	"##MIN_WP_VERSION##":     "6.0",
+	"##MIN_PHP_VERSION##":    "8.0",
+	"##REST_NAMESPACE##":     "pinkcrab-comment-moderation/v1",
+	"##LICENSE##":            "GPLv3"
+}

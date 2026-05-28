@@ -1,0 +1,19 @@
+{
+	"##PLUGIN_NAME##":        "Example Perique Plugin",
+	"##PLUGIN_SLUG##":        "example-perique-plugin",
+	"##PLUGIN_DESCRIPTION##": "A worked example of the Perique plugin scaffold.",
+	"##PLUGIN_URI##":         "https://github.com/example/example-perique-plugin",
+	"##PLUGIN_VERSION##":     "0.1.0",
+	"##NAMESPACE##":          "Example\\Example_Perique_Plugin",
+	"##TEXT_DOMAIN##":        "example-perique-plugin",
+	"##FUNCTION_PREFIX##":    "example_perique_plugin_",
+	"##CONSTANT_PREFIX##":    "EXAMPLE_PERIQUE_PLUGIN_",
+	"##COMPOSER_PACKAGE##":   "example/example-perique-plugin",
+	"##AUTHOR_NAME##":        "Example Author",
+	"##AUTHOR_EMAIL##":       "author@example.com",
+	"##AUTHOR_URI##":         "https://example.com",
+	"##MIN_WP_VERSION##":     "6.4",
+	"##MIN_PHP_VERSION##":    "8.1",
+	"##REST_NAMESPACE##":     "example-perique-plugin/v1",
+	"##LICENSE##":            "GPL-2.0-or-later"
+}

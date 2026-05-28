@@ -1,0 +1,62 @@
+{
+	"name": "pinkcrab-comment-moderation",
+	"version": "0.1.0",
+	"description": "Rule-based comment moderation engine for WordPress.",
+	"author": {
+		"name": "PinkCrab",
+		"homepage": "https://github.com/Pink-Crab"
+	},
+	"license": "GPL-2.0-or-later",
+	"keywords": [
+		"wordpress",
+		"perique"
+	],
+	"homepage": "https://github.com/Pink-Crab/comment-moderation",
+	"repository": "https://github.com/Pink-Crab/comment-moderation",
+	"bugs": "https://github.com/Pink-Crab/comment-moderation/issues",
+	"engines": {
+		"node": ">=20.0",
+		"npm": ">=10.0"
+	},
+	"devDependencies": {
+		"@csstools/postcss-sass": "^5.0.1",
+		"@playwright/test": "^1.49.1",
+		"@wordpress/browserslist-config": "^6.8.1",
+		"@wordpress/env": "^10.14.0",
+		"@wordpress/postcss-plugins-preset": "^5.8.3",
+		"@wordpress/scripts": "^30.0.6",
+		"dotenv": "^16.4.7",
+		"elm": "^0.19.1-6",
+		"elm-format": "^0.8.7",
+		"elm-review": "^2.13.2",
+		"npm-run-all": "^4.1.5",
+		"postcss-cli": "^10.1.0"
+	},
+	"browserslist": [
+		"extends @wordpress/browserslist-config"
+	],
+	"scripts": {
+		"build": "npm-run-all --sequential build:styles build:elm",
+		"build:scripts": "echo \"build:scripts: no scaffold script bundle to build\"",
+		"build:styles": "if find assets/src/styles -name '*.scss' -type f 2>/dev/null | grep -q .; then postcss \"assets/src/styles/**/*.scss\" --base assets/src/styles --dir assets/build/styles --ext .css; else echo 'build:styles: no .scss sources to compile (skipping)'; fi",
+		"build:elm": "elm make assets/elm/Main.elm --optimize --output=assets/js/admin.elm.js && node scripts/bundle-admin.js",
+		"start": "npm-run-all --parallel start:styles",
+		"start:scripts": "echo \"start:scripts: no scaffold script bundle to watch\"",
+		"start:styles": "if find assets/src/styles -name '*.scss' -type f 2>/dev/null | grep -q .; then postcss \"assets/src/styles/**/*.scss\" --base assets/src/styles --dir assets/build/styles --ext .css --watch; else echo 'start:styles: no .scss sources to watch (skipping)'; fi",
+		"format": "npm-run-all --sequential format:scripts format:styles",
+		"format:scripts": "wp-scripts format assets/src/scripts --no-error-on-unmatched-pattern",
+		"format:styles": "npm run lint:styles -- --fix",
+		"lint": "npm-run-all --sequential lint:scripts lint:styles lint:pkg-json",
+		"lint:scripts": "wp-scripts lint-js assets/src/scripts --no-error-on-unmatched-pattern",
+		"lint:styles": "wp-scripts lint-style \"assets/src/styles/**/*.{css,sass,scss}\" --allow-empty-input",
+		"lint:pkg-json": "wp-scripts lint-pkg-json",
+		"lint:elm": "elm-format --validate assets/elm && elm-review",
+		"check-engines": "wp-scripts check-engines",
+		"check-licenses": "wp-scripts check-licenses",
+		"packages-update": "wp-scripts packages-update",
+		"test:e2e": "playwright test",
+		"test:e2e:ui": "playwright test --ui",
+		"test:e2e:headed": "playwright test --headed",
+		"wp-env": "wp-env"
+	}
+}
