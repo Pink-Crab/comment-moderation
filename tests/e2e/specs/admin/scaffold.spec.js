@@ -53,6 +53,48 @@ test.describe( 'admin scaffold', () => {
 		} );
 	} );
 
+	test( 'Stage 4: plugin remains active after the AJAX controller drops the unused Plugin_Config dependency', async ( {
+		page,
+	} ) => {
+		// Stage 4 strips three dead members from Rule_Ajax_Controller — the
+		// `Plugin_Config $config` constructor parameter (and its property
+		// assignment), the matching `use` import, and the `text_domain()`
+		// accessor that only existed to silence PHPMD's "unused property"
+		// warning. The controller is autowired by Perique (`config/di.php` does
+		// NOT explicitly inject `Plugin_Config`), so removing the parameter is
+		// a no-op for the DI graph. There is no admin screen built yet — the
+		// available end-to-end claim is the same as stages 1/3: the plugin
+		// still autoloads, no fatal escapes from the entry file, and Settings
+		// → Comment Moderation still mounts.
+		await page.goto( '/wp-admin/plugins.php' );
+		await expect( page ).toHaveURL( /plugins\.php/ );
+		await expect(
+			page.getByRole( 'row', { name: /PinkCrab Comment Moderation/i } )
+		).toBeVisible();
+
+		await page.goto(
+			'/wp-admin/options-general.php?page=pinkcrab-comment-moderation'
+		);
+		await expect( page ).toHaveURL(
+			/options-general\.php\?page=pinkcrab-comment-moderation/
+		);
+		await expect(
+			page.getByRole( 'heading', {
+				name: /Comment Moderation/i,
+				level: 1,
+			} )
+		).toBeVisible();
+		await expect( page.locator( '#pccm-admin-root' ) ).toBeAttached();
+
+		await page.screenshot( {
+			path: path.resolve(
+				__dirname,
+				'../../../../.karkinos/shots/stage-4.png'
+			),
+			fullPage: true,
+		} );
+	} );
+
 	test( 'Stage 3: plugin remains active after the empty functions.php helper-stub is retired', async ( {
 		page,
 	} ) => {

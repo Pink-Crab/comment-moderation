@@ -20,7 +20,6 @@ namespace PinkCrab\Comment_Moderation\Tests\Integration\Ajax;
 use DateTimeImmutable;
 use DateTimeZone;
 use PinkCrab\Comment_Moderation\Application\Services\Rule_Validator;
-use PinkCrab\Comment_Moderation\Application\Settings\Plugin_Config;
 use PinkCrab\Comment_Moderation\Domain\Rule\Comment_Part;
 use PinkCrab\Comment_Moderation\Domain\Rule\Comment_Parts;
 use PinkCrab\Comment_Moderation\Domain\Rule\Regex_Rule;
@@ -93,8 +92,7 @@ class Test_Rule_Ajax_Controller extends WP_Ajax_UnitTestCase {
 
 		$this->controller = new Rule_Ajax_Controller(
 			$this->repo,
-			new Rule_Validator(),
-			new Plugin_Config( $app_config )
+			new Rule_Validator()
 		);
 
 		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );

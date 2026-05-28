@@ -34,7 +34,6 @@ use DateTimeImmutable;
 use DateTimeZone;
 use InvalidArgumentException;
 use PinkCrab\Comment_Moderation\Application\Services\Rule_Validator;
-use PinkCrab\Comment_Moderation\Application\Settings\Plugin_Config;
 use PinkCrab\Comment_Moderation\Domain\Rule\Combinator;
 use PinkCrab\Comment_Moderation\Domain\Rule\Comment_Part;
 use PinkCrab\Comment_Moderation\Domain\Rule\Comment_Parts;
@@ -98,18 +97,14 @@ final class Rule_Ajax_Controller implements Hookable {
 	public const ACTION_CLEAR  = self::ACTION_PREFIX . 'clear_rules';
 
 	/**
-	 * Construct with the rule persistence port, the boundary validator, and the
-	 * plugin's typed config wrapper (used only for the text domain on the few
-	 * translated error strings).
+	 * Construct with the rule persistence port and the boundary validator.
 	 *
 	 * @param Rule_Repository $repository Rule persistence port.
 	 * @param Rule_Validator  $validator  Save-time validation service.
-	 * @param Plugin_Config   $config     Plugin config wrapper.
 	 */
 	public function __construct(
 		private Rule_Repository $repository,
-		private Rule_Validator $validator,
-		private Plugin_Config $config
+		private Rule_Validator $validator
 	) {}
 
 	/**
@@ -856,16 +851,5 @@ final class Rule_Ajax_Controller implements Hookable {
 	private function raw_field( string $key ): mixed {
 		$post = $this->raw_post();
 		return $post[ $key ] ?? '';
-	}
-
-	/**
-	 * Internal accessor for the plugin's text domain. Exposed to suppress an
-	 * "unused property" PHPMD warning on `$config` while leaving the dependency
-	 * wired for future use (e.g. per-error help links).
-	 *
-	 * @return string
-	 */
-	public function text_domain(): string {
-		return $this->config->text_domain();
 	}
 }
