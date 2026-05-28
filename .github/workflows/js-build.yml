@@ -41,6 +41,4 @@ jobs:
         run: npm run build
 
       - name: Verify build output exists
-        run: |
-          test -f assets/build/scripts/hello-world.js
-          test -f assets/build/styles/hello-world.css
+        run: test -f assets/js/admin.js

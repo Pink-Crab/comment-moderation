@@ -13,6 +13,46 @@ const path = require( 'path' );
  * projects.
  */
 test.describe( 'admin scaffold', () => {
+	test( 'Stage 1: plugin remains active and admin page loads after Hello_World scaffold removal', async ( {
+		page,
+	} ) => {
+		// Stage 1 retires the scaffold Hello_World Hookable, its View Component,
+		// its kebab-case template, its asset sources, and its integration test;
+		// it also trims the now-orphaned npm `build:scripts`/`start:scripts`
+		// wiring and rewrites the CI job's `Verify build output exists` step.
+		// No user-facing feature changes — the proof is that the plugin still
+		// autoloads (no fatal from a class deleted out from under
+		// config/registration.php) and the Settings → Comment Moderation page
+		// the rest of the rebuild lives on still mounts.
+		await page.goto( '/wp-admin/plugins.php' );
+		await expect( page ).toHaveURL( /plugins\.php/ );
+		await expect(
+			page.getByRole( 'row', { name: /PinkCrab Comment Moderation/i } )
+		).toBeVisible();
+
+		await page.goto(
+			'/wp-admin/options-general.php?page=pinkcrab-comment-moderation'
+		);
+		await expect( page ).toHaveURL(
+			/options-general\.php\?page=pinkcrab-comment-moderation/
+		);
+		await expect(
+			page.getByRole( 'heading', {
+				name: /Comment Moderation/i,
+				level: 1,
+			} )
+		).toBeVisible();
+		await expect( page.locator( '#pccm-admin-root' ) ).toBeAttached();
+
+		await page.screenshot( {
+			path: path.resolve(
+				__dirname,
+				'../../../../.karkinos/shots/stage-1.png'
+			),
+			fullPage: true,
+		} );
+	} );
+
 	test( 'dashboard is reachable for the logged-in administrator', async ( {
 		page,
 	} ) => {

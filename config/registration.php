@@ -25,9 +25,6 @@ defined( 'ABSPATH' ) || exit;
 
 return array(
 
-	// Hookables (core middleware — no module required).
-	\PinkCrab\Comment_Moderation\Presentation\Hook\Hello_World::class,
-
 	// Invisible comment engine — hooks `pre_comment_approved` and diverts
 	// matching comments to the rule's outcome (rebuild spec §9).
 	\PinkCrab\Comment_Moderation\Application\Engine\Comment_Engine::class,

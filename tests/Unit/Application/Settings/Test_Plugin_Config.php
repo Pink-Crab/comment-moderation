@@ -108,13 +108,13 @@ class Test_Plugin_Config extends WP_UnitTestCase {
 		);
 
 		$this->assertSame(
-			'https://example.org/wp-content/plugins/my-plugin/assets/build/scripts/hello-world.js',
-			$config->asset_url( 'scripts/hello-world.js' )
+			'https://example.org/wp-content/plugins/my-plugin/assets/build/scripts/admin.js',
+			$config->asset_url( 'scripts/admin.js' )
 		);
 		// Leading slashes on the relative path are stripped — only one between base and path.
 		$this->assertSame(
-			'https://example.org/wp-content/plugins/my-plugin/assets/build/styles/hello-world.css',
-			$config->asset_url( '/styles/hello-world.css' )
+			'https://example.org/wp-content/plugins/my-plugin/assets/build/styles/admin.css',
+			$config->asset_url( '/styles/admin.css' )
 		);
 	}
 
@@ -171,13 +171,13 @@ class Test_Plugin_Config extends WP_UnitTestCase {
 		$config = new Plugin_Config( $this->make_app_config() );
 
 		$this->assertSame(
-			'/var/www/plugin/assets/build/scripts/hello-world.js',
-			$config->asset_path( 'scripts/hello-world.js' )
+			'/var/www/plugin/assets/build/scripts/admin.js',
+			$config->asset_path( 'scripts/admin.js' )
 		);
 		// Leading slashes on the relative path are stripped — only one between base and path.
 		$this->assertSame(
-			'/var/www/plugin/assets/build/styles/hello-world.css',
-			$config->asset_path( '/styles/hello-world.css' )
+			'/var/www/plugin/assets/build/styles/admin.css',
+			$config->asset_path( '/styles/admin.css' )
 		);
 	}
 

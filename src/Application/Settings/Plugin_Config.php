@@ -18,8 +18,8 @@ use Webmozart\Assert\Assert;
  *
  * Inject this in your own classes instead of `App_Config` directly when you
  * want method names that read in your domain's language — e.g.
- * `$config->asset_url( 'scripts/hello-world.js' )` rather than
- * `$app_config->asset_url() . '/scripts/hello-world.js'`. The wrapper also
+ * `$config->asset_url( 'scripts/admin.js' )` rather than
+ * `$app_config->asset_url() . '/scripts/admin.js'`. The wrapper also
  * gives you a single place to add caching or memoisation later.
  *
  * Perique auto-wires `App_Config` (it's pre-registered for DI), so this

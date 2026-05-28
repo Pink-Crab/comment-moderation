@@ -20,8 +20,8 @@ use WP_UnitTestCase;
  *
  * Kept reflection-only on purpose — actually invoking boot() registers Perique
  * globally and would collide with the live boot triggered by activate_plugin()
- * in tests/bootstrap.php. The contract is what stage 3 introduces; the boot
- * side effect is already exercised by tests/Integration/Test_Hello_World.
+ * in tests/bootstrap.php. The boot side effect is exercised end-to-end by the
+ * integration suite (every test there boots the plugin once via the bootstrap).
  *
  * @group unit
  */

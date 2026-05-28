@@ -25,9 +25,9 @@ template by, in order:
 3. A `public function template(): ?string` method on the class.
 4. The class name converted to kebab-case.
 
-`Hello_World_Component` uses option 4 — kebab-case of `Hello_World_Component`
-is `hello-world-component`, so its template is
-[components/hello-world-component.php](components/hello-world-component.php).
+For example, a hypothetical `My_Card_Component` would use option 4 — kebab-case
+of `My_Card_Component` is `my-card-component`, so its template would be
+`views/components/my-card-component.php`.
 
 Inside the template `$this` is bound to the View (Renderable), not the
 Component. You read component properties as `$this->name` (etc.) — Perique
