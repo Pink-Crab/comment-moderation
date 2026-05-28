@@ -73,7 +73,17 @@
         "packages-update": [
             "@composer clear-cache",
             "@composer update --prefer-stable --ignore-platform-reqs --no-interaction"
-        ]
+        ],
+        "internationalize": [
+            "@i18n:makepot",
+            "@i18n:updatepo",
+            "@i18n:makemo",
+            "@i18n:makephp"
+        ],
+        "i18n:makepot":  "wp i18n make-pot ./ --slug=pinkcrab-comment-moderation",
+        "i18n:updatepo": "wp i18n update-po ./languages/pinkcrab-comment-moderation.pot",
+        "i18n:makemo":   "wp i18n make-mo ./languages/",
+        "i18n:makephp":  "wp i18n make-php ./languages/"
     },
     "config": {
         "allow-plugins": {
