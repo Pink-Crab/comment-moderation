@@ -243,17 +243,124 @@ test.describe( 'admin scaffold', () => {
 		} );
 	} );
 
-	test( 'plugin remains active after Stage 10 domain-model unit tests land', async ( {
+	test( 'Stage 10: ?pccm_edit={id} URL opens the matching rule\'s editor pre-filled in the Elm app', async ( {
 		page,
 	} ) => {
-		// Stage 10 only adds PHPUnit coverage for the rule / condition-tree
-		// domain model — no admin wiring exists yet. The available end-to-end
-		// claim is the same as stage 9: the plugin still autoloads and stays
-		// active on the plugins screen.
-		await page.goto( '/wp-admin/plugins.php' );
-		await expect( page ).toHaveURL( /plugins\.php/ );
+		// Stage 10 wires the JS + Elm consumer side of the deep-link the
+		// Stage 9 PHP enqueue already surfaces on `pccmAdminData.editRuleId`
+		// (rebuild spec §6 "Direct link to a rule"). The boot snippet forwards
+		// the id into the Elm `flags` object; `flagsDecoder` reads it as an
+		// optional `Maybe Int`; `init` dispatches the existing `get_rule`
+		// admin-ajax call alongside the initial list and, on success, opens
+		// the editor pre-filled with the stored values.
+		//
+		// Verify end-to-end: seed a real Regex rule through admin-ajax, then
+		// land on the page with `?pccm_edit={id}` in the URL and assert that
+		// the editor mounts open with that rule's stored fields populated.
+
+		// 1) Seed a rule we can deep-link to.
+		await page.goto(
+			'/wp-admin/options-general.php?page=pinkcrab-comment-moderation'
+		);
 		await expect(
-			page.getByRole( 'row', { name: /PinkCrab Comment Moderation/i } )
+			page.getByRole( 'heading', {
+				name: /Comment Moderation/i,
+				level: 1,
+			} )
+		).toBeVisible();
+		const bootstrap = await page.evaluate(
+			() => /** @type {any} */ ( window ).pccmAdminData
+		);
+		expect( bootstrap ).toBeTruthy();
+
+		// Reset the rules table so the deep-linked id is the only row we
+		// have to reason about and the spec is repeatable.
+		await page.evaluate( async ( data ) => {
+			const params = new URLSearchParams();
+			params.set( 'action', data.ajaxActions.clear );
+			params.set( '_wpnonce', data.ajaxNonce );
+			await fetch( data.ajaxUrl, {
+				method: 'POST',
+				credentials: 'include',
+				body: params,
+			} );
+		}, bootstrap );
+
+		const seeded = await page.evaluate( async ( data ) => {
+			const params = new URLSearchParams();
+			params.set( 'action', data.ajaxActions.create );
+			params.set( '_wpnonce', data.ajaxNonce );
+			params.set( 'type', 'regex' );
+			params.set( 'name', 'Stage 10 deep-link target' );
+			params.set(
+				'description',
+				'Seeded by stage 10 to verify the Elm deep-link.'
+			);
+			params.set( 'pattern', '/casino|gambling/i' );
+			params.append( 'comment_parts[]', 'content' );
+			params.append( 'comment_parts[]', 'email' );
+			params.set( 'response', 'spam' );
+			const response = await fetch( data.ajaxUrl, {
+				method: 'POST',
+				credentials: 'include',
+				body: params,
+			} );
+			return response.json();
+		}, bootstrap );
+		expect( seeded.success ).toBe( true );
+		const deepLinkId = seeded.data.rule.id;
+		expect( typeof deepLinkId ).toBe( 'number' );
+
+		// 2) Land on the screen with `?pccm_edit={id}` — the editor must
+		//    open pre-filled with the seeded rule's values without any
+		//    further user interaction.
+		await page.goto(
+			`/wp-admin/options-general.php?page=pinkcrab-comment-moderation&pccm_edit=${ deepLinkId }`
+		);
+		await expect(
+			page.getByRole( 'heading', {
+				name: /Edit Regular Expression Rule/i,
+				level: 2,
+			} )
+		).toBeVisible();
+		await expect( page.locator( '#pccm-rule-name' ) ).toHaveValue(
+			'Stage 10 deep-link target'
+		);
+		await expect( page.locator( '#pccm-rule-pattern' ) ).toHaveValue(
+			'/casino|gambling/i'
+		);
+		await expect( page.locator( '#pccm-part-content' ) ).toBeChecked();
+		await expect( page.locator( '#pccm-part-email' ) ).toBeChecked();
+		await expect( page.locator( '#pccm-response-spam' ) ).toBeChecked();
+
+		// 3) Cancel: the editor closes and the rule remains in the list.
+		await page.getByRole( 'button', { name: 'Cancel' } ).click();
+		await expect( page.locator( '.pccm-editor' ) ).toHaveCount( 0 );
+		await expect(
+			page.locator( '.pccm-rule', {
+				hasText: 'Stage 10 deep-link target',
+			} )
+		).toBeVisible();
+
+		// 4) No deep-link in the URL → the editor stays closed on load.
+		await page.goto(
+			'/wp-admin/options-general.php?page=pinkcrab-comment-moderation'
+		);
+		await expect(
+			page.getByRole( 'heading', { name: 'Rules', level: 2 } )
+		).toBeVisible();
+		await expect( page.locator( '.pccm-editor' ) ).toHaveCount( 0 );
+
+		// 5) Re-open with the deep-link so the screenshot captures the
+		//    primary changed screen for this stage (the pre-filled editor).
+		await page.goto(
+			`/wp-admin/options-general.php?page=pinkcrab-comment-moderation&pccm_edit=${ deepLinkId }`
+		);
+		await expect(
+			page.getByRole( 'heading', {
+				name: /Edit Regular Expression Rule/i,
+				level: 2,
+			} )
 		).toBeVisible();
 
 		await page.screenshot( {

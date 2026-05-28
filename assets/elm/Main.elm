@@ -38,6 +38,7 @@ type alias Flags =
     , ajaxNonce : String
     , ajaxActions : AjaxActions
     , pageSlug : String
+    , editRuleId : Maybe Int
     }
 
 
@@ -53,11 +54,26 @@ type alias AjaxActions =
 
 flagsDecoder : Decoder Flags
 flagsDecoder =
-    D.map4 Flags
+    D.map5 Flags
         (D.field "ajaxUrl" D.string)
         (D.field "ajaxNonce" D.string)
         (D.field "ajaxActions" actionsDecoder)
         (D.field "pageSlug" D.string)
+        editRuleIdDecoder
+
+
+{-| Decode the optional `editRuleId` field surfaced by `Admin_Page::enqueue()`
+when the request URL carries `?pccm_edit={id}`. The boot snippet already
+normalises the value to a positive integer or `null` before handing it to
+Elm, so the decoder only has to tolerate the field being absent (older
+bootstraps) or explicitly null (no deep-link in this request).
+-}
+editRuleIdDecoder : Decoder (Maybe Int)
+editRuleIdDecoder =
+    D.oneOf
+        [ D.field "editRuleId" (D.nullable D.int)
+        , D.succeed Nothing
+        ]
 
 
 actionsDecoder : Decoder AjaxActions
@@ -820,6 +836,7 @@ type Msg
     | GotSaveResult (Result Http.Error SaveResponse)
     | GotDeleteResult (Result Http.Error MessageResponse)
     | GotClearResult (Result Http.Error MessageResponse)
+    | GotEditRule (Result Http.Error Rule)
     | TypeToAddChanged String
     | AddRuleClicked
     | ClearAllRulesClicked
@@ -914,6 +931,15 @@ messageResponseDecoder =
         )
 
 
+{-| The `get_rule` endpoint replies with `{ data: { rule: … } }` — strip
+the envelope so the deep-link `GotEditRule` handler works directly with a
+decoded Rule.
+-}
+getRuleResponseDecoder : Decoder Rule
+getRuleResponseDecoder =
+    D.field "data" (D.field "rule" ruleDecoder)
+
+
 
 -- INIT ------------------------------------------------------------------------
 
@@ -932,8 +958,22 @@ init : E.Value -> ( Model, Cmd Msg )
 init raw =
     case D.decodeValue flagsDecoder raw of
         Ok flags ->
+            let
+                -- Rebuild spec §6: when the request URL carried
+                -- `?pccm_edit={id}` the PHP enqueue surfaced the id on the
+                -- bootstrap payload. Fire the existing `get_rule` AJAX
+                -- endpoint alongside the initial list so the editor opens
+                -- pre-filled as soon as the rule comes back.
+                deepLinkCmd =
+                    case flags.editRuleId of
+                        Just id ->
+                            getRuleByIdCmd flags id
+
+                        Nothing ->
+                            Cmd.none
+            in
             ( initialModel flags Nothing
-            , listRulesCmd flags emptyFilter 1
+            , Cmd.batch [ listRulesCmd flags emptyFilter 1, deepLinkCmd ]
             )
 
         Err e ->
@@ -955,6 +995,7 @@ emptyFlags =
         , clear = ""
         }
     , pageSlug = ""
+    , editRuleId = Nothing
     }
 
 
@@ -1031,6 +1072,21 @@ update msg model =
 
         GotClearResult result ->
             handleMessage model result
+
+        GotEditRule result ->
+            case result of
+                Ok rule ->
+                    -- Rebuild spec §6 "Direct link to a rule": surface the
+                    -- pre-fetched rule by opening the editor immediately, in
+                    -- the same shape an explicit `Edit` click would.
+                    ( { model | editor = EditorOpen rule, banner = NoBanner }
+                    , Cmd.none
+                    )
+
+                Err err ->
+                    ( { model | banner = ErrorBanner (errorToBanner err) }
+                    , Cmd.none
+                    )
 
         TypeToAddChanged value ->
             ( { model | typeToAdd = value }, Cmd.none )
@@ -1481,6 +1537,25 @@ clearRulesCmd flags =
                 , ( "_wpnonce", flags.ajaxNonce )
                 ]
         , expect = Http.expectJson GotClearResult messageResponseDecoder
+        }
+
+
+{-| Fetch one rule via the shared `get_rule` AJAX endpoint so the deep-link
+flow (`?pccm_edit={id}`) can open the editor pre-filled on load. Reuses
+the same admin-ajax action the list/edit path uses, so there is exactly
+one server-side surface for "load a single rule by id".
+-}
+getRuleByIdCmd : Flags -> Int -> Cmd Msg
+getRuleByIdCmd flags id =
+    Http.post
+        { url = flags.ajaxUrl
+        , body =
+            buildFormBody
+                [ ( "action", flags.ajaxActions.get )
+                , ( "_wpnonce", flags.ajaxNonce )
+                , ( "id", String.fromInt id )
+                ]
+        , expect = Http.expectJson GotEditRule getRuleResponseDecoder
         }
 
 

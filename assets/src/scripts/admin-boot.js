@@ -26,6 +26,24 @@
 		return;
 	}
 
+	// `wp_localize_script` stringifies scalar payload values, so
+	// `editRuleId` arrives as either a string ("42"), a number (42), or is
+	// absent when no `?pccm_edit={id}` deep-link was in the request URL.
+	// Normalise to a positive integer (or null) before handing it to Elm so
+	// `flagsDecoder` only ever sees the two shapes it expects.
+	let editRuleId = null;
+	const rawEditRuleId = data.editRuleId;
+	if (
+		rawEditRuleId !== undefined &&
+		rawEditRuleId !== null &&
+		rawEditRuleId !== ''
+	) {
+		const parsed = parseInt( rawEditRuleId, 10 );
+		if ( Number.isFinite( parsed ) && parsed > 0 ) {
+			editRuleId = parsed;
+		}
+	}
+
 	window.Elm.Main.init( {
 		node,
 		flags: {
@@ -33,6 +51,7 @@
 			ajaxNonce: data.ajaxNonce || '',
 			ajaxActions: data.ajaxActions || {},
 			pageSlug: data.pageSlug || '',
+			editRuleId,
 		},
 	} );
 } )();
