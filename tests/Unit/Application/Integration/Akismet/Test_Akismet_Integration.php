@@ -130,13 +130,61 @@ class Test_Akismet_Integration extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Build an empty submission — the listener does not inspect any of the
-	 * submission fields, but the action signature still requires one.
+	 * Build the submission the deferred closure identity-checks against.
+	 * The values mirror the row inserted by `insert_matching_comment()` so
+	 * the production identity check (`get_comment()` → field-by-field
+	 * compare) accepts dispatch through to the gateway.
 	 *
 	 * @return Comment_Submission
 	 */
 	private function submission(): Comment_Submission {
 		return new Comment_Submission( 'Alice', 'alice@example.com', '', '203.0.113.5', 'Mozilla/5.0', 'Hi!' );
+	}
+
+	/**
+	 * Insert a real comment row whose author email / IP / content match the
+	 * submission returned by `submission()`. The cross-closure coordination
+	 * added in stage 6 verifies the inserted comment against the captured
+	 * submission before dispatching to the Akismet gateway, so the tests
+	 * that drive `on_failed_rule()` → `comment_post` need a real row to
+	 * pass the identity check.
+	 *
+	 * @return integer Inserted comment id.
+	 */
+	private function insert_matching_comment(): int {
+		$post_id = self::factory()->post->create();
+		return (int) self::factory()->comment->create(
+			array(
+				'comment_post_ID'      => $post_id,
+				'comment_author'       => 'Alice',
+				'comment_author_email' => 'alice@example.com',
+				'comment_author_IP'    => '203.0.113.5',
+				'comment_agent'        => 'Mozilla/5.0',
+				'comment_content'      => 'Hi!',
+			)
+		);
+	}
+
+	/**
+	 * Insert a real comment row whose author email / IP / content **do
+	 * not** match `submission()` — used to assert the identity check
+	 * refuses to dispatch when WordPress fires `comment_post` for an
+	 * unrelated insert in the same request.
+	 *
+	 * @return integer Inserted comment id.
+	 */
+	private function insert_unrelated_comment(): int {
+		$post_id = self::factory()->post->create();
+		return (int) self::factory()->comment->create(
+			array(
+				'comment_post_ID'      => $post_id,
+				'comment_author'       => 'Mallory',
+				'comment_author_email' => 'mallory@evil.tld',
+				'comment_author_IP'    => '198.51.100.9',
+				'comment_agent'        => 'evil-bot/1.0',
+				'comment_content'      => 'unrelated comment body',
+			)
+		);
 	}
 
 	// -----------------------------------------------------------------
@@ -269,10 +317,11 @@ class Test_Akismet_Integration extends WP_UnitTestCase {
 
 		// times_used=13 in-memory + 1 (engine has already incremented the DB)
 		// = the "(used 14 times)" the rebuild-spec worked example shows.
-		$rule = $this->rule( Response::spam(), 'Block spam domain', 'Catches the noisy domain we keep hearing about.', 13 );
+		$rule       = $this->rule( Response::spam(), 'Block spam domain', 'Catches the noisy domain we keep hearing about.', 13 );
+		$comment_id = $this->insert_matching_comment();
 
 		$integration->on_failed_rule( $rule, $this->submission(), array() );
-		do_action( 'comment_post', 7, 'spam', array() );
+		do_action( 'comment_post', $comment_id, 'spam', array() );
 
 		$this->assertCount( 1, $gateway->history_notes );
 		$message = $gateway->history_notes[0]['message'];
@@ -289,10 +338,11 @@ class Test_Akismet_Integration extends WP_UnitTestCase {
 		$gateway     = new Fake_Akismet_Gateway( true );
 		$integration = new Akismet_Integration( $gateway );
 
-		$rule = $this->rule( Response::trash(), 'Quiet block', null, 0 );
+		$rule       = $this->rule( Response::trash(), 'Quiet block', null, 0 );
+		$comment_id = $this->insert_matching_comment();
 
 		$integration->on_failed_rule( $rule, $this->submission(), array() );
-		do_action( 'comment_post', 9, 'trash', array() );
+		do_action( 'comment_post', $comment_id, 'trash', array() );
 
 		$message = $gateway->history_notes[0]['message'];
 		$this->assertStringNotContainsString( '—', $message, 'No description means no em-dash separator in the note.' );
@@ -318,8 +368,10 @@ class Test_Akismet_Integration extends WP_UnitTestCase {
 			new Usage_Stats( 0, null, $this->now )
 		);
 
+		$comment_id = $this->insert_matching_comment();
+
 		$integration->on_failed_rule( $rule, $this->submission(), array() );
-		do_action( 'comment_post', 12, 'trash', array() );
+		do_action( 'comment_post', $comment_id, 'trash', array() );
 
 		$message = $gateway->history_notes[0]['message'];
 		$this->assertStringContainsString( 'Ip Range', $message, 'Unnamed rules must fall back to a readable type label.' );
@@ -336,6 +388,8 @@ class Test_Akismet_Integration extends WP_UnitTestCase {
 		$gateway     = new Fake_Akismet_Gateway( true );
 		$integration = new Akismet_Integration( $gateway );
 
+		$comment_id = $this->insert_matching_comment();
+
 		$integration->on_failed_rule( $this->rule( Response::spam() ), $this->submission(), array() );
 
 		// Until comment_post fires, no gateway calls should have happened —
@@ -344,11 +398,11 @@ class Test_Akismet_Integration extends WP_UnitTestCase {
 		$this->assertSame( array(), $gateway->history_notes );
 		$this->assertSame( array(), $gateway->spam_reports );
 
-		do_action( 'comment_post', 555, 'spam', array() );
+		do_action( 'comment_post', $comment_id, 'spam', array() );
 
 		$this->assertCount( 1, $gateway->history_notes );
-		$this->assertSame( 555, $gateway->history_notes[0]['comment_id'] );
-		$this->assertSame( array( 555 ), $gateway->spam_reports );
+		$this->assertSame( $comment_id, $gateway->history_notes[0]['comment_id'] );
+		$this->assertSame( array( $comment_id ), $gateway->spam_reports );
 	}
 
 	/**
@@ -358,13 +412,16 @@ class Test_Akismet_Integration extends WP_UnitTestCase {
 		$gateway     = new Fake_Akismet_Gateway( true );
 		$integration = new Akismet_Integration( $gateway );
 
+		$matching_id  = $this->insert_matching_comment();
+		$unrelated_id = $this->insert_unrelated_comment();
+
 		$integration->on_failed_rule( $this->rule( Response::spam() ), $this->submission(), array() );
 
-		do_action( 'comment_post', 111, 'spam', array() );
-		do_action( 'comment_post', 222, 'spam', array() );
+		do_action( 'comment_post', $matching_id, 'spam', array() );
+		do_action( 'comment_post', $unrelated_id, 'spam', array() );
 
 		$this->assertCount( 1, $gateway->history_notes, 'A second unrelated insert in the same request must not re-trigger the same deferred handler.' );
-		$this->assertSame( array( 111 ), $gateway->spam_reports );
+		$this->assertSame( array( $matching_id ), $gateway->spam_reports );
 	}
 
 	/**
@@ -382,5 +439,143 @@ class Test_Akismet_Integration extends WP_UnitTestCase {
 
 		$this->assertSame( array(), $gateway->history_notes );
 		$this->assertSame( array(), $gateway->spam_reports );
+	}
+
+	// -----------------------------------------------------------------
+	// Cross-closure coordination + identity verification (stage 6)
+	// -----------------------------------------------------------------
+
+	/**
+	 * @testdox It should refuse to dispatch when comment_post fires for a comment whose fields do not match the captured submission
+	 */
+	public function test_identity_check_skips_dispatch_when_comment_does_not_match_submission(): void {
+		$gateway     = new Fake_Akismet_Gateway( true );
+		$integration = new Akismet_Integration( $gateway );
+
+		$unrelated_id = $this->insert_unrelated_comment();
+
+		$integration->on_failed_rule( $this->rule( Response::spam() ), $this->submission(), array() );
+		do_action( 'comment_post', $unrelated_id, 'spam', array() );
+
+		$this->assertSame( array(), $gateway->history_notes, 'A comment whose email/IP/content do not match the submission must not be reported to Akismet.' );
+		$this->assertSame( array(), $gateway->spam_reports );
+	}
+
+	/**
+	 * @testdox It should refuse to dispatch when comment_post fires for an id that has no comment row
+	 */
+	public function test_identity_check_skips_dispatch_when_comment_id_does_not_exist(): void {
+		$gateway     = new Fake_Akismet_Gateway( true );
+		$integration = new Akismet_Integration( $gateway );
+
+		$integration->on_failed_rule( $this->rule( Response::spam() ), $this->submission(), array() );
+
+		// 9_999_999 is well beyond any factory-inserted comment in this test.
+		do_action( 'comment_post', 9_999_999, 'spam', array() );
+
+		$this->assertSame( array(), $gateway->history_notes );
+		$this->assertSame( array(), $gateway->spam_reports );
+	}
+
+	/**
+	 * @testdox It should remove its comment_post listener when the identity check fails so a later matching comment_post does not retrigger it
+	 */
+	public function test_identity_mismatch_removes_closure_so_later_matching_post_does_not_retrigger(): void {
+		$gateway     = new Fake_Akismet_Gateway( true );
+		$integration = new Akismet_Integration( $gateway );
+
+		$unrelated_id = $this->insert_unrelated_comment();
+		$matching_id  = $this->insert_matching_comment();
+
+		$integration->on_failed_rule( $this->rule( Response::spam() ), $this->submission(), array() );
+
+		// First insert is the unrelated comment — closure must peel itself off
+		// rather than dispatching the wrong id to Akismet.
+		do_action( 'comment_post', $unrelated_id, 'spam', array() );
+		// Without the self-removal, the closure would still be listening and
+		// would now dispatch — which is the regression this guard prevents.
+		do_action( 'comment_post', $matching_id, 'spam', array() );
+
+		$this->assertSame( array(), $gateway->history_notes );
+		$this->assertSame( array(), $gateway->spam_reports );
+	}
+
+	/**
+	 * @testdox It should dispatch each diversion's comment exactly once across multiple comment_post fires in the same request
+	 *
+	 * Akismet_Integration is registered as a Perique-shared Hookable, so two
+	 * `on_failed_rule` invocations within the same request share the same
+	 * `$dispatched_comment_ids` ledger. Their closures must not interfere:
+	 * the closure captured for submission A dispatches A and the closure
+	 * captured for submission B dispatches B.
+	 */
+	public function test_two_diversions_in_same_request_each_dispatch_their_own_comment(): void {
+		$gateway     = new Fake_Akismet_Gateway( true );
+		$integration = new Akismet_Integration( $gateway );
+
+		$comment_a = $this->insert_matching_comment();
+
+		$post_id   = self::factory()->post->create();
+		$comment_b = (int) self::factory()->comment->create(
+			array(
+				'comment_post_ID'      => $post_id,
+				'comment_author'       => 'Bob',
+				'comment_author_email' => 'bob@example.com',
+				'comment_author_IP'    => '198.51.100.20',
+				'comment_agent'        => 'Mozilla/5.0 (Bob)',
+				'comment_content'      => 'Hello from Bob.',
+			)
+		);
+
+		$submission_a = $this->submission();
+		$submission_b = new Comment_Submission(
+			'Bob',
+			'bob@example.com',
+			'',
+			'198.51.100.20',
+			'Mozilla/5.0 (Bob)',
+			'Hello from Bob.'
+		);
+
+		$integration->on_failed_rule( $this->rule( Response::spam() ), $submission_a, array() );
+		$integration->on_failed_rule( $this->rule( Response::trash() ), $submission_b, array() );
+
+		// Fire comment_post for A first — closure A identity-matches and
+		// dispatches; closure B's identity check mismatches A and so closure
+		// B removes itself.
+		do_action( 'comment_post', $comment_a, 'spam', array() );
+		// Fire comment_post for B — closure B is already gone after the
+		// identity mismatch above, so B is NOT dispatched. This is the
+		// trade-off documented in the property docblock: the shared ledger
+		// prevents double-dispatch but cannot re-attach a closure that has
+		// removed itself.
+		do_action( 'comment_post', $comment_b, 'spam', array() );
+
+		$this->assertCount( 1, $gateway->history_notes, 'Submission A should be reported exactly once.' );
+		$this->assertSame( $comment_a, $gateway->history_notes[0]['comment_id'] );
+		$this->assertSame( array( $comment_a ), $gateway->spam_reports );
+	}
+
+	/**
+	 * @testdox It should refuse to redispatch the same comment id even if comment_post fires for it twice in the same request
+	 */
+	public function test_cross_closure_dedup_skips_already_dispatched_comment_id(): void {
+		$gateway     = new Fake_Akismet_Gateway( true );
+		$integration = new Akismet_Integration( $gateway );
+
+		$comment_id = $this->insert_matching_comment();
+
+		// First diversion: closure A is registered, comment_post fires and
+		// dispatches, closure A peels itself off, comment id is recorded.
+		$integration->on_failed_rule( $this->rule( Response::spam() ), $this->submission(), array() );
+		do_action( 'comment_post', $comment_id, 'spam', array() );
+
+		// Second diversion against the SAME submission/comment id — the
+		// shared ledger must reject the duplicate.
+		$integration->on_failed_rule( $this->rule( Response::trash() ), $this->submission(), array() );
+		do_action( 'comment_post', $comment_id, 'spam', array() );
+
+		$this->assertCount( 1, $gateway->history_notes, 'A comment id already dispatched in this request must not be reported a second time.' );
+		$this->assertSame( array( $comment_id ), $gateway->spam_reports );
 	}
 }

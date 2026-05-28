@@ -60,6 +60,27 @@ final class Akismet_Integration implements Hookable {
 	public const FILTER_ENABLED = 'pccm_akismet_enabled';
 
 	/**
+	 * Comment ids already dispatched within this PHP request. Lives on the
+	 * instance rather than inside the `comment_post` closure so that two
+	 * `on_failed_rule` calls in the same request — each producing its own
+	 * deferred closure — share a single dedup ledger and cannot dispatch
+	 * the same id twice.
+	 *
+	 * This guard relies on `Akismet_Integration` being resolved as a single
+	 * instance per request. Perique's registration middleware (see
+	 * `config/registration.php`) instantiates each Hookable once and binds
+	 * its `register()` callback against that instance; every closure
+	 * captured inside `on_failed_rule()` therefore mutates the same
+	 * `$this->dispatched_comment_ids`. If a future `config/di.php` change
+	 * ever introduced a per-resolution binding for this class the
+	 * coordination would silently regress, so anyone touching that file
+	 * must keep this assumption in mind.
+	 *
+	 * @var array<int,int>
+	 */
+	private array $dispatched_comment_ids = array();
+
+	/**
 	 * Construct with the narrow gateway over the Akismet plugin's surface.
 	 *
 	 * @param Akismet_Gateway $gateway Injected gateway; the production binding
@@ -93,7 +114,7 @@ final class Akismet_Integration implements Hookable {
 	 * the listener returns without scheduling anything.
 	 *
 	 * @param Rule                $rule        Matched rule (with pre-record_hit stats; the engine has already incremented the DB row).
-	 * @param Comment_Submission  $submission  Submission the engine evaluated. Currently unused; kept on the signature so the action contract stays stable for other consumers.
+	 * @param Comment_Submission  $submission  Submission the engine evaluated; captured by the deferred closure so the inserted comment can be identity-checked before the gateway is called.
 	 * @param array<string,mixed> $commentdata Raw `$commentdata` WordPress passed in. Currently unused; kept on the signature so the action contract stays stable for other consumers.
 	 *
 	 * @return void
@@ -109,13 +130,44 @@ final class Akismet_Integration implements Hookable {
 		$response = $rule->response();
 
 		$dispatch = null;
-		$dispatch = function ( $comment_id ) use ( &$dispatch, $message, $response ): void {
-			// One-shot — peel ourselves off immediately so a second comment in
-			// the same request goes through its own pre_comment_approved →
-			// pccm_comment_failed_rule → comment_post chain rather than re-using
-			// this closure.
+		$dispatch = function ( $comment_id ) use ( &$dispatch, $message, $response, $submission ): void {
+			$comment_id = (int) $comment_id;
+
+			// Cross-closure dedup. Two diversions in the same request each queue
+			// their own `comment_post` closure; all of them share this instance's
+			// $dispatched_comment_ids ledger (see the property docblock for the
+			// shared-instance assumption this relies on) so the same id can never
+			// be reported to Akismet twice, even if WordPress fires `comment_post`
+			// for it more than once.
+			if ( in_array( $comment_id, $this->dispatched_comment_ids, true ) ) {
+				remove_action( 'comment_post', $dispatch );
+				return;
+			}
+			$this->dispatched_comment_ids[] = $comment_id;
+
+			// Identity verification. When multiple closures are queued they all
+			// fire on every `comment_post`; without this check, a closure
+			// captured for submission B would dispatch when comment A is
+			// inserted, reporting the wrong comment to Akismet. A missing /
+			// mismatched row also implies an unrelated `comment_post`
+			// firing — treat it as not-ours and bow out cleanly.
+			$comment = get_comment( $comment_id );
+			if (
+				! $comment instanceof \WP_Comment
+				|| $comment->comment_author_email !== $submission->email()
+				|| $comment->comment_author_IP !== $submission->ip()
+				|| $comment->comment_content !== $submission->content()
+			) {
+				remove_action( 'comment_post', $dispatch );
+				return;
+			}
+
+			// Happy path — peel ourselves off and hand the prepared note +
+			// outcome to the gateway. The self-removal here mirrors the
+			// previous one-shot guarantee so a later, unrelated insert in the
+			// same request does not re-trigger this closure.
 			remove_action( 'comment_post', $dispatch );
-			$this->dispatch_to_gateway( (int) $comment_id, $message, $response );
+			$this->dispatch_to_gateway( $comment_id, $message, $response );
 		};
 		add_action( 'comment_post', $dispatch, 10, 1 );
 	}

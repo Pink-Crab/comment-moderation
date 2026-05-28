@@ -133,20 +133,45 @@ test.describe( 'admin scaffold', () => {
 		} );
 	} );
 
-	test( 'dashboard is reachable for the logged-in administrator', async ( {
+	test( 'Stage 6: Settings → Comment Moderation still mounts after the Akismet listener replaces its per-closure guard with shared cross-closure coordination', async ( {
 		page,
 	} ) => {
-		await page.goto( '/wp-admin/' );
-		await expect( page ).toHaveURL( /wp-admin/ );
+		// Stage 6 rebuilds the deferred-dispatch path inside
+		// `Akismet_Integration`: a `$dispatched_comment_ids` ledger lives on
+		// the (Perique-shared) instance, the `comment_post` closure now
+		// dedupes against that ledger, and an identity check
+		// (`get_comment( $id )` → field-by-field compare against the captured
+		// `Comment_Submission`) gates the call to the gateway. The change is
+		// invisible to the admin UI — the listener has no UI — so the
+		// available end-to-end claim is the same shape used by the other
+		// invisible-engine stages: registering the listener through DI still
+		// boots cleanly, the Settings → Comment Moderation screen still
+		// renders, and the Elm app still mounts onto its root node.
+		await page.goto( '/wp-admin/plugins.php' );
+		await expect( page ).toHaveURL( /plugins\.php/ );
 		await expect(
-			page.getByRole( 'heading', { name: /dashboard/i } )
+			page.getByRole( 'row', { name: /PinkCrab Comment Moderation/i } )
 		).toBeVisible();
 
-		// Capture stage-6 evidence: plugin activated cleanly (which is what
-		// runs the Perique migration that creates `{$wpdb->prefix}pccm_rules`).
-		// The rules screen itself is built in a later stage, so the dashboard
-		// is the available proof that activation — and therefore the
-		// migration — completed without error.
+		await page.goto(
+			'/wp-admin/options-general.php?page=pinkcrab-comment-moderation'
+		);
+		await expect( page ).toHaveURL(
+			/options-general\.php\?page=pinkcrab-comment-moderation/
+		);
+		await expect(
+			page.getByRole( 'heading', {
+				name: /Comment Moderation/i,
+				level: 1,
+			} )
+		).toBeVisible();
+		await expect(
+			page.locator( 'div#pccm-admin-root.pccm-app' )
+		).toHaveCount( 1 );
+		await expect(
+			page.getByRole( 'heading', { name: 'Rules', level: 2 } )
+		).toBeVisible();
+
 		await page.screenshot( {
 			path: path.resolve(
 				__dirname,
