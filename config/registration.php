@@ -25,6 +25,11 @@ defined( 'ABSPATH' ) || exit;
 
 return array(
 
+	// Loads the plugin's translation files on `init` at priority 10 — the
+	// earliest hook WP 6.7+ allows for `load_plugin_textdomain()` without
+	// emitting the `_load_textdomain_just_in_time` notice.
+	\PinkCrab\Comment_Moderation\Application\I18n\Load_Text_Domain::class,
+
 	// Invisible comment engine — hooks `pre_comment_approved` and diverts
 	// matching comments to the rule's outcome (rebuild spec §9).
 	\PinkCrab\Comment_Moderation\Application\Engine\Comment_Engine::class,

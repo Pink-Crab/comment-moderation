@@ -504,18 +504,19 @@ test.describe( 'admin scaffold', () => {
 		} );
 	} );
 
-	test( 'plugin remains active after Stage 16 rule-evaluator unit tests land', async ( {
+	test( 'plugin remains active after Stage 16 wires the i18n Load_Text_Domain hookable on init', async ( {
 		page,
 	} ) => {
-		// Stage 16 only adds PHPUnit coverage for the Stage 15 fail-safe
-		// rule evaluators — including the three-level mixed-combinator case
-		// mirroring the spec's worked expression
-		// `EMAIL HAS APPLE OR TREE AND (NAME IS (SAM OR REBECCA) OR EMAIL IS FOO)`.
-		// No production code changes, no admin wiring, no UI. The available
-		// end-to-end claim is therefore unchanged from prior pre-UI stages:
-		// the plugin still autoloads and WordPress reports it as active.
-		// The new evaluator coverage itself lives in
-		// tests/Unit/Domain/Engine/Test_Rule_Evaluator.php.
+		// Stage 16 introduces src/Application/I18n/Load_Text_Domain.php — a
+		// Perique Hookable that calls load_plugin_textdomain() on `init` at
+		// priority 10 so the plugin's translations are loaded at the exact
+		// timing WP 6.7+ demands (anything earlier trips the
+		// `_load_textdomain_just_in_time` doing-it-wrong notice). It is
+		// registered in config/registration.php and exercised by
+		// tests/Integration/I18n/Test_Load_Text_Domain.php. No admin UI or
+		// JS changes — the available end-to-end claim is therefore the same
+		// as the other pre-UI stages: the plugin still autoloads and
+		// WordPress reports it as active.
 		await page.goto( '/wp-admin/plugins.php' );
 		await expect( page ).toHaveURL( /plugins\.php/ );
 		await expect(
