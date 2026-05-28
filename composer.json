@@ -42,7 +42,8 @@
         "vlucas/phpdotenv": "^5.4",
         "roave/security-advisories": "dev-latest",
         "humbug/php-scoper": "^0.18",
-        "pinkcrab/php-scoper-helper": "dev-main"
+        "pinkcrab/php-scoper-helper": "dev-main",
+        "wp-cli/wp-cli-bundle": "^2.10"
     },
     "autoload": {
         "psr-4": {
